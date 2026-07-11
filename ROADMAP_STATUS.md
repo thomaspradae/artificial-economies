@@ -44,7 +44,7 @@ Status rule: an item is checked only if it is implemented in this repo, covered 
 
 ## Running Work
 
-- [x] No Phase 3/Resource Island remote jobs remain running from the old1/old2 batch; completed outputs have been pulled and validated locally.
+- [ ] Resource Island P.6 full cross-mind batch is running remotely: DQN full run is active on old1, PPO full run is active on old2, independent-DQN is queued on old1 behind DQN, and centralized-critic is queued on old2 behind PPO.
 
 ## Validated Implemented Artifacts
 
