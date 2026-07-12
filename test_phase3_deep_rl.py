@@ -14,7 +14,7 @@ from minds.deep_rl.simple_ppo_mind import SimplePPOMind
 from minds.deep_rl.torch_dqn_mind import StructuredQNet, TorchDQNMind
 from minds.deep_rl.torch_ppo_mind import StructuredPolicyNet, StructuredValueNet, TorchPPOMind
 from minds.marl.centralized_critic import CentralizedCriticLearners
-from minds.marl.independent_learners import IndependentLearners
+from minds.marl.independent_learners import IndependentDQNLearners, IndependentLearners
 from run_phase3_validation import run_validation, parse_args
 from worlds.pricing_arena.training import train_market
 
@@ -83,6 +83,22 @@ class MARLTests(unittest.TestCase):
         actions = learners.act(observations)
         self.assertEqual(len(actions), 2)
         learners.update(observations, actions, [1.0, 2.0], [(2, 3), (2, 3)], [False, False])
+
+    def test_independent_dqn_agents_are_decorrelated_from_one_base_seed(self):
+        learners = IndependentDQNLearners(
+            n_agents=2,
+            obs_dim=10,
+            action_dim=8,
+            base_seed=42,
+            hidden_dim=8,
+            batch_size=2,
+            min_replay_size=2,
+        )
+        obs = np.random.default_rng(0).random(10).astype(np.float32)
+        q0 = learners.agents[0].q_values(obs)
+        q1 = learners.agents[1].q_values(obs)
+        self.assertFalse(np.allclose(q0, q1))
+        self.assertNotEqual(learners.agents[0].seed, learners.agents[1].seed)
 
     def test_centralized_critic_updates_from_joint_observation(self):
         learners = CentralizedCriticLearners(

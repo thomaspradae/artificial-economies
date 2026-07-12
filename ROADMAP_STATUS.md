@@ -8,11 +8,11 @@ Status rule: an item is checked only if it is implemented in this repo, covered 
 - [x] Multiseed tests pass: `test_multiseed.py` ran 6 tests, all passing.
 - [x] Exploitability tests pass: `test_exploitability.py` ran 6 tests, all passing.
 - [x] Phase 0 architecture tests pass: `test_phase0_core.py` ran 18 focused tests and is included in full discovery, covering core interfaces, registry composition, pricing-world parity, mind wrappers, institution transforms, logging, and combined-table construction.
-- [x] Phase 3 deep-RL/MARL tests pass: `test_phase3_deep_rl.py` is included in full discovery and covers feature encoding, PyTorch DQN, PyTorch PPO, explicit NumPy fallback baselines, independent learners, centralized critic, Pricing Arena integration, and validation-run output.
+- [x] Phase 3 deep-RL/MARL tests pass: `test_phase3_deep_rl.py` ran 10 tests and is included in full discovery, covering feature encoding, PyTorch DQN, PyTorch PPO, explicit NumPy fallback baselines, decorrelated independent learners, centralized critic, Pricing Arena integration, and validation-run output.
 - [x] Resource Island tests pass: `test_resource_island.py` ran 20 tests, all passing, covering metrics, benchmarks, movement/collision, gathering/starvation, posted-offer trading, trade-radius behavior, institutions, Q-learning integration, corrected inventory-aware observations, and smoke output.
-- [x] Resource Island Phase 3 cross-mind tests pass: `test_resource_island_phase3.py` ran 6 tests, all passing, covering fixed-width structured observations, DQN, PPO, independent-DQN, centralized-critic, validation-run output, smoke-run mind selection, and mind-comparison table construction.
+- [x] Resource Island Phase 3 cross-mind tests pass: `test_resource_island_phase3.py` ran 7 tests, all passing, covering fixed-width structured observations, DQN, PPO, independent-DQN, centralized-critic, validation-run output, smoke-run mind selection, DQN-vs-independent-DQN divergence, and mind-comparison table construction.
 - [x] Auction House mechanics tests pass: `test_auction_house.py` ran 5 tests, all passing, covering allocation, first-price and second-price payment resolution, deterministic tie-breaking, registry construction, and explicitly deferred benchmarks.
-- [x] Full unittest discovery passes: 77 tests, all passing.
+- [x] Full unittest discovery passes: 79 tests, all passing.
 - [x] Python compile check passes for the legacy v0 module, experiment scripts, new `core/`, `worlds/`, `minds/`, `institutions/`, Resource Island modules, Auction House modules, deep-RL/MARL modules, validation runners, combined-table builder, and all test files.
 - [x] Phase 0 hot-path parity smoke check passes: old-path vs new-architecture multiseed CSVs are byte-identical for fixed seeds.
 - [x] Phase 0 hot-path parity smoke check passes: old-path vs new-architecture exploitability CSVs are byte-identical for fixed seeds.
@@ -46,6 +46,7 @@ Status rule: an item is checked only if it is implemented in this repo, covered 
 - [x] Resource Island Phase 3 full validation observed: each neural/MARL full run has 100 by-seed rows, 5 aggregate rows, exactly 20 seeds per institution, and no blank/NaN/inf values.
 - [x] Resource Island Phase 3 full comparison table exists at `outputs/resource_island_phase3_full/mind_comparison.csv` with 25 rows across Q-learning, DQN, PPO, independent-DQN, and centralized-critic for all five Resource Island institutions; it should be read as four distinct conditions plus one DQN alias row.
 - [x] Thesis-facing Resource Island distinct-mind comparison table exists at `outputs/resource_island_phase3_full/distinct_mind_comparison.csv`; it excludes the `independent_dqn` alias row and contains Q-learning, DQN, PPO, and centralized-critic.
+- [x] Independent-DQN decorrelation fix validated: `test_phase3_deep_rl.py` covers decorrelated independent-DQN Q-values from one base seed, `test_resource_island_phase3.py` confirms Resource Island DQN and independent-DQN rollouts diverge, and `outputs/resource_island_independent_dqn_smoke_fixed_gate/summary_aggregate.csv` differs from the matching DQN smoke gate.
 
 ## Running Work
 
@@ -75,7 +76,7 @@ Status rule: an item is checked only if it is implemented in this repo, covered 
 - [x] `minds/deep_rl/dqn_mind.py` and `minds/deep_rl/ppo_mind.py`: public compatibility modules now alias the PyTorch implementations.
 - [x] `minds/deep_rl/simple_dqn_mind.py` and `minds/deep_rl/simple_ppo_mind.py`: former NumPy implementations are retained as explicit lightweight baselines registered as `simple_dqn` and `simple_ppo`.
 - [x] `minds/deep_rl/features.py`, `minds/deep_rl/numpy_nn.py`, and `minds/deep_rl/torch_optim.py`: shared feature encoding, legacy NumPy primitives, and DeepMind-style RMSProp support exist and are tested through Phase 3.
-- [x] `minds/marl/independent_learners.py`: independent learner coordinator exists, and `independent_dqn` is registered. Current audit: the registered `IndependentDQNMind` subclasses `DQNMind` without overriding behavior, and both Pricing Arena and Resource Island instantiate `dqn` and `independent_dqn` with the same per-agent seed pattern; it is therefore a DQN alias/placeholder, not a distinct MARL condition.
+- [x] `minds/marl/independent_learners.py`: independent learner coordinator exists, and `independent_dqn` is registered. Current implementation uses `IndependentDQNLearners` with NumPy `SeedSequence` child streams, per-agent replay/exploration RNGs, and scoped PyTorch network initialization so the condition is no longer a DQN alias.
 - [x] `minds/marl/centralized_critic.py`: decentralized-actor/centralized-critic scaffold exists and is integration-tested on Pricing Arena.
 - [x] `institutions/*.py`: six institution classes exist, subclass `Institution`, have focused transform tests, and are used by `PricingArenaWorld.step()`.
 - [x] `build_combined_table.py`: merges multiseed and exploitability aggregate outputs into one institution-level comparison table, including price-normalized and profit-normalized collusion columns.
@@ -96,7 +97,7 @@ Status rule: an item is checked only if it is implemented in this repo, covered 
 - [x] `worlds/auction_house/env.py`: Auction House mechanics skeleton exists, subclasses `World`, and implements single-item sealed-bid allocation, deterministic tie-breaking, first-price payments, second-price payments, revenue/welfare/efficiency metrics, and registry construction tests.
 - [x] `worlds/auction_house/benchmarks.py`: Auction House benchmark placeholders exist and explicitly raise `NotImplementedError` until the theory-lock pass.
 - [x] `scripts/pull_results.sh`: remote output puller exists and has been run successfully for old1 plus old2 through ofi1.
-- [x] `outputs/phase3_full/mind_comparison.csv`: full Phase 3 comparison table exists across Q-learning, random, DQN, PPO, independent-DQN, and centralized-critic for all 6 Pricing Arena mechanisms. The independent-DQN rows are currently an alias of DQN and should not be counted as a separate mind; use `outputs/phase3_full/distinct_mind_comparison.csv` for thesis-facing comparisons.
+- [x] `outputs/phase3_full/mind_comparison.csv`: full Phase 3 comparison table exists across Q-learning, random, DQN, PPO, independent-DQN, and centralized-critic for all 6 Pricing Arena mechanisms. Existing independent-DQN rows were generated before the decorrelation fix and should be treated as stale alias rows until fixed reruns land.
 - [x] Phase 3 price-cap divergence diagnosis: exploitability falls under price cap across distinct tested mind families, while collusion effects are metric-sensitive for higher-capability minds. The DQN condition sits effectively at the cap under price cap (`avg_price_mean=3.999038`, `price_dispersion_mean=0.259025`) and earns materially higher profit than uncapped (`profit_total_mean=291.703303` vs. `236.345482`), supporting a real cap/quantity-profit channel rather than only normalized-index noise. The matching independent-DQN row is not separate corroboration because it currently routes to the same per-agent DQN implementation.
 
 ## Phase 0 - Core Abstractions
@@ -182,8 +183,9 @@ This replaces the old separate Phase 2, Phase 4, and Phase 5 world sections. Res
 - [x] P.6 fixed structured observations: Resource Island exposes a constant-width vector with normalized energy, inventory, position, local resource maps, nearby-agent context, and alive flag.
 - [x] P.6 smoke pass: DQN, PPO, the `independent_dqn` alias, and centralized-critic run on all five Resource Island institutions for `steps=500`, `n_seeds=3`, with clean CSV outputs.
 - [x] P.6 smoke comparison table: `outputs/resource_island_phase3_smoke/mind_comparison.csv` compares Q-learning, DQN, PPO, the `independent_dqn` alias, and centralized-critic on Resource Island.
-- [x] P.6 full run: n=20 Resource Island replicated runs for DQN, PPO, and centralized-critic as distinct neural conditions. The `independent_dqn` run also completed but is a DQN-alias reproducibility row, not a distinct condition.
-- [x] P.6 full comparison: Resource Island full cross-mind table and roadmap conclusion after the n=20 outputs land.
+- [x] P.6 full run: n=20 Resource Island replicated runs for DQN, PPO, and centralized-critic as distinct neural conditions. The existing `independent_dqn` full output was generated before the decorrelation fix and should be treated as stale until the fixed rerun lands.
+- [ ] P.6 fixed independent-DQN full rerun: rerun Resource Island `independent_dqn` after the decorrelation fix and rebuild the Resource Island full comparison table.
+- [ ] P.6 full comparison: final Resource Island full cross-mind table after replacing the stale independent-DQN row.
 
 Resource Island full-run note:
 
@@ -193,10 +195,10 @@ Resource Island full-run note:
 - `property_rights` creates claims in every seed but has zero observed violations in the corrected full run. `trade_price_controls` has zero institution blocks because v0 only offers 1-for-1 trades, so there is no unequal exchange to block. Treat those as mechanism-inactive diagnostics, not evidence that the concepts are ineffective in richer Resource Island variants.
 - Follow-up property-rights opportunity replay over 20 seeds x 40,000 steps found claims in 13/20 seeds but only 21 total non-owner-visible claimed-cell steps, only 9 claimed-resource-visible steps, and zero non-owner gather attempts on claimed cells. Property rights were therefore almost never put under behavioral pressure in v0.
 - Source audit confirms `trade_price_controls` is structurally unable to bind in v0 because every constructed trade has `food_units=1` and `wood_units=1`, so the exchange ratio is always exactly 1. Unequal exchange offers are required before this institution can be evaluated.
-- P.6 smoke results are execution/integration evidence, not final statistical Resource Island cross-mind evidence. At `n_seeds=3`, Q-learning has higher short-horizon welfare and more successful trades than DQN/PPO/MARL on the `none` institution. DQN and independent-DQN match exactly because `IndependentDQNMind` is currently a subclass alias of `DQNMind` and the training paths use the same per-agent seed schedule.
+- P.6 smoke results are execution/integration evidence, not final statistical Resource Island cross-mind evidence. At `n_seeds=3`, Q-learning has higher short-horizon welfare and more successful trades than DQN/PPO/MARL on the `none` institution. The old DQN/independent-DQN smoke match exposed an implementation defect; the fixed independent-DQN implementation now diverges from DQN in unit and smoke gates.
 - P.6 full results show a stronger version of the smoke pattern. On `none`, neural/MARL minds have higher survival and welfare than Q-learning (`survival_rate_mean`: Q-learning `0.9686`, DQN `0.9875`, PPO `0.9931`, centralized-critic `0.9955`; `welfare_mean`: Q-learning `1.0052`, DQN `1.2575`, PPO `1.3393`, centralized-critic `1.3006`), but they do not develop the intended trade economy. Q-learning has `trade_count_mean=0.2939`; DQN, PPO, independent-DQN, and centralized-critic all have `trade_count_mean=0.0` in the full comparison table.
 - Trade-attempt diagnostics mean the Resource Island deep-RL trade result should be framed as exploration/coordination failure, not as proven strategic trade avoidance. DQN makes rare attempts on `none` (`trade_attempt_count_mean=0.2850`) and centralized-critic also makes rare attempts (`0.1760`), but all are inventory-blocked; PPO makes no trade attempts at all. The safe claim is that the neural/MARL minds find higher survival/welfare policies without learning successful trade under the current reward/observation/training horizon.
-- DQN and independent-DQN are exactly identical in the Resource Island full comparison. This is expected from the current implementation: Resource Island already instantiates one independent DQN-style learner per agent for `dqn`, and `independent_dqn` is a public subclass alias of the same DQN mind rather than a distinct coordinator.
+- The old DQN and independent-DQN rows are exactly identical in the Resource Island full comparison because they were generated before the decorrelation fix. The full Resource Island independent-DQN row must be rerun before final thesis claims.
 
 #### 2. Auction House
 
@@ -242,7 +244,7 @@ Resource Island full-run note:
 - [x] `dqn_mind.py`: PyTorch structured-observation DQN mind for discrete worlds
 - [x] `ppo_mind.py`: PyTorch structured-observation discrete PPO mind
 - [x] Validate both on Pricing Arena first
-- [x] `independent_learners.py` exists, but the registered `independent_dqn` mind is currently an alias/placeholder rather than a distinct MARL condition.
+- [x] `independent_learners.py` exists and the registered `independent_dqn` mind now routes through a decorrelated independent-learners DQN baseline.
 - [x] `centralized_critic.py`
 - [x] Re-run exploitability protocol with deep RL minds
 - [x] Compare exploitability: tabular Q vs DQN vs PPO vs MARL
@@ -251,13 +253,13 @@ Phase 3 notes:
 
 - PyTorch is installed and pinned as `torch==2.12.1+cpu`; GPU is not required for these structured MLP experiments.
 - The current repo still does not vendor the external Atari DQN or missile-interception PPO source trees. The active Phase 3 implementation is now PyTorch-native and uses the relevant audited update-rule structure adapted to structured observations/discrete actions.
-- `run_multiseed.py` supports `--mind dqn`, `--mind ppo`, `--mind independent_dqn`, `--mind centralized_critic`, plus explicit fallback baselines `simple_dqn` and `simple_ppo`. Current audit: `independent_dqn` is a DQN alias and should be excluded from distinct-mind claims.
-- `run_exploitability.py` supports the same values through `--incumbent-mind`; the same alias caveat applies to `independent_dqn`.
+- `run_multiseed.py` supports `--mind dqn`, `--mind ppo`, `--mind independent_dqn`, `--mind centralized_critic`, plus explicit fallback baselines `simple_dqn` and `simple_ppo`. Independent-DQN now routes through a decorrelated independent-learners coordinator, but existing full Pricing Arena independent-DQN outputs predate that fix and must be rerun.
+- `run_exploitability.py` supports the same values through `--incumbent-mind`; existing full Pricing Arena independent-DQN exploitability outputs also predate the decorrelation fix and must be rerun.
 - Best-response validation is intentionally one-step (`gamma=0`) against a fixed opponent action in Pricing Arena. It checks that DQN/PPO can recover the computed profit-maximizing discrete action before multi-agent smoke results are trusted.
 - Phase 3 PyTorch smoke runs cover all 6 current institutions with `n_seeds=2`; they validate execution and table production, not full statistical evidence.
 - Full-scale Phase 3 n=20 replicated multiseed/exploitability runs are complete and validated in `outputs/phase3_full/validation_report.json`.
 - Resource Island v0 tabular-Q validation exists, Resource Island Phase 3 torch cross-world wiring passes validation and all-institution smoke tests, and full Resource Island n=20 cross-mind torch runs are complete. Use `outputs/resource_island_phase3_full/distinct_mind_comparison.csv` for thesis-facing comparisons.
-- Do not count `independent_dqn` as a distinct mind until its implementation diverges from DQN; current independent-DQN outputs are alias/reproducibility evidence.
+- Independent-DQN now diverges from DQN in tests and smoke gates. Existing full independent-DQN result tables remain stale until fixed reruns replace them.
 
 ## Phase 6 - LLM Agents and Hybrids
 

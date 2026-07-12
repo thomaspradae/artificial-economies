@@ -74,6 +74,20 @@ class ResourceIslandPhase3TrainingTests(unittest.TestCase):
                 self.assertEqual(result.obs_dim, resource_island_obs_dim(radius=1))
                 self.assertTrue(all("survival_rate" in record for record in result.records))
 
+    def test_independent_dqn_no_longer_matches_plain_dqn_rollout(self):
+        cfg = ResourceIslandConfig(
+            grid_size=3,
+            n_agents=2,
+            max_steps=20,
+            initial_resource_units=4,
+            resource_spawn_probability=0.0,
+        )
+        dqn = train_resource_island(steps=12, seed=5, config=cfg, mind="dqn")
+        independent = train_resource_island(steps=12, seed=5, config=cfg, mind="independent_dqn")
+        dqn_actions = [record["actions"] for record in dqn.records]
+        independent_actions = [record["actions"] for record in independent.records]
+        self.assertNotEqual(dqn_actions, independent_actions)
+
     def test_smoke_runner_accepts_dqn_mind(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             args = parse_smoke_args(

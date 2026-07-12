@@ -58,6 +58,7 @@ class TorchDQNMind(Agent):
         target_update_interval: int = 100,
         grad_clip: float = 10.0,
         seed: int = 0,
+        rng: np.random.Generator | None = None,
         device: str = "cpu",
     ):
         if action_dim < 1:
@@ -77,8 +78,7 @@ class TorchDQNMind(Agent):
         self.grad_clip = grad_clip
         self.seed = seed
         self.device = torch.device(device)
-        self.rng = np.random.default_rng(seed)
-        torch.manual_seed(seed)
+        self.rng = rng if rng is not None else np.random.default_rng(seed)
         self.replay = ReplayBuffer(replay_size, self.rng)
         self.q_net: StructuredQNet | None = None
         self.target_net: StructuredQNet | None = None
@@ -97,8 +97,10 @@ class TorchDQNMind(Agent):
             return
         features = self._features(obs)
         self.obs_dim = int(len(features))
-        self.q_net = StructuredQNet(self.obs_dim, self.action_dim, self.hidden_dims).to(self.device)
-        self.target_net = StructuredQNet(self.obs_dim, self.action_dim, self.hidden_dims).to(self.device)
+        with torch.random.fork_rng(devices=[]):
+            torch.manual_seed(int(self.seed))
+            self.q_net = StructuredQNet(self.obs_dim, self.action_dim, self.hidden_dims).to(self.device)
+            self.target_net = StructuredQNet(self.obs_dim, self.action_dim, self.hidden_dims).to(self.device)
         self.target_net.load_state_dict(self.q_net.state_dict())
         self.target_net.eval()
         self.optimizer = DeepMindRMSprop(self.q_net.parameters(), lr=self.lr, alpha=0.95, eps=0.01)
@@ -116,6 +118,14 @@ class TorchDQNMind(Agent):
         with torch.no_grad():
             q_values = self.q_net(self._tensor(self._features(obs))[None, :])
         return int(torch.argmax(q_values, dim=1).item())
+
+    def q_values(self, obs: Any) -> np.ndarray:
+        """Return Q-values for diagnostics and independence tests."""
+        self._ensure_network(obs)
+        assert self.q_net is not None
+        with torch.no_grad():
+            values = self.q_net(self._tensor(self._features(obs))[None, :])
+        return values.detach().cpu().numpy()[0]
 
     def update(self, obs: Any, action: Any, reward: float, next_obs: Any, done: bool) -> None:
         self._ensure_network(obs)

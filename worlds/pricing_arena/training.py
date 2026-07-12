@@ -10,6 +10,7 @@ from core.registry import build_experiment
 import institutions  # noqa: F401 - registers institutions
 import minds  # noqa: F401 - registers minds
 from minds.marl.centralized_critic import CentralizedCriticLearners
+from minds.marl.independent_learners import IndependentDQNLearners
 from minds.q_learning import QLearningMind
 from worlds.pricing_arena.benchmarks import compute_static_benchmarks
 from worlds.pricing_arena.env import PricingArenaWorld
@@ -69,6 +70,31 @@ def _build_pricing_world(
 ) -> PricingArenaWorld:
     config = MarketConfig(mechanism=mechanism)
     if agents is None:
+        if mind == "independent_dqn":
+            joint_learner = IndependentDQNLearners(
+                n_agents=2,
+                action_dim=19,
+                obs_dim=38,
+                base_seed=seed,
+                hidden_dim=32,
+                batch_size=16,
+                min_replay_size=16,
+                target_update_interval=50,
+            )
+            world = build_experiment(
+                {
+                    "world": "pricing_arena",
+                    "institution": mechanism,
+                    "institution_params": _institution_params(config),
+                    "seed": seed,
+                    "world_params": {"config": config},
+                    "n_agents": 0,
+                }
+            )
+            world.agents = joint_learner.agents
+            world.joint_learner = joint_learner
+            return world
+
         if mind == "centralized_critic":
             joint_learner = CentralizedCriticLearners(
                 n_agents=2,
@@ -127,7 +153,7 @@ def _mind_params(mind: str, seed: int) -> dict[str, int]:
         return {"n_prices": 19, "seed": seed}
     if mind in {"random", "heuristic_pricing"}:
         return {"n_actions": 19, "seed": seed} if mind == "random" else {"n_actions": 19}
-    if mind in {"dqn", "independent_dqn", "simple_dqn"}:
+    if mind in {"dqn", "simple_dqn"}:
         return {
             "action_dim": 19,
             "obs_dim": 38,

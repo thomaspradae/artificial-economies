@@ -10,6 +10,7 @@ from core.registry import build_experiment
 import institutions  # noqa: F401 - registers institution classes
 import minds  # noqa: F401 - registers mind classes
 from minds.marl.centralized_critic import CentralizedCriticLearners
+from minds.marl.independent_learners import IndependentDQNLearners
 from minds.q_learning import QLearningMind
 from worlds.resource_island.env import N_ACTIONS, ResourceIslandConfig, ResourceIslandWorld
 from worlds.resource_island.features import (
@@ -100,7 +101,7 @@ def _mind_params(mind: str, seed: int, obs_dim: int) -> dict[str, Any]:
             "seed": seed,
             "state_shape": (N_ACTIONS, N_ACTIONS, N_ACTIONS),
         }
-    if mind in {"dqn", "independent_dqn"}:
+    if mind == "dqn":
         return {
             "action_dim": N_ACTIONS,
             "obs_dim": obs_dim,
@@ -137,6 +138,30 @@ def build_resource_island_world(
 
     cfg = config if config is not None else ResourceIslandConfig()
     obs_dim = resource_island_obs_dim(obs_radius)
+    if mind == "independent_dqn":
+        joint_learner = IndependentDQNLearners(
+            n_agents=cfg.n_agents,
+            action_dim=N_ACTIONS,
+            obs_dim=obs_dim,
+            base_seed=seed,
+            hidden_dim=32,
+            batch_size=16,
+            min_replay_size=16,
+            target_update_interval=50,
+        )
+        world = build_experiment(
+            {
+                "world": "resource_island",
+                "institution": institution,
+                "seed": seed,
+                "world_params": {"config": cfg},
+                "n_agents": 0,
+            }
+        )
+        world.agents = joint_learner.agents
+        world.joint_learner = joint_learner
+        return world
+
     if mind == "centralized_critic":
         joint_learner = CentralizedCriticLearners(
             n_agents=cfg.n_agents,
