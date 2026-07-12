@@ -50,7 +50,7 @@ Status rule: an item is checked only if it is implemented in this repo, covered 
 
 ## Running Work
 
-- [x] No Resource Island P.6 remote jobs remain running; DQN, PPO, independent-DQN, and centralized-critic full outputs have been pulled and validated locally.
+- [ ] Fixed independent-DQN replacement reruns are active remotely: old1 is running Pricing Arena `independent_dqn` multiseed fixed output, queued to run exploitability fixed output afterward; old2 is running Resource Island `independent_dqn` full fixed output.
 
 ## Validated Implemented Artifacts
 
