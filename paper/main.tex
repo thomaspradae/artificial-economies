@@ -1,0 +1,581 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\newcommand{\todo}[1]{\textbf{[TODO: #1]}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{Artificial Economies for Learning Agents:\\
+Testing Whether Institutions Stay Robust as Agent Capability Changes}
+\author{
+  \todo{Author name}\\
+  \todo{Institution / Department}\\
+  \todo{Email}
+}
+\date{Draft v0.2 -- \today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper introduces a code-first experimental platform for studying whether
+economic mechanisms remain robust when the strategic agents inside them are
+adaptive learners rather than equilibrium solvers. The platform implements a
+shared \code{World}/\code{Agent}/\code{Institution} interface, repeated
+multiseed evaluation, exploitability tests, and interchangeable mind classes
+ranging from random and tabular Q-learning agents to PyTorch DQN, PPO,
+independent-DQN, and centralized-critic agents. The first validated environment
+is a repeated two-firm pricing arena with six regulatory mechanisms. In this
+world, price caps robustly reduce exploitability across mind classes, but their
+effect on collusion is metric- and capability-dependent: stronger DQN-family
+learners can sit effectively at the cap while preserving high profit through
+the quantity margin. The second environment, Resource Island, extends the same
+interface to a spatial inventory economy and reveals a different lesson:
+institution conclusions are only meaningful when the world actually exercises
+the institutional channel. Early Resource Island versions mechanically
+under-tested property rights and trade price controls; a hardened v1 now
+creates contested resources, unequal trades, and specialization pressure. Three
+additional environments extend the ladder: Auction House provides a benchmarked
+auction-design testbed, Public Goods exposes common-pool extraction and
+contribution incentives, and Labor Market tests learned reporting under
+deferred acceptance. The current contribution is both empirical and
+methodological: it reports initial evidence that institutional robustness can
+change with learner capability, and it documents the validation discipline
+needed to distinguish real economic findings from inactive-mechanism artifacts.
+\end{abstract}
+
+\section*{First-Page Build Map}
+
+This draft is intentionally structured as the arXiv-facing version of the
+project, with the parts that already have evidence separated from the parts
+that still need final runs or prose.
+
+\begin{center}
+\begin{tabular}{p{0.2\linewidth}p{0.36\linewidth}p{0.34\linewidth}}
+\toprule
+Part & What It Must Do & Current Status \\
+\midrule
+Motivation & State the core question: do mechanisms stay robust under a
+capability ladder of learning agents? & Ready to draft. \\
+Platform & Define \code{World}, \code{Agent}, \code{Institution}, metrics,
+manifests, parity tests, and output validation. & Built and tested. \\
+Pricing Arena & Main mature result: collusion, welfare, exploitability, and
+capability dependence in a repeated pricing game. & Full n=20 outputs exist;
+fixed independent-DQN is merged into the main table. \\
+Resource Island & Non-pricing stress test: spatial resources, inventory,
+trade, property, redistribution, reputation. & v0 diagnosed; v1 and cross-mind
+full outputs validated. \\
+Auction House & Third world: sealed-bid auctions with theory benchmarks. &
+Mechanics, benchmarks, Q-learning full run, P.6 smoke, and full P.6 queue are
+active. \\
+Public Goods & Common-pool resource world with contribution, extraction,
+sanctions, matching, information restriction, reputation, and taxes. & Q-learning
+full run and P.6 smoke exist; full P.6 queue is active. \\
+Labor Market & Two-sided matching world with learning workers and fixed
+employer preferences under deferred acceptance. & Q-learning full run and P.6
+smoke exist; full P.6 queue is active. \\
+Synthesis & Convert runs into thesis claims: which institutional effects
+generalize, which are world-specific, and which are capability-sensitive. &
+Preliminary five-world smoke synthesis exists; final claims wait on current
+full P.6 queues. \\
+Limitations & Be explicit about inactive institutions, finite compute, simple
+worlds, and non-equilibrium learned behavior. & Ready to draft. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent
+Stop condition for the first complete paper draft: after the current Auction
+House, Public Goods, and Labor Market full P.6 queues validate cleanly, freeze
+the build-out temporarily and write the cross-world synthesis before adding
+another environment or LLM-agent layer.
+
+\section{Introduction}
+
+Economic mechanisms are usually evaluated against a model of strategic
+behavior: equilibrium prices, truthful bidding, efficient allocation, or some
+other theoretical benchmark. That approach is powerful, but it leaves open a
+practical question that becomes more important as deployed systems are
+increasingly populated by adaptive software agents: what happens when the
+agents do not solve the theorist's equilibrium, but instead learn from repeated
+interaction?
+
+This paper studies that question with artificial economies: small, controlled
+economic worlds in which institutions can be swapped while the learning
+architecture of the agents is varied. The goal is not to simulate a whole
+economy. The goal is to create environments that are simple enough to audit but
+rich enough to expose failures of institutional robustness. A mechanism is
+treated as robust only if it performs well across seeds, across learner classes,
+and under adversarial or exploitability-style checks.
+
+The central research question is:
+
+\begin{quote}
+When agent capability increases from random behavior to tabular Q-learning and
+deep reinforcement learning, do the same economic institutions still reduce
+collusion, exploitability, inequality, and inefficient strategic behavior?
+\end{quote}
+
+The current evidence already gives a nontrivial answer in the pricing world.
+Price caps reduce exploitability for every tested mind class, but their
+collusion effect depends on the operational metric and on learner capability.
+In the full Pricing Arena comparison, tabular Q-learning under no regulation has
+average price 5.49, total profit 365.34, and exploitability 95.69. Under a price
+cap, average price falls to 4.73 and exploitability falls to 40.32. For
+DQN-family learners, however, the cap can create a different pattern: the agents
+sit near the ceiling, with low price dispersion, while preserving high
+profit-normalized collusion through quantity and demand effects. That is the
+kind of result this platform is meant to surface: a regulation can look strong
+under one behavioral lens and weaker under another.
+
+\section{Related Work}
+
+This project sits at the intersection of algorithmic collusion, reinforcement
+learning, and mechanism design. The Pricing Arena is motivated by work showing
+that learning algorithms can sustain supra-competitive outcomes in repeated
+pricing environments \citep{calvano2020,calvano2021}. The exploitability
+protocol is related to the broader idea that a learned policy should not only be
+evaluated by its on-policy average outcome, but also by its brittleness against
+strategic deviation.
+
+The mind ladder follows standard reinforcement-learning baselines:
+tabular Q-learning and deep Q-networks \citep{sutton2018,mnih2015}, PPO
+\citep{schulman2017}, and independent multi-agent Q-learning in the spirit of
+\citet{tan1993}. The Auction House environment connects the platform back to
+classic mechanism-design results: truthful bidding in second-price auctions
+\citep{vickrey1961}, revenue and allocation tradeoffs in auction design
+\citep{myerson1981,milgrom2004}, and strategic bid shading in first-price
+auctions.
+
+The Public Goods and Resource Island environments connect the platform to
+common-pool resource and social-dilemma settings, where individually profitable
+extraction can destroy shared surplus and where sanctions, reputation, and
+matching contributions are standard institutional responses. The Labor Market
+environment connects to two-sided matching and deferred acceptance, where
+truthful revelation and stability provide unusually sharp benchmark concepts.
+
+\todo{Tighten this section with exact citations for Calvano et al. 2021,
+Asker--Fershtman--Pakes, and Banchio--Skrzypacz once the literature pass is
+done.}
+
+\section{Platform}
+
+\subsection{Interfaces}
+
+The codebase is organized around three abstractions:
+
+\begin{itemize}
+  \item A \code{World} defines state transitions, observations, metrics, and
+  rendering state.
+  \item An \code{Agent} or mind maps observations to actions and updates from
+  rewards and next observations.
+  \item An \code{Institution} modifies rules, rewards, constraints, or
+  information inside a world.
+\end{itemize}
+
+This separation is not cosmetic. It makes it possible to ask whether a result is
+about a world, an institution, or a learner. It also creates a regression test:
+if a new world requires rewriting the shared learning interface, then the
+platform abstraction has failed.
+
+\subsection{Validation Discipline}
+
+The platform treats a result as reportable only after three checks. First, the
+mechanics must be unit-tested: allocation, movement, payment, trade, collision,
+or reward rules must match hand-computed cases. Second, the experiment must be
+replicated over seeds, with per-seed and aggregate CSV outputs. Third, the
+institution must actually activate. If a property-rights rule never faces a
+non-owner gather attempt, or a trade price control can never bind because every
+trade is one-for-one, then the result is not evidence about that institution. It
+is evidence about the world design.
+
+This distinction matters for Resource Island. The initial version ran and
+passed tests, but three institutions were mechanically under-exercised. Rather
+than report those as null effects, the project added diagnostic counters and a
+v1 pressure configuration with contested resources and unequal trades.
+
+\subsection{Mind Ladder}
+
+The current mind ladder includes random agents, tabular Q-learning, PyTorch DQN,
+PyTorch PPO, independent-DQN, and a centralized-critic scaffold. The DQN
+implementation uses replay, a target network, Huber TD loss, and a
+DeepMind-style centered RMSProp optimizer. PPO uses categorical actions, GAE,
+clipped policy loss, value loss, entropy regularization, and minibatch epochs.
+
+An important implementation issue was discovered and fixed during the project:
+the original independent-DQN condition behaved like a DQN alias in several
+tables. The corrected implementation now uses separate per-agent learners,
+decorrelated child random streams, separate replay and exploration randomness,
+and scoped PyTorch initialization. Fixed independent-DQN replacement rows are
+now merged for Pricing Arena and Resource Island, and the same corrected
+condition is used in the active Auction House, Public Goods, and Labor Market
+P.6 queues.
+
+\section{Environment 1: Pricing Arena}
+
+\subsection{World}
+
+Pricing Arena is a repeated two-firm pricing market. Each firm chooses a price
+from a discrete grid. Consumers choose between firms according to a noisy logit
+demand model. Firms earn profit from demand net of costs, and learning agents
+update from repeated play. The implemented mechanisms are no regulation, price
+cap, high-price tax, random audits, anti-collusion penalty, and demand shocks.
+
+\subsection{Metrics}
+
+The main metrics are average price, total profit, consumer surplus, welfare,
+exploitability, and two collusion indexes. The historical project metric is a
+price-normalized proxy. The literature-comparable metric is a profit-normalized
+index:
+
+\begin{equation}
+  \mathrm{CI}_{profit}
+  =
+  \frac{\pi_{observed} - \pi_{Nash}}
+       {\pi_{monopoly} - \pi_{Nash}}.
+\end{equation}
+
+Both are reported because the divergence between them is empirically
+informative.
+
+\subsection{Main Result}
+
+Table~\ref{tab:pricing-cap} shows a compact version of the mature Pricing Arena
+result for Q-learning and random baselines. Price caps reduce exploitability and
+raise welfare relative to the no-regulation case in these rows.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llrrrrr}
+\toprule
+Mind & Mechanism & Price & Profit & Welfare & Profit CI & Exploitability \\
+\midrule
+Q-learning & none & 5.49 & 365.34 & 810.43 & 0.475 & 95.69 \\
+Q-learning & price cap & 4.73 & 342.42 & 829.99 & 0.424 & 40.32 \\
+Random & none & 5.51 & 277.92 & 785.05 & 0.282 & 54.62 \\
+Random & price cap & 4.32 & 261.89 & 819.83 & 0.247 & 22.84 \\
+\bottomrule
+\end{tabular}
+\caption{Selected Pricing Arena full-run results from the Phase 3 comparison
+output.}
+\label{tab:pricing-cap}
+\end{table}
+
+The more interesting finding appears when learner capability increases. In the
+Phase 3 table, price caps reduce exploitability across tested minds, but
+collusion is metric-sensitive for stronger learners. DQN-family agents can sit
+effectively at the cap, with low price dispersion, while maintaining high total
+profit. The current diagnosis is that the cap constrains the price margin but
+does not eliminate the quantity/profit channel.
+
+\todo{Add a full table comparing DQN, PPO, centralized-critic, and corrected
+independent-DQN under price cap versus no regulation.}
+
+\section{Environment 2: Resource Island}
+
+\subsection{World}
+
+Resource Island is a bounded-grid gather/trade economy. Agents move, gather food
+and wood, maintain energy, accumulate inventories, and can die from starvation.
+The world contains property rights, redistribution, trade price controls, and
+reputation institutions. It was built to test whether the platform abstractions
+work outside a two-firm pricing game.
+
+\subsection{What v0 Taught}
+
+The first full Resource Island runs were mechanically valid but economically
+under-activated. In the initial full run, successful trade was sparse and some
+institutions did not bind. Follow-up replay showed that property rights almost
+never faced behavioral pressure: even when claims existed, non-owner
+opportunities to gather from claimed resource cells were extremely rare.
+Similarly, trade price controls could not bind because the original trade
+protocol only allowed one-for-one exchange.
+
+This is an important negative result for the platform: a world can be runnable,
+tested, and statistically replicated while still failing to exercise the
+institution it is supposed to study.
+
+\subsection{v1 Hardening}
+
+Resource Island v1 adds four changes:
+
+\begin{enumerate}
+  \item contested resource layouts, so multiple agents have reason to access the
+  same cells;
+  \item unequal trade offers, so price controls can actually bind;
+  \item specialization pressure through heterogeneous resource preferences and
+  starting inventories;
+  \item activation diagnostics for trade attempts, blocked trades, property
+  opportunities, property violations, and institution blocks.
+\end{enumerate}
+
+The v1 validation run verified that the economic channels were active, and the
+subsequent n=20 full run preserves that activation. Table~\ref{tab:resource-v1}
+shows the medium validation values used as the pre-full-run gate.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrrr}
+\toprule
+Institution & Welfare & Survival & Trades & Trade Blocks & Property Opps. \\
+\midrule
+none & 1.095 & 0.933 & 6.034 & 0.000 & 0.000 \\
+property rights & 1.078 & 0.923 & 5.790 & 0.000 & 17.734 \\
+trade price controls & 0.875 & 0.898 & 0.000 & 5.779 & 0.000 \\
+reputation & 1.313 & 0.927 & 6.867 & 0.000 & 0.000 \\
+\bottomrule
+\end{tabular}
+\caption{Resource Island v1 validation results.}
+\label{tab:resource-v1}
+\end{table}
+
+The interpretation is straightforward. Price controls now bind because the
+world permits unequal trades. Reputation increases successful trade and welfare
+in the validation setting. Property-right opportunities are present, although
+the welfare effect is small in this medium run. The full n=20 v1 run confirms
+the activation pattern: successful trade appears under no institution, price
+controls bind and suppress trade, property-right opportunities are measured,
+and reputation produces the strongest welfare gains in this pressure setup.
+
+\subsection{Cross-Mind Resource Island}
+
+The Resource Island Phase 3 full table gives a different pattern from Pricing
+Arena. Neural/MARL minds find higher survival and welfare policies, but they do
+not learn the intended trade economy under the current reward and training
+horizon. On the no-institution condition, Q-learning has survival 0.969,
+welfare 1.005, and trade count 0.294. DQN has survival 0.987 and welfare 1.257
+but trade count 0.000. PPO and centralized-critic show the same qualitative
+pattern.
+
+This should not be over-interpreted as proof that stronger agents strategically
+avoid trade. The trade-attempt diagnostics suggest exploration and coordination
+failure: DQN and centralized-critic make rare attempts, PPO makes essentially no
+attempts, and attempts tend to be inventory-blocked. The safe claim is that
+these stronger learners find high-survival policies without discovering
+successful trade under the current Resource Island setup.
+
+\todo{Add a compact Resource Island cross-mind table with Q-learning, DQN, PPO,
+fixed independent-DQN, and centralized-critic on the no-institution row.}
+
+\section{Environment 3: Auction House}
+
+\subsection{World}
+
+Auction House is a single-item sealed-bid auction world with independent private
+values, discrete bids, deterministic tie-breaking, first-price and second-price
+payment rules, and optional reserve prices. Each bidder observes its own
+valuation bin and chooses a bid. The world reports seller revenue, bidder
+surplus, total welfare, allocative efficiency, regret, overbidding, underbidding,
+and distance from benchmark bid functions.
+
+\subsection{Benchmarks}
+
+The second-price benchmark is truthful bidding. The first-price benchmark is
+bid shading under symmetric independent private values, with discrete-grid
+regret checks used where the continuous benchmark is too coarse. Reserve-price
+variants evaluate the revenue-efficiency tradeoff against the no-reserve
+benchmark.
+
+\subsection{Validation}
+
+The Auction House validation run is economically coherent but not yet final
+evidence. Second-price learning moves toward the truthful benchmark, first-price
+learning shows underbidding and bid shading, and reserve prices increase revenue
+while changing allocative efficiency. Table~\ref{tab:auction-validation}
+summarizes the current validation run.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Scenario & Revenue & Welfare & Efficiency & Underbid Rate \\
+\midrule
+second price & 3.373 & 6.216 & 0.747 & 0.381 \\
+first price & 3.481 & 6.331 & 0.768 & 0.774 \\
+second price + reserve & 4.031 & 6.098 & 0.814 & 0.366 \\
+\bottomrule
+\end{tabular}
+\caption{Auction House validation results.}
+\label{tab:auction-validation}
+\end{table}
+
+\todo{Replace or extend this table with the active full P.6 Auction House
+ladder runs once DQN, PPO, fixed independent-DQN, and centralized-critic
+validate. Add learned bid curves against truthful and first-price shaded
+reference curves.}
+
+\section{Environment 4: Public Goods}
+
+\subsection{World}
+
+Public Goods is a repeated common-pool resource environment. Agents choose
+between contributing to the pool, extracting from it, or remaining inactive.
+Extraction pays private reward but depletes the shared stock; contribution costs
+the contributor but helps sustain the pool. When requested extraction exceeds
+available stock, extraction is rationed proportionally. Deterministic
+regeneration makes the sustainability channel easy to audit.
+
+The implemented institutions are no intervention, a penalty schedule,
+contribution matching, reputation rewards, information restriction, and a
+generic tax-and-redistribution schedule. The main metrics are welfare,
+sustainability, total contribution, extraction relative to regeneration,
+inequality, collapse diagnostics, and tax revenue where applicable.
+
+\subsection{Q-Learning Full Run}
+
+The n=20 tabular Q-learning full run confirms the intended commons pressure. In
+the baseline, agents mostly extract and contribute little: sustainability is
+0.0892 and total contribution is 0.1418. Contribution matching improves both
+welfare and sustainability in this setting, reaching welfare 2.0808 and
+sustainability 0.1048. Reputation is a strong reward-shaping intervention, with
+welfare 9.5750, while the tax schedule mainly changes redistribution/accounting
+at the tested rates.
+
+The effect validator classifies the tax schedule as mostly reward/accounting
+under this configuration, while penalty, contribution matching, reputation, and
+information restriction change state metrics relative to baseline. This is a
+diagnostic classification, not yet a final welfare ranking.
+
+\subsection{Cross-Mind Status}
+
+Public Goods is P.6 smoke-validated and currently running full P.6 ladder jobs.
+The question for the full table is whether stronger learners worsen commons
+collapse by extracting more efficiently, or improve sustainability by
+discovering contribution and institution-mediated cooperation.
+
+\todo{Insert the full Public Goods P.6 comparison after the active remote queue
+validates.}
+
+\section{Environment 5: Labor Market}
+
+\subsection{World}
+
+Labor Market is a two-sided matching environment. Workers are learning agents;
+employers have fixed preferences. Each worker reports a top choice, the world
+constructs reported preferences, and matching is resolved using deferred
+acceptance. The world reports match rate, total welfare, truthful-report rate,
+stability, blocking-pair diagnostics, and manipulation-gain diagnostics.
+
+This world is intentionally asymmetric. Unlike Pricing Arena, Resource Island,
+Public Goods, and Auction House, not every economic actor is a learning agent.
+That asymmetry is the main interface test for the capability ladder: DQN, PPO,
+independent-DQN, and centralized-critic operate only over the worker side while
+employers remain fixed preference holders.
+
+\subsection{Q-Learning Full Run}
+
+The n=20 tabular Q-learning full run is substantially more stable than the
+short smoke run. Match rate remains \code{1.0}, while
+\code{stability\_mean=0.9508}, \code{truthful\_report\_rate\_mean=0.7859}, and
+\code{total\_welfare\_mean=3.6393}. The report-top action space creates
+truthfulness variation, but worker-proposing deferred acceptance still produces
+mostly stable matchings under the current random-preference setup.
+
+Fixed benchmark cases clarify the interpretation. Under worker-proposing
+deferred acceptance, workers should not have profitable report deviations in
+the canonical strategy-proof setting. Future manipulation tests therefore need
+to target the non-proposing side, change the mechanism, or add information and
+commitment frictions rather than treating worker misreports under standard
+deferred acceptance as the main expected failure mode.
+
+\subsection{Cross-Mind Status}
+
+Labor Market is P.6 smoke-validated and currently running full P.6 ladder jobs.
+The active full runs test whether stronger learners change truthful-report
+rates, stability, and welfare in the asymmetric worker-only learning setup.
+
+\todo{Insert the full Labor Market P.6 comparison after the active remote queue
+validates.}
+
+\section{Cross-World Synthesis}
+
+The emerging thesis is not that one institution always works. The emerging
+thesis is that institutional robustness must be evaluated jointly with learner
+capability and with activation diagnostics.
+
+The Pricing Arena result shows capability-sensitive institutional effects:
+price caps reduce exploitability broadly, but stronger learners can preserve
+profit under the cap through a channel that a price-only collusion metric would
+miss. Resource Island shows the complementary failure mode: if the world design
+does not put an institution under pressure, then the absence of an effect is not
+a mechanism result. Auction House adds theory-anchored bidding benchmarks.
+Public Goods adds a sustainability and commons-collapse channel. Labor Market
+adds a matching-stability and truthfulness channel.
+
+The preliminary five-world synthesis scaffold already exists, but three of its
+worlds currently use smoke-scale neural/MARL rows. Those rows are useful for
+checking the pipeline, not for final claims. The active full P.6 queues are
+therefore the current paper blocker: once Auction House, Public Goods, and
+Labor Market validate, the synthesis can be rewritten around five full
+capability-ladder tables instead of two full tables plus three smoke gates.
+
+\todo{After current full P.6 queues land, write this section as claims rather
+than a roadmap. Required inputs: final Pricing Arena table, final Resource
+Island table, final Auction House P.6 table, final Public Goods P.6 table, final
+Labor Market P.6 table, and regenerated cross-world synthesis outputs.}
+
+\section{Limitations}
+
+Several limitations are deliberate. The environments are small and stylized.
+They are designed for auditability rather than realism. The deep-RL agents are
+structured-observation MLP agents rather than large-scale policies. The
+Resource Island trade protocol is still simple, and the current v1 pressure
+configuration is an activation test rather than a realistic market. Auction
+House currently has benchmarked sealed-bid full runs and smoke-tested clock and
+information variants. Public Goods is still a stylized common-pool model rather
+than an empirical commons. Labor Market currently uses worker-side learning
+under deferred acceptance, so it tests one asymmetric matching channel rather
+than matching-market design generally.
+
+The most important limitation is interpretive. A clean CSV does not imply a
+clean economic result. Every institution must be checked for activation. Every
+capability comparison must be checked for implementation artifacts. The
+independent-DQN alias issue is a concrete example: the table was statistically
+valid as an output file, but not valid as evidence for a distinct mind until the
+implementation was corrected and rerun.
+
+\section{Reproducibility}
+
+The repository records validation status in \code{ROADMAP\_STATUS.md}. Core
+outputs are stored under \code{outputs/}. Major runners include:
+
+\begin{itemize}
+  \item \code{run\_multiseed.py} for Pricing Arena replicated runs;
+  \item \code{run\_exploitability.py} for frozen-policy adversarial evaluation;
+  \item \code{run\_phase3\_full.py} and \code{validate\_phase3\_full.py} for
+  full Phase 3 Pricing Arena checks;
+  \item \code{run\_resource\_island\_smoke.py} for Resource Island smoke,
+  validation, and full runs;
+  \item \code{run\_auction\_house\_smoke.py} for Auction House runs;
+  \item \code{run\_public\_goods\_smoke.py} for Public Goods runs;
+  \item \code{run\_labor\_market\_smoke.py} for Labor Market runs;
+  \item \code{build\_world\_mind\_comparison.py} and
+  \code{build\_cross\_world\_synthesis.py} for ladder comparisons and
+  cross-world synthesis.
+\end{itemize}
+
+The test suite currently includes unit, integration, and output-validation
+coverage for the core abstractions, Pricing Arena, Resource Island, Auction
+House, Public Goods, Labor Market, and deep-RL/MARL minds.
+
+\section{Conclusion}
+
+This draft reports a first version of an artificial-economies platform for
+testing institutional robustness under learning agents. The mature Pricing
+Arena result already shows why the question matters: exploitability and
+collusion can move differently under the same institution, and stronger learners
+can expose channels that weaker learners do not. Resource Island, Auction
+House, Public Goods, and Labor Market extend the project beyond pricing games.
+Their role is not merely to add more checkboxes, but to test whether the
+patterns found in Pricing Arena survive when the economic structure changes.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

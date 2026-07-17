@@ -26,6 +26,53 @@ from worlds.resource_island.training import (
 DEFAULT_INSTITUTIONS = ("none", "property_rights", "redistribution", "trade_price_controls", "reputation_system")
 
 
+def specialization_preferences(preset: str, n_agents: int) -> tuple[tuple[float, float], ...] | None:
+    if preset == "none":
+        return None
+    if preset != "complementary":
+        raise ValueError(f"unknown specialization preset {preset!r}")
+    preferences: list[tuple[float, float]] = []
+    for agent_id in range(n_agents):
+        if agent_id % 2 == 0:
+            preferences.append((1.4, 0.6))
+        else:
+            preferences.append((0.6, 1.4))
+    return tuple(preferences)
+
+
+def activation_start_positions(preset: str, grid_size: int, n_agents: int) -> tuple[tuple[int, int], ...] | None:
+    if preset == "none":
+        return None
+    if preset != "pressure":
+        raise ValueError(f"unknown activation preset {preset!r}")
+    center = grid_size // 2
+    positions = [(center, center), (center, min(grid_size - 1, center + 1))]
+    corners = [(0, 0), (grid_size - 1, grid_size - 1), (0, grid_size - 1), (grid_size - 1, 0)]
+    for candidate in corners:
+        if len(positions) >= n_agents:
+            break
+        if candidate not in positions:
+            positions.append(candidate)
+    return tuple(positions[:n_agents])
+
+
+def activation_initial_inventory(
+    preset: str,
+    n_agents: int,
+    trade_food_units: int,
+    trade_wood_units: int,
+) -> tuple[tuple[int, int], ...] | None:
+    if preset == "none":
+        return None
+    if preset != "pressure":
+        raise ValueError(f"unknown activation preset {preset!r}")
+    inventory = [[0, 0] for _ in range(n_agents)]
+    if n_agents >= 2:
+        inventory[0][0] = int(trade_food_units)
+        inventory[1][1] = int(trade_wood_units)
+    return tuple((food, wood) for food, wood in inventory)
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]], fieldnames: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as handle:
@@ -53,13 +100,30 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
     start = time.time()
     save_dir = args.save_dir
     save_dir.mkdir(parents=True, exist_ok=True)
+    resource_layout = (
+        "contested"
+        if args.activation_preset == "pressure" and args.resource_layout == "random"
+        else args.resource_layout
+    )
     config = ResourceIslandConfig(
         grid_size=args.grid_size,
         n_agents=args.n_agents,
         max_steps=args.steps,
         initial_resource_units=args.initial_resource_units,
+        resource_layout=resource_layout,
         resource_spawn_probability=args.resource_spawn_probability,
         trade_radius=args.trade_radius,
+        trade_food_units=args.trade_food_units,
+        trade_wood_units=args.trade_wood_units,
+        trade_acquisition_reward=args.trade_acquisition_reward,
+        resource_preferences=specialization_preferences(args.specialization_preset, args.n_agents),
+        start_positions=activation_start_positions(args.activation_preset, args.grid_size, args.n_agents),
+        initial_inventory=activation_initial_inventory(
+            args.activation_preset,
+            args.n_agents,
+            args.trade_food_units,
+            args.trade_wood_units,
+        ),
     )
 
     rows: list[dict[str, Any]] = []
@@ -144,8 +208,14 @@ def run(args: argparse.Namespace) -> dict[str, Path]:
             "grid_size": args.grid_size,
             "n_agents": args.n_agents,
             "initial_resource_units": args.initial_resource_units,
+            "resource_layout": resource_layout,
+            "activation_preset": args.activation_preset,
             "resource_spawn_probability": args.resource_spawn_probability,
             "trade_radius": config.trade_radius,
+            "trade_food_units": args.trade_food_units,
+            "trade_wood_units": args.trade_wood_units,
+            "trade_acquisition_reward": args.trade_acquisition_reward,
+            "specialization_preset": args.specialization_preset,
             "mind": args.mind,
             "obs_radius": args.obs_radius,
             "save_dir": str(save_dir),
@@ -170,8 +240,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--grid-size", type=int, default=5)
     parser.add_argument("--n-agents", type=int, default=2)
     parser.add_argument("--initial-resource-units", type=int, default=12)
+    parser.add_argument("--resource-layout", choices=("random", "contested", "split"), default="random")
+    parser.add_argument("--activation-preset", choices=("none", "pressure"), default="none")
     parser.add_argument("--resource-spawn-probability", type=float, default=0.08)
     parser.add_argument("--trade-radius", type=int, default=None)
+    parser.add_argument("--trade-food-units", type=int, default=1)
+    parser.add_argument("--trade-wood-units", type=int, default=1)
+    parser.add_argument("--trade-acquisition-reward", type=float, default=0.0)
+    parser.add_argument("--specialization-preset", choices=("none", "complementary"), default="none")
     parser.add_argument("--obs-radius", type=int, default=1)
     parser.add_argument("--institutions", nargs="+", default=list(DEFAULT_INSTITUTIONS), choices=DEFAULT_INSTITUTIONS)
     parser.add_argument("--save-dir", type=Path, default=Path("outputs/resource_island_smoke"))

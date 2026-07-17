@@ -36,6 +36,7 @@ from worlds.resource_island.env import (
     ResourceIslandConfig,
     ResourceIslandWorld,
 )
+from worlds.resource_island.resources import initial_resource_map
 from worlds.resource_island.training import train_resource_island
 
 
@@ -121,6 +122,19 @@ class ResourceIslandWorldTests(unittest.TestCase):
         self.assertGreater(rewards[0], 0.0)
         self.assertEqual(info["gathered_food_step"], 1.0)
 
+    def test_contested_resource_layout_clusters_resources_near_center(self):
+        resources = initial_resource_map(
+            np.random.default_rng(1),
+            grid_size=5,
+            n_resource_types=2,
+            resource_capacity=4,
+            initial_resource_units=8,
+            resource_layout="contested",
+        )
+
+        self.assertEqual(int(np.sum(resources)), 8)
+        self.assertGreater(int(np.sum(resources[2, 2, :])), 0)
+
     def test_lone_agent_can_survive_by_gathering_food(self):
         resources = zero_resources()
         resources[0, 0, FOOD] = 2
@@ -188,6 +202,25 @@ class ResourceIslandWorldTests(unittest.TestCase):
         self.assertEqual(info["trade_count_step"], 1.0)
         self.assertEqual(info["trade_inventory_blocked_count_step"], 0.0)
 
+    def test_unequal_trade_units_swap_when_unregulated(self):
+        cfg = ResourceIslandConfig(
+            grid_size=3,
+            n_agents=2,
+            start_positions=((1, 1), (1, 2)),
+            initial_resources=zero_resources(),
+            resource_spawn_probability=0.0,
+            trade_food_units=2,
+            trade_wood_units=1,
+        )
+        world = ResourceIslandWorld(config=cfg, seed=1)
+        world.inventory[0, FOOD] = 2
+        world.inventory[1, WOOD] = 1
+        _, _, _, info = world.step([OFFER_FOOD_FOR_WOOD, STAY])
+
+        self.assertEqual(world.inventory.tolist(), [[0, 1], [2, 0]])
+        self.assertEqual(info["trade_count_step"], 1.0)
+        self.assertEqual(info["trade_blocked_count_step"], 0.0)
+
     def test_strict_trade_radius_blocks_non_adjacent_trade_attempts(self):
         cfg = ResourceIslandConfig(
             grid_size=5,
@@ -214,6 +247,7 @@ class ResourceIslandWorldTests(unittest.TestCase):
         self.assertIn("welfare", metrics)
         self.assertIn("inequality_over_time", metrics)
         self.assertIn("resource_sustainability", metrics)
+        self.assertIn("property_opportunities", metrics)
 
 
 class ResourceIslandInstitutionTests(unittest.TestCase):
@@ -235,6 +269,25 @@ class ResourceIslandInstitutionTests(unittest.TestCase):
         self.assertEqual(world.inventory[1, FOOD], 0)
         self.assertLess(rewards[1], rewards[0])
 
+    def test_property_rights_opportunity_counters_track_pressure(self):
+        resources = zero_resources()
+        resources[1, 1, FOOD] = 2
+        cfg = ResourceIslandConfig(
+            grid_size=3,
+            n_agents=2,
+            start_positions=((1, 1), (1, 2)),
+            initial_resources=resources,
+            resource_spawn_probability=0.0,
+            vision_radius=1,
+        )
+        world = ResourceIslandWorld(config=cfg, institution=PropertyRights(), seed=1)
+        world.step([GATHER, STAY])
+        _, _, _, info = world.step([STAY, STAY])
+
+        self.assertEqual(info["property_claims"], 1.0)
+        self.assertGreaterEqual(info["property_opportunities"], 1.0)
+        self.assertGreaterEqual(info["property_resource_opportunities"], 1.0)
+
     def test_redistribution_taxes_positive_rewards(self):
         institution = Redistribution(tax_rate=0.5)
         state = {
@@ -249,6 +302,42 @@ class ResourceIslandInstitutionTests(unittest.TestCase):
         institution = TradePriceControls(max_exchange_ratio=1.5)
         out = institution.apply({"phase": "pre_trade", "food_units": 2.0, "wood_units": 1.0, "allowed": True})
         self.assertFalse(out["allowed"])
+
+    def test_trade_price_controls_block_unequal_world_trade(self):
+        cfg = ResourceIslandConfig(
+            grid_size=3,
+            n_agents=2,
+            start_positions=((1, 1), (1, 2)),
+            initial_resources=zero_resources(),
+            resource_spawn_probability=0.0,
+            trade_food_units=2,
+            trade_wood_units=1,
+        )
+        world = ResourceIslandWorld(config=cfg, institution=TradePriceControls(max_exchange_ratio=1.0), seed=1)
+        world.inventory[0, FOOD] = 2
+        world.inventory[1, WOOD] = 1
+        _, _, _, info = world.step([OFFER_FOOD_FOR_WOOD, STAY])
+
+        self.assertEqual(world.inventory.tolist(), [[2, 0], [0, 1]])
+        self.assertEqual(info["trade_count_step"], 0.0)
+        self.assertEqual(info["trade_institution_blocked_count_step"], 1.0)
+
+    def test_resource_preferences_change_gather_reward(self):
+        resources = zero_resources()
+        resources[0, 0, FOOD] = 1
+        cfg = ResourceIslandConfig(
+            grid_size=3,
+            n_agents=1,
+            start_positions=((0, 0),),
+            initial_resources=resources,
+            resource_spawn_probability=0.0,
+            resource_preferences=((2.0, 0.5),),
+            gather_reward=1.0,
+        )
+        world = ResourceIslandWorld(config=cfg, seed=1)
+        _, rewards, _, _ = world.step([GATHER])
+
+        self.assertGreater(rewards[0], 2.0)
 
     def test_reputation_system_adds_trade_bonus(self):
         institution = ReputationSystem(trade_reputation_gain=2.0, reward_bonus=0.5)
@@ -308,6 +397,7 @@ class ResourceIslandIntegrationTests(unittest.TestCase):
         self.assertTrue(all("trade_inventory_blocked_count" in record for record in result.records))
         self.assertTrue(all("trade_institution_blocked_count" in record for record in result.records))
         self.assertTrue(all("property_claims" in record for record in result.records))
+        self.assertTrue(all("property_opportunities" in record for record in result.records))
 
     def test_smoke_runner_writes_summary_csvs_and_manifest(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -322,6 +412,16 @@ class ResourceIslandIntegrationTests(unittest.TestCase):
                     "--institutions",
                     "none",
                     "property_rights",
+                    "--resource-layout",
+                    "contested",
+                    "--activation-preset",
+                    "pressure",
+                    "--specialization-preset",
+                    "complementary",
+                    "--trade-food-units",
+                    "2",
+                    "--trade-wood-units",
+                    "1",
                     "--save-dir",
                     tmpdir,
                 ]
@@ -338,11 +438,16 @@ class ResourceIslandIntegrationTests(unittest.TestCase):
             self.assertIn("trade_attempt_count", rows[0])
             self.assertIn("trade_inventory_blocked_count", rows[0])
             self.assertIn("property_claims", rows[0])
+            self.assertIn("property_opportunities", rows[0])
             self.assertIn("resource_sustainability", rows[0])
 
             manifest = json.loads(outputs["manifest"].read_text())
             self.assertEqual(manifest["world"], "resource_island")
             self.assertEqual(manifest["mind"], "q_learning")
+            self.assertEqual(manifest["config"]["resource_layout"], "contested")
+            self.assertEqual(manifest["config"]["activation_preset"], "pressure")
+            self.assertEqual(manifest["config"]["specialization_preset"], "complementary")
+            self.assertEqual(manifest["config"]["trade_food_units"], 2)
             self.assertIn("inequality_over_time", manifest["summary_metrics"])
             self.assertIn("resource_sustainability", manifest["summary_metrics"])
 

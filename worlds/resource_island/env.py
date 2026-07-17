@@ -65,11 +65,17 @@ class ResourceIslandConfig:
     death_penalty: float = 5.0
     resource_capacity: int = 3
     initial_resource_units: int = 12
+    resource_layout: str = "random"
     resource_spawn_probability: float = 0.08
     vision_radius: int = 1
     trade_radius: int | None = None
+    trade_food_units: int = 1
+    trade_wood_units: int = 1
+    trade_acquisition_reward: float = 0.0
     tabular_bins: int = N_ACTIONS
     start_positions: tuple[tuple[int, int], ...] | None = None
+    initial_inventory: tuple[tuple[int, int], ...] | None = None
+    resource_preferences: tuple[tuple[float, float], ...] | None = None
     initial_resources: np.ndarray | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
@@ -85,6 +91,16 @@ class ResourceIslandConfig:
             self.trade_radius = 2 * (self.grid_size - 1)
         if self.trade_radius < 1:
             raise ValueError("trade_radius must be positive")
+        if self.resource_layout not in ("random", "contested", "split"):
+            raise ValueError("resource_layout must be random, contested, or split")
+        if self.trade_food_units < 1 or self.trade_wood_units < 1:
+            raise ValueError("trade unit counts must be positive")
+        if self.trade_acquisition_reward < 0.0:
+            raise ValueError("trade_acquisition_reward must be non-negative")
+        if self.initial_inventory is not None and len(self.initial_inventory) != self.n_agents:
+            raise ValueError("initial_inventory must have one row per agent")
+        if self.resource_preferences is not None and len(self.resource_preferences) != self.n_agents:
+            raise ValueError("resource_preferences must have one row per agent")
 
 
 def action_cost(config: ResourceIslandConfig, action: int) -> float:
@@ -125,6 +141,9 @@ class ResourceIslandWorld(World):
         self.trade_institution_blocked_count = 0
         self.property_claim_count = 0
         self.property_violation_count = 0
+        self.property_opportunity_count = 0
+        self.property_resource_opportunity_count = 0
+        self.property_gather_opportunity_count = 0
         self.alive = np.ones(self.config.n_agents, dtype=bool)
         self.resources = np.zeros((self.config.grid_size, self.config.grid_size, len(RESOURCE_TYPES)), dtype=int)
         self.initial_resource_total = 0
@@ -137,7 +156,7 @@ class ResourceIslandWorld(World):
         self.step_idx = 0
         self.positions = self._initial_positions()
         self.energy = np.full(self.config.n_agents, self.config.initial_energy, dtype=float)
-        self.inventory = np.zeros((self.config.n_agents, len(RESOURCE_TYPES)), dtype=int)
+        self.inventory = self._initial_inventory()
         self.gathered_totals = np.zeros((self.config.n_agents, len(RESOURCE_TYPES)), dtype=int)
         self.trade_counts = np.zeros(self.config.n_agents, dtype=int)
         self.trade_attempt_count = 0
@@ -146,6 +165,9 @@ class ResourceIslandWorld(World):
         self.trade_institution_blocked_count = 0
         self.property_claim_count = 0
         self.property_violation_count = 0
+        self.property_opportunity_count = 0
+        self.property_resource_opportunity_count = 0
+        self.property_gather_opportunity_count = 0
         self.alive = np.ones(self.config.n_agents, dtype=bool)
         self.resources = self._initial_resources()
         self.initial_resource_total = int(np.sum(self.resources))
@@ -187,7 +209,17 @@ class ResourceIslandWorld(World):
             resource_capacity=self.config.resource_capacity,
             initial_resource_units=self.config.initial_resource_units,
             initial_resources=self.config.initial_resources,
+            resource_layout=self.config.resource_layout,
         )
+
+    def _initial_inventory(self) -> np.ndarray:
+        if self.config.initial_inventory is None:
+            return np.zeros((self.config.n_agents, len(RESOURCE_TYPES)), dtype=int)
+        inventory = np.asarray(self.config.initial_inventory, dtype=int).copy()
+        expected = (self.config.n_agents, len(RESOURCE_TYPES))
+        if inventory.shape != expected:
+            raise ValueError(f"initial_inventory must have shape {expected}")
+        return np.maximum(inventory, 0)
 
     def observations(self) -> list[tuple[int, int, int]]:
         return [self.discretize_obs(agent_id) for agent_id in range(self.config.n_agents)]
@@ -237,9 +269,13 @@ class ResourceIslandWorld(World):
             "trade_institution_blocked_step": 0,
             "property_claims_step": 0,
             "property_violations_step": 0,
+            "property_opportunities_step": 0,
+            "property_resource_opportunities_step": 0,
+            "property_gather_opportunities_step": 0,
         }
 
         self._apply_movement(clean_actions)
+        self._update_property_opportunity_diagnostics(clean_actions, diagnostic_counts)
 
         for agent_id, action in enumerate(clean_actions):
             if not self.alive[agent_id]:
@@ -267,7 +303,15 @@ class ResourceIslandWorld(World):
         self._regenerate_resources()
         self.step_idx += 1
         done = bool(self.step_idx >= self.config.max_steps or not np.any(self.alive))
-        info = self._info(clean_actions, rewards, gathered_this_step, trades_this_step, diagnostic_counts, done)
+        info = self._info(
+            clean_actions,
+            rewards,
+            gathered_this_step,
+            trades_this_step,
+            diagnostic_counts,
+            done,
+            reward_state,
+        )
         self.history.append(info)
         return self.observations(), rewards, done, info
 
@@ -345,7 +389,7 @@ class ResourceIslandWorld(World):
             self.inventory[agent_id, resource_type] += 1
             self.gathered_totals[agent_id, resource_type] += 1
             gathered_this_step[agent_id, resource_type] += 1
-            rewards[agent_id] += self.config.gather_reward
+            rewards[agent_id] += self.config.gather_reward * self.resource_preference(agent_id, resource_type)
             post_gather = self.institution.apply(
                 {
                     "phase": "post_gather",
@@ -414,19 +458,33 @@ class ResourceIslandWorld(World):
                     diagnostic_counts["trade_blocked_step"] += 1
                     diagnostic_counts["trade_inventory_blocked_step"] += 1
                     continue
-                self.inventory[giver_food, FOOD] -= 1
-                self.inventory[giver_food, WOOD] += 1
-                self.inventory[giver_wood, WOOD] -= 1
-                self.inventory[giver_wood, FOOD] += 1
+                food_units = int(trade.get("food_units", self.config.trade_food_units))
+                wood_units = int(trade.get("wood_units", self.config.trade_wood_units))
+                if self.inventory[giver_food, FOOD] < food_units or self.inventory[giver_wood, WOOD] < wood_units:
+                    self.trade_blocked_count += 1
+                    self.trade_inventory_blocked_count += 1
+                    diagnostic_counts["trade_blocked_step"] += 1
+                    diagnostic_counts["trade_inventory_blocked_step"] += 1
+                    continue
+                self.inventory[giver_food, FOOD] -= food_units
+                self.inventory[giver_food, WOOD] += wood_units
+                self.inventory[giver_wood, WOOD] -= wood_units
+                self.inventory[giver_wood, FOOD] += food_units
                 self.trade_counts[[giver_food, giver_wood]] += 1
                 trades_this_step[[giver_food, giver_wood]] += 1
                 rewards[[giver_food, giver_wood]] += self.config.trade_reward
+                rewards[giver_food] += (
+                    self.config.trade_acquisition_reward * wood_units * self.resource_preference(giver_food, WOOD)
+                )
+                rewards[giver_wood] += (
+                    self.config.trade_acquisition_reward * food_units * self.resource_preference(giver_wood, FOOD)
+                )
                 self.institution.apply(
                     {
                         "phase": "post_trade",
                         "participants": (giver_food, giver_wood),
-                        "food_units": 1,
-                        "wood_units": 1,
+                        "food_units": food_units,
+                        "wood_units": wood_units,
                     }
                 )
                 used.update({giver_food, giver_wood})
@@ -450,11 +508,50 @@ class ResourceIslandWorld(World):
                     "participants": (food_giver, wood_giver),
                     "food_giver": food_giver,
                     "wood_giver": wood_giver,
-                    "food_units": 1,
-                    "wood_units": 1,
+                    "food_units": self.config.trade_food_units,
+                    "wood_units": self.config.trade_wood_units,
                     "allowed": True,
                 }
         return None
+
+    def resource_preference(self, agent_id: int, resource_type: int) -> float:
+        if self.config.resource_preferences is None:
+            return 1.0
+        return float(self.config.resource_preferences[int(agent_id)][int(resource_type)])
+
+    def _property_claims(self) -> dict[tuple[int, int], int]:
+        claims = getattr(self.institution, "claims", None)
+        return dict(claims) if isinstance(claims, dict) else {}
+
+    def _update_property_opportunity_diagnostics(
+        self,
+        actions: list[int],
+        diagnostic_counts: dict[str, int],
+    ) -> None:
+        claims = self._property_claims()
+        if not claims:
+            return
+        for agent_id in range(self.config.n_agents):
+            if not self.alive[agent_id]:
+                continue
+            for position, owner in claims.items():
+                if int(owner) == agent_id:
+                    continue
+                distance = manhattan_distance(tuple(int(value) for value in self.positions[agent_id]), position)
+                if distance <= self.config.vision_radius:
+                    self.property_opportunity_count += 1
+                    diagnostic_counts["property_opportunities_step"] += 1
+                    row, col = position
+                    if int(np.sum(self.resources[row, col, :])) > 0:
+                        self.property_resource_opportunity_count += 1
+                        diagnostic_counts["property_resource_opportunities_step"] += 1
+                if (
+                    actions[agent_id] == GATHER
+                    and tuple(int(value) for value in self.positions[agent_id]) == position
+                    and int(np.sum(self.resources[position[0], position[1], :])) > 0
+                ):
+                    self.property_gather_opportunity_count += 1
+                    diagnostic_counts["property_gather_opportunities_step"] += 1
 
     def _apply_energy_and_death(self, rewards: np.ndarray) -> None:
         for agent_id in range(self.config.n_agents):
@@ -485,6 +582,7 @@ class ResourceIslandWorld(World):
         trades_this_step: np.ndarray,
         diagnostic_counts: dict[str, int],
         done: bool,
+        reward_state: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         alive_count = int(np.sum(self.alive))
         total_inventory = np.sum(self.inventory, axis=0)
@@ -514,6 +612,8 @@ class ResourceIslandWorld(World):
             "resource_stock": current_resource_stock,
             "resource_units_introduced": total_introduced,
             "resource_sustainability": resource_sustainability(current_resource_stock, total_introduced),
+            "tax_revenue": float((reward_state or {}).get("tax_revenue", 0.0)),
+            "tax_revenue_cumulative": float((reward_state or {}).get("tax_revenue_cumulative", 0.0)),
             "inequality_over_time": gini(holdings),
             "gathered_food": float(np.sum(self.gathered_totals[:, FOOD])),
             "gathered_wood": float(np.sum(self.gathered_totals[:, WOOD])),
@@ -533,6 +633,12 @@ class ResourceIslandWorld(World):
             "property_claims_step": float(diagnostic_counts["property_claims_step"]),
             "property_violations": float(self.property_violation_count),
             "property_violations_step": float(diagnostic_counts["property_violations_step"]),
+            "property_opportunities": float(self.property_opportunity_count),
+            "property_opportunities_step": float(diagnostic_counts["property_opportunities_step"]),
+            "property_resource_opportunities": float(self.property_resource_opportunity_count),
+            "property_resource_opportunities_step": float(diagnostic_counts["property_resource_opportunities_step"]),
+            "property_gather_opportunities": float(self.property_gather_opportunity_count),
+            "property_gather_opportunities_step": float(diagnostic_counts["property_gather_opportunities_step"]),
             "specialization_index": specialization_index(self.gathered_totals),
         }
 
@@ -581,6 +687,9 @@ class ResourceIslandWorld(World):
             "trade_institution_blocked_count": self.trade_institution_blocked_count,
             "property_claim_count": self.property_claim_count,
             "property_violation_count": self.property_violation_count,
+            "property_opportunity_count": self.property_opportunity_count,
+            "property_resource_opportunity_count": self.property_resource_opportunity_count,
+            "property_gather_opportunity_count": self.property_gather_opportunity_count,
             "alive": self.alive.tolist(),
             "resources": self.resources.tolist(),
             "last_info": self.history[-1] if self.history else None,

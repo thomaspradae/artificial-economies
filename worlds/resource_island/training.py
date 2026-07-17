@@ -60,9 +60,14 @@ SUMMARY_METRICS = (
     "trade_institution_blocked_count",
     "property_claims",
     "property_violations",
+    "property_opportunities",
+    "property_resource_opportunities",
+    "property_gather_opportunities",
     "specialization_index",
     "inequality_over_time",
     "resource_sustainability",
+    "tax_revenue",
+    "tax_revenue_cumulative",
 )
 
 
@@ -70,6 +75,7 @@ def build_resource_island_q_world(
     seed: int,
     institution: str = "none",
     config: ResourceIslandConfig | None = None,
+    institution_params: dict[str, Any] | None = None,
 ) -> ResourceIslandWorld:
     """Build Resource Island with QLearningMind over the world's tabular observation."""
     cfg = config if config is not None else ResourceIslandConfig()
@@ -77,6 +83,7 @@ def build_resource_island_q_world(
         {
             "world": "resource_island",
             "institution": institution,
+            "institution_params": institution_params or {},
             "seed": seed,
             "world_params": {"config": cfg},
             "agents": [
@@ -129,10 +136,16 @@ def build_resource_island_world(
     config: ResourceIslandConfig | None = None,
     mind: str = "q_learning",
     obs_radius: int = 1,
+    institution_params: dict[str, Any] | None = None,
 ) -> ResourceIslandWorld:
     """Build Resource Island with tabular or structured neural minds."""
     if mind == "q_learning":
-        return build_resource_island_q_world(seed=seed, institution=institution, config=config)
+        return build_resource_island_q_world(
+            seed=seed,
+            institution=institution,
+            config=config,
+            institution_params=institution_params,
+        )
     if mind not in SUPPORTED_RESOURCE_ISLAND_MINDS:
         raise ValueError(f"Unsupported Resource Island mind {mind!r}")
 
@@ -153,6 +166,7 @@ def build_resource_island_world(
             {
                 "world": "resource_island",
                 "institution": institution,
+                "institution_params": institution_params or {},
                 "seed": seed,
                 "world_params": {"config": cfg},
                 "n_agents": 0,
@@ -176,6 +190,7 @@ def build_resource_island_world(
             {
                 "world": "resource_island",
                 "institution": institution,
+                "institution_params": institution_params or {},
                 "seed": seed,
                 "world_params": {"config": cfg},
                 "n_agents": 0,
@@ -189,6 +204,7 @@ def build_resource_island_world(
         {
             "world": "resource_island",
             "institution": institution,
+            "institution_params": institution_params or {},
             "seed": seed,
             "world_params": {"config": cfg},
             "agents": [
@@ -240,6 +256,7 @@ def train_resource_island(
     steps: int = 200,
     seed: int = 0,
     institution: str = "none",
+    institution_params: dict[str, Any] | None = None,
     config: ResourceIslandConfig | None = None,
     epsilon_start: float = 1.0,
     epsilon_min: float = 0.05,
@@ -254,6 +271,7 @@ def train_resource_island(
     world = build_resource_island_world(
         seed=seed,
         institution=institution,
+        institution_params=institution_params,
         config=config,
         mind=mind,
         obs_radius=obs_radius,

@@ -20,7 +20,7 @@ If `ps -p 379605` returns nothing, the orchestrator is dead too — `status.json
 ### Step 2 — Check how far each dead job actually got, before discarding anything
 
 ```bash
-for m in dqn ppo independent_dqn centralized_critic; do
+for m in dqn ppo centralized_critic; do
   echo "=== $m ==="
   tail -20 outputs/phase3_full/logs/${m}_multiseed.log
   ls -la outputs/${m}_v0_multiseed/ 2>&1
@@ -79,14 +79,16 @@ Wait and confirm each actually started and is climbing in CPU-time (not thrashin
 ssh old1 "cat ~/thesis/outputs/dqn.pid; ps -p \$(cat ~/thesis/outputs/dqn.pid) -o pid,%cpu,%mem,etime,cmd"
 ```
 
-Once `dqn` on old1 is confirmed healthy, queue `independent_dqn` behind it on the same machine (sequential, not parallel) — same for `centralized_critic` behind `ppo` on old2:
+Do not queue `independent_dqn` as a distinct full-run condition until it is made algorithmically different from `dqn`. Current audit: `IndependentDQNMind` subclasses `DQNMind` without overriding behavior, and the training paths instantiate both names with the same per-agent seed schedule. Queue `centralized_critic` behind `ppo` on old2 as the next distinct MARL condition:
 
 ```bash
-ssh old1 "cd ~/thesis && source .venv/bin/activate && \
-  nohup bash -c 'wait \$(cat outputs/dqn.pid); python run_multiseed.py --mind independent_dqn --steps 40000 --n-seeds 20 --save-dir outputs/independent_dqn_v0_multiseed' > outputs/independent_dqn_multiseed.log 2>&1 &"
+ssh old2 "cd ~/thesis && source .venv/bin/activate && \
+  nohup python run_multiseed.py --mind centralized_critic --steps 40000 --n-seeds 20 \
+  --save-dir outputs/centralized_critic_v0_multiseed > outputs/centralized_critic_multiseed.log 2>&1 & \
+  echo \$! > outputs/centralized_critic.pid"
 ```
 
-(If `wait` on an arbitrary PID doesn't work in your shell since it's not a child process, simplest fix: just launch it manually once you've confirmed the first job on that box finished, rather than chaining automatically.)
+(Launch it manually once you've confirmed the first job on that box finished; avoid shell `wait` on a PID that is not a child process.)
 
 ### Step 7 — Verify health repeatedly, not just once
 

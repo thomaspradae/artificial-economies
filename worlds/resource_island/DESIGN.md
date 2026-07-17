@@ -46,6 +46,12 @@ Cells hold integer resource stocks by type. `gather` takes one unit from the cur
 
 Resources regenerate stochastically after each step up to per-cell capacity. A resource spawn adds one unit to a random cell/type with probability `resource_spawn_probability`.
 
+V1 hardening adds deterministic resource-layout options:
+
+- `random`: original v0 random placement.
+- `contested`: scarce resources are clustered around the island center so property claims face repeated access pressure.
+- `split`: food and wood are placed in opposite corners for specialization/trade ablations.
+
 ## Energy, Starvation, And Death
 
 Each active action has an energy cost:
@@ -67,6 +73,7 @@ Trading is one-shot and simultaneous:
 - A one-for-one trade clears when the posted offer is inventory-valid: the food giver has at least 1 food and the wood giver has at least 1 wood.
 - The default `trade_radius` spans the whole island, making v0 trade a simple matching-market institution. Set `trade_radius=1` for strict adjacency-only trade ablations.
 - This is a deliberate v0 simplification, not an emergent result: movement and gathering remain spatial, but trade itself is centralized by default so the trade/reputation institutions are mechanically exercisable. Spatially constrained trade should be reported separately with `trade_radius=1` or other finite radii before making claims about spatial trade institutions.
+- V1 can set `trade_food_units` and `trade_wood_units` above 1, creating unequal exchange ratios. This is required before `trade_price_controls` can be economically evaluated rather than only mechanically tested.
 - Each agent participates in at most one trade per step.
 
 There is no multi-round bargaining in v0.
@@ -85,6 +92,8 @@ survival_reward
 ```
 
 Food converted to energy is not counted as a new gather reward.
+
+V1 specialization pressure can set per-agent `resource_preferences`, scaling gather and trade-acquisition rewards by resource type. This creates agents that value food and wood differently without changing the shared `Agent` interface.
 
 ## Institutions
 
@@ -127,6 +136,9 @@ Core metrics added for this world:
 - `trade_institution_blocked_count`: cumulative attempted trades blocked by an institution.
 - `property_claims`: cumulative property-right claims created after successful gathering under the property-rights institution.
 - `property_violations`: cumulative denied gathers from another agent's claimed cell.
+- `property_opportunities`: cumulative non-owner opportunities to observe another agent's claimed cell.
+- `property_resource_opportunities`: cumulative non-owner opportunities to observe another agent's claimed cell while resources remain on that cell.
+- `property_gather_opportunities`: cumulative non-owner gather attempts on claimed resource cells before the institution blocks or allows the action.
 - `stability`: inverse volatility score for finite metric series.
 - `robustness_under_shock`: shocked-performance divided by baseline-performance.
 
@@ -138,6 +150,7 @@ An item is checked in `ROADMAP_STATUS.md` only after code exists and tests or sm
 - movement and collision tests,
 - gather/starvation/trade tests,
 - institution hook tests,
+- v1 activation-pressure tests for contested layouts, unequal trades, price-control blocks, property-right opportunity counters, and specialization rewards,
 - static benchmark tests,
 - proof that the existing `QLearningMind` class and update rule run through an explicit Resource Island tabular state shape,
 - an explicit note that v0 tabular compatibility is achieved by giving `QLearningMind` an inventory-aware discrete observation, so it validates interface compatibility by explicit state-shape configuration rather than unconstrained interface generality,
