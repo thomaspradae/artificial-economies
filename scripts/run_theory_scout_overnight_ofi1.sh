@@ -37,7 +37,7 @@ TUNNEL_PID=$!
 
 sleep 2
 
-"$PYTHON_BIN" -m tools.theory_scout.cli full \
+PYTHONUNBUFFERED=1 "$PYTHON_BIN" -m tools.theory_scout.cli full \
   --env-file "${OUT_DIR}/secrets.env" \
   --per-query "$PER_QUERY" \
   --card-limit "$CARD_LIMIT" \
