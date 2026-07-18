@@ -411,10 +411,11 @@ Phase 3 notes:
 - [x] `literature/secrets.env.example`: ignored secrets-file template exists for OpenAlex and Semantic Scholar credentials.
 - [x] Local `literature/secrets.env` is configured outside git and test calls against OpenAlex and Semantic Scholar succeeded.
 - [x] First cached outputs exist: `literature/papers_raw.jsonl`, `literature/papers_ranked.csv`, `literature/novelty_gap_table.csv`, strict paper-card templates, and `literature/theory_obligations.md`.
+- [x] Local LLM host benchmark exists at `literature/local_llm_benchmark_ofi1.md`: `ofi1` has a user-local Ollama `0.32.1` install, `llama3.2:3b` is the recommended bulk JSON extractor, and `qwen3:8b` is reserved for slower audit passes.
 - [ ] Run the full Semantic Scholar-enriched scout with the configured secrets and refresh the cached literature outputs after rate limits clear.
 - [ ] Fill the main paper cards from paper text or abstracts: Pricing RL collusion, auctions/deep-RL auction design, public goods/MARL, matching/strategy-proofness, common-pool resources/property rights, and LLM economic agents.
 - [ ] Add an LLM-assisted extractor that turns paper text into strict card fields without inventing claims: theoretical benchmark, learning setup, metrics, main result, what is proved, what is simulated, what is not tested, and what this repo must reproduce.
-- [ ] Add a cached local-LLM backend option, preferably Ollama on `ofi1` if installed there or `old1` with `qwen3:1.7b` for smaller extraction passes.
+- [ ] Add a cached local-LLM backend option using the benchmarked `ofi1` Ollama host, with `llama3.2:3b` as the default bulk extractor and `qwen3:8b` as the optional audit model.
 - [ ] Add citation/evidence guards: each filled paper-card claim must cite a metadata id, DOI/arXiv id when available, and a short source excerpt or abstract-derived note.
 - [ ] Add code/result obligation checker: compare paper-card obligations against implemented benchmarks, metrics, tests, and output CSV columns for each world.
 - [ ] Add a thesis-facing theory gap report that answers, per world: classical prediction, known RL/MARL result, benchmark to reproduce, prior metric, our metric, and remaining gap.
