@@ -12,6 +12,9 @@ results, creates strict paper-card templates, and generates obligation tables.
 - `paper_cards/`: strict extraction templates for individual papers.
 - `pdf_text_report.csv`: per-paper PDF discovery/download/text-extraction status.
 - `card_fill_manifest.json`: per-card local-LLM fill status.
+- `theory_coverage.csv` / `theory_coverage.md`: per-world coverage report for metadata leads, PDF/text availability, and filled paper cards.
+- `manual_pdf_queue.csv`: balanced per-world link list for manually finding PDFs and recording status.
+- `scholar_comparison_worksheet.csv`: Google Scholar query worksheet comparing API top titles against manual Scholar checks.
 - `novelty_gap_table.csv`: `world | institution | mind | closest paper | theory benchmark | their metric | our metric | gap`.
 - `theory_obligations.md`: world-level theory obligations.
 - `obligation_audit.md`: deterministic check that theory obligations have code/result evidence.
@@ -43,10 +46,10 @@ scripts/run_theory_scout_overnight_ofi1.sh
 
 This opens an SSH tunnel to `ofi1`'s Ollama server, runs metadata search,
 creates paper-card templates, resolves/downloads open-access PDFs from metadata
-or Unpaywall, extracts canonical text into `literature/text/`, fills the first
-ranked cards with `llama3.2:3b`, rebuilds obligation tables, and writes the
-deterministic obligation audit. It is the default “leave it running at night”
-pipeline.
+or Unpaywall, extracts canonical text into `literature/text/`, fills a balanced
+per-world set of strict paper cards with `llama3.2:3b`, rebuilds obligation
+tables, writes the deterministic obligation audit, and emits manual review
+worksheets. It is the default “leave it running at night” pipeline.
 
 Equivalent direct Python command:
 
@@ -158,6 +161,13 @@ default from the `ofi1` benchmark is `llama3.2:3b`:
 python -m tools.theory_scout.cli fill-cards --limit 10 --model llama3.2:3b
 ```
 
+For thesis coverage, prefer a balanced per-world fill instead of only the
+globally highest-ranked papers:
+
+```bash
+python -m tools.theory_scout.cli fill-cards --per-world-limit 8 --model llama3.2:3b
+```
+
 To use `ofi1`'s user-local Ollama server from this local checkout, use the SSH
 tunnel helper:
 
@@ -194,6 +204,28 @@ The audit is deterministic. It checks for expected world files, benchmark
 helpers, tests/output files, and result columns/terms. Filled paper-card fields
 are added as review rows; unfilled TODO templates are skipped rather than
 counted as failures. It does not replace human review of filled paper cards.
+
+Generate coverage-first review files without network access:
+
+```bash
+python -m tools.theory_scout.cli review --per-world-limit 30
+```
+
+This writes:
+
+- `literature/theory_coverage.csv` and `.md`: which worlds have metadata,
+  PDF/text, and filled-card coverage.
+- `literature/manual_pdf_queue.csv`: balanced link list with paper URLs, PDF
+  URLs, and Google Scholar title/query links for manual PDF discovery.
+- `literature/scholar_comparison_worksheet.csv`: one row per configured query,
+  with the API top titles next to a Google Scholar search URL and blank columns
+  for manual Scholar results. This is how to compare OpenAlex/Semantic
+  Scholar/arXiv coverage against Scholar without scraping Google Scholar.
+
+If you have a SerpAPI key and want an automated Google Scholar snapshot for
+review only, `scripts/serpapi_scholar_lit.py` exists, but it is intentionally
+separate from the reproducible pipeline because Google Scholar metadata is
+noisy and terms of use differ from OpenAlex/Semantic Scholar/arXiv.
 
 API configuration:
 

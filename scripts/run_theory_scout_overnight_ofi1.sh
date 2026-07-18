@@ -8,6 +8,8 @@ PER_QUERY="${THEORY_SCOUT_PER_QUERY:-8}"
 CARD_LIMIT="${THEORY_SCOUT_CARD_LIMIT:-150}"
 TEXT_LIMIT="${THEORY_SCOUT_TEXT_LIMIT:-80}"
 FILL_LIMIT="${THEORY_SCOUT_FILL_LIMIT:-40}"
+TEXT_PER_WORLD_LIMIT="${THEORY_SCOUT_TEXT_PER_WORLD_LIMIT:-16}"
+FILL_PER_WORLD_LIMIT="${THEORY_SCOUT_FILL_PER_WORLD_LIMIT:-8}"
 OUT_DIR="${THEORY_SCOUT_OUT_DIR:-literature}"
 PYTHON_BIN="${THEORY_SCOUT_PYTHON:-}"
 
@@ -42,7 +44,9 @@ PYTHONUNBUFFERED=1 "$PYTHON_BIN" -m tools.theory_scout.cli full \
   --per-query "$PER_QUERY" \
   --card-limit "$CARD_LIMIT" \
   --text-limit "$TEXT_LIMIT" \
+  --text-per-world-limit "$TEXT_PER_WORLD_LIMIT" \
   --fill-limit "$FILL_LIMIT" \
+  --fill-per-world-limit "$FILL_PER_WORLD_LIMIT" \
   --semantic-delay-seconds 1.1 \
   --resolve-pdfs \
   --download \

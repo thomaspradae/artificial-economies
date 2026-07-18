@@ -24,6 +24,13 @@ from .http import read_jsonl, write_jsonl
 from .make_paper_cards import make_blank_card
 from .models import PaperRecord, record_key
 from .query_config import iter_world_queries, load_queries
+from .review_outputs import (
+    build_manual_pdf_queue_rows,
+    build_scholar_comparison_rows,
+    build_theory_coverage_rows,
+    write_coverage_markdown,
+    write_csv,
+)
 from .resolve_pdf import resolve_unpaywall_pdf
 from .search_arxiv import search_arxiv
 from .search_openalex import search_openalex
@@ -302,6 +309,7 @@ def fill_cards_command(args: argparse.Namespace) -> None:
         worlds=worlds,
         title_contains=args.title_contains,
         limit=args.limit,
+        per_world_limit=args.per_world_limit,
         force=args.force,
         dry_run=args.dry_run,
         num_predict=args.num_predict,
@@ -349,12 +357,43 @@ def hydrate_text_command(args: argparse.Namespace) -> None:
         worlds=worlds,
         title_contains=args.title_contains,
         limit=args.limit,
+        per_world_limit=args.per_world_limit,
         resolve_pdfs=args.resolve_pdfs,
         min_text_chars=args.min_text_chars,
     )
     summary = hydration_summary(rows)
     print(f"[wrote] {args.report} ({len(rows)} rows)")
     print("[hydrate] " + ", ".join(f"{key}={value}" for key, value in sorted(summary.items())))
+
+
+def theory_review_command(args: argparse.Namespace) -> None:
+    worlds = set(args.world) if args.world else None
+    coverage_rows = build_theory_coverage_rows(
+        queries_path=Path(args.queries),
+        records_path=Path(args.records),
+        cards_dir=Path(args.cards_dir),
+        text_dir=Path(args.text_dir),
+    )
+    manual_rows = build_manual_pdf_queue_rows(
+        records_path=Path(args.records),
+        text_dir=Path(args.text_dir),
+        worlds=worlds,
+        limit=args.limit,
+        per_world_limit=args.per_world_limit,
+    )
+    scholar_rows = build_scholar_comparison_rows(
+        queries_path=Path(args.queries),
+        records_path=Path(args.records),
+        top_n=args.scholar_top_n,
+    )
+    write_csv(coverage_rows, Path(args.coverage_csv))
+    write_coverage_markdown(coverage_rows, Path(args.coverage_md))
+    write_csv(manual_rows, Path(args.manual_pdf_csv))
+    write_csv(scholar_rows, Path(args.scholar_csv))
+    print(f"[wrote] {args.coverage_csv} ({len(coverage_rows)} rows)")
+    print(f"[wrote] {args.coverage_md}")
+    print(f"[wrote] {args.manual_pdf_csv} ({len(manual_rows)} rows)")
+    print(f"[wrote] {args.scholar_csv} ({len(scholar_rows)} rows)")
 
 
 def audit_obligations_command(args: argparse.Namespace) -> None:
@@ -395,6 +434,10 @@ def full_command(args: argparse.Namespace) -> None:
         "out_dir": args.out_dir,
         "per_query": args.per_query,
         "semantic_delay_seconds": args.semantic_delay_seconds,
+        "text_limit": args.text_limit,
+        "text_per_world_limit": args.text_per_world_limit,
+        "fill_limit": args.fill_limit,
+        "fill_per_world_limit": args.fill_per_world_limit,
         "sources_requested": [],
         "sources_run": [],
         "secrets_loaded": sorted(env_loaded.keys()),
@@ -405,6 +448,9 @@ def full_command(args: argparse.Namespace) -> None:
             "cards": str(out_dir / "paper_cards"),
             "pdf_text_report": str(out_dir / "pdf_text_report.csv"),
             "card_fill_manifest": str(out_dir / "card_fill_manifest.json"),
+            "theory_coverage": str(out_dir / "theory_coverage.md"),
+            "manual_pdf_queue": str(out_dir / "manual_pdf_queue.csv"),
+            "scholar_comparison_worksheet": str(out_dir / "scholar_comparison_worksheet.csv"),
             "gap_table": str(out_dir / "novelty_gap_table.csv"),
             "obligations": str(out_dir / "theory_obligations.md"),
             "obligation_audit": str(out_dir / "obligation_audit.md"),
@@ -458,6 +504,7 @@ def full_command(args: argparse.Namespace) -> None:
                 world=None,
                 title_contains=None,
                 limit=args.text_limit,
+                per_world_limit=args.text_per_world_limit,
                 resolve_pdfs=args.resolve_pdfs,
                 min_text_chars=args.min_text_chars,
             )
@@ -474,6 +521,7 @@ def full_command(args: argparse.Namespace) -> None:
                 world=None,
                 title_contains=None,
                 limit=args.fill_limit,
+                per_world_limit=args.fill_per_world_limit,
                 force=args.force_fill,
                 dry_run=False,
                 num_predict=args.num_predict,
@@ -492,6 +540,22 @@ def full_command(args: argparse.Namespace) -> None:
             out_md=str(out_dir / "obligation_audit.md"),
             no_card_obligations=False,
             fail_on_missing=False,
+        )
+    )
+    theory_review_command(
+        argparse.Namespace(
+            queries=args.queries,
+            records=str(out_dir / "papers_ranked.csv"),
+            cards_dir=str(out_dir / "paper_cards"),
+            text_dir=str(out_dir / "text"),
+            coverage_csv=str(out_dir / "theory_coverage.csv"),
+            coverage_md=str(out_dir / "theory_coverage.md"),
+            manual_pdf_csv=str(out_dir / "manual_pdf_queue.csv"),
+            scholar_csv=str(out_dir / "scholar_comparison_worksheet.csv"),
+            world=None,
+            limit=None,
+            per_world_limit=25,
+            scholar_top_n=10,
         )
     )
 
@@ -572,6 +636,12 @@ def build_parser() -> argparse.ArgumentParser:
     fill.add_argument("--world", action="append", help="Limit to one world; repeat for multiple worlds.")
     fill.add_argument("--title-contains", help="Only fill records whose title contains this text.")
     fill.add_argument("--limit", type=int, default=5)
+    fill.add_argument(
+        "--per-world-limit",
+        type=int,
+        default=None,
+        help="Fill up to this many records for each world, ignoring global rank imbalance.",
+    )
     fill.add_argument("--force", action="store_true", help="Overwrite cards that no longer contain TODOs.")
     fill.add_argument("--dry-run", action="store_true")
     fill.add_argument("--num-predict", type=int, default=900)
@@ -597,6 +667,12 @@ def build_parser() -> argparse.ArgumentParser:
     hydrate.add_argument("--world", action="append", help="Limit to one world; repeat for multiple worlds.")
     hydrate.add_argument("--title-contains", help="Only hydrate records whose title contains this text.")
     hydrate.add_argument("--limit", type=int, default=20)
+    hydrate.add_argument(
+        "--per-world-limit",
+        type=int,
+        default=None,
+        help="Hydrate up to this many records for each world, ignoring global rank imbalance.",
+    )
     hydrate.add_argument("--resolve-pdfs", action="store_true", help="Use Unpaywall when metadata lacks a PDF URL.")
     hydrate.add_argument("--min-text-chars", type=int, default=1000)
     hydrate.set_defaults(func=hydrate_text_command)
@@ -613,6 +689,24 @@ def build_parser() -> argparse.ArgumentParser:
     audit.add_argument("--fail-on-missing", action="store_true")
     audit.set_defaults(func=audit_obligations_command)
 
+    review = subparsers.add_parser(
+        "review",
+        help="write coverage-first theory review artifacts without network access",
+    )
+    review.add_argument("--queries", default="literature/queries.yaml")
+    review.add_argument("--records", default="literature/papers_ranked.csv")
+    review.add_argument("--cards-dir", default="literature/paper_cards")
+    review.add_argument("--text-dir", default="literature/text")
+    review.add_argument("--coverage-csv", default="literature/theory_coverage.csv")
+    review.add_argument("--coverage-md", default="literature/theory_coverage.md")
+    review.add_argument("--manual-pdf-csv", default="literature/manual_pdf_queue.csv")
+    review.add_argument("--scholar-csv", default="literature/scholar_comparison_worksheet.csv")
+    review.add_argument("--world", action="append", help="Limit manual PDF queue to one world; repeat for multiple worlds.")
+    review.add_argument("--limit", type=int, default=None, help="Global cap for manual PDF queue rows.")
+    review.add_argument("--per-world-limit", type=int, default=20, help="Manual PDF rows per world.")
+    review.add_argument("--scholar-top-n", type=int, default=10)
+    review.set_defaults(func=theory_review_command)
+
     full = subparsers.add_parser("full", help="run the overnight metadata scout pipeline")
     full.add_argument("--queries", default="literature/queries.yaml")
     full.add_argument("--out-dir", default="literature")
@@ -625,9 +719,21 @@ def build_parser() -> argparse.ArgumentParser:
     full.add_argument("--download", action="store_true")
     full.add_argument("--hydrate-text", action="store_true")
     full.add_argument("--text-limit", type=int, default=50)
+    full.add_argument(
+        "--text-per-world-limit",
+        type=int,
+        default=None,
+        help="Hydrate up to this many records per world instead of only the global top records.",
+    )
     full.add_argument("--min-text-chars", type=int, default=1000)
     full.add_argument("--fill-cards", action="store_true")
     full.add_argument("--fill-limit", type=int, default=25)
+    full.add_argument(
+        "--fill-per-world-limit",
+        type=int,
+        default=None,
+        help="Fill up to this many cards per world instead of only the global top records.",
+    )
     full.add_argument("--force-fill", action="store_true")
     full.add_argument("--ollama-url", default=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"))
     full.add_argument("--model", default=os.getenv("THEORY_SCOUT_LLM_MODEL", "llama3.2:3b"))

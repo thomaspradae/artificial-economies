@@ -1,0 +1,11 @@
+test_deepmind_no_batch_mean_reduction (audit.tests.test_loss_match.LossSemanticsMatchTest.test_deepmind_no_batch_mean_reduction) ... ok
+test_pytorch_and_deepmind_effective_rows_match (audit.tests.test_loss_match.LossSemanticsMatchTest.test_pytorch_and_deepmind_effective_rows_match) ... ok
+test_required_batches_present (audit.tests.test_loss_match.LossSemanticsMatchTest.test_required_batches_present) ... ok
+test_sparse_selected_action_output_gradient (audit.tests.test_loss_match.LossSemanticsMatchTest.test_sparse_selected_action_output_gradient) ... ok
+test_stage5c_compare_passed (audit.tests.test_loss_match.LossSemanticsMatchTest.test_stage5c_compare_passed) ... ok
+test_threshold_clipping_contract (audit.tests.test_loss_match.LossSemanticsMatchTest.test_threshold_clipping_contract) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.012s
+
+OK

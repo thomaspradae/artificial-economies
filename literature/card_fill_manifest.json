@@ -1,11 +1,493 @@
 [
   {
     "card_path": "literature/paper_cards/2022_optimal_er_auctions_through_attention.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": null,
+    "source_basis": "skipped_existing_filled",
+    "title": "Optimal-er Auctions through Attention",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2023_a_scalable_neural_network_for_dsic_affine_maximizer_auction_design.md",
     "changed": true,
     "model": "llama3.2:3b",
-    "output_tokens_per_second": 6.595297484430306,
-    "source_basis": "text:literature/text/2022_optimal_er_auctions_through_attention.txt",
-    "title": "Optimal-er Auctions through Attention",
+    "output_tokens_per_second": 6.983375439912975,
+    "source_basis": "text:literature/text/2023_a_scalable_neural_network_for_dsic_affine_maximizer_auction_design.txt",
+    "title": "A Scalable Neural Network for DSIC Affine Maximizer Auction Design",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2023_optimal_auctions_through_deep_learning_advances_in_differentiable_economics.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": null,
+    "source_basis": "skipped_existing_filled",
+    "title": "Optimal Auctions through Deep Learning: Advances in Differentiable Economics",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1990_why_are_vickrey_auctions_rare.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.78119289883658,
+    "source_basis": "abstract",
+    "title": "Why Are Vickrey Auctions Rare?",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2010_why_customers_value_self_designed_products_the_importance_of_process_effort_and_enjoyment_.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.264142331416265,
+    "source_basis": "abstract",
+    "title": "Why Customers Value Self\u2010Designed Products: The Importance of Process Effort and Enjoyment<sup>*</sup>",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2017_optimal_economic_design_through_deep_learning_short_paper.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 7.798753242827865,
+    "source_basis": "abstract",
+    "title": "Optimal Economic Design Through Deep Learning (Short Paper)",
+    "validation_errors": [
+      "missing key: paper",
+      "missing key: world",
+      "missing key: institution",
+      "missing key: agent_type",
+      "missing key: theoretical_benchmark",
+      "missing key: learning_setup",
+      "missing key: metrics",
+      "missing key: main_result",
+      "missing key: what_they_prove",
+      "missing key: what_they_only_simulate",
+      "missing key: what_they_do_not_test",
+      "missing key: what_we_need_to_reproduce",
+      "missing key: how_our_project_differs"
+    ],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2011_position_auctions_with_consumer_search.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.821451249022982,
+    "source_basis": "abstract",
+    "title": "Position Auctions with Consumer Search",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1997_auctioning_conservation_contracts_a_theoretical_analysis_and_an_application.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.612393862242177,
+    "source_basis": "abstract",
+    "title": "Auctioning Conservation Contracts: A Theoretical Analysis and an Application",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2020_flash_boys_2_0_frontrunning_in_decentralized_exchanges_miner_extractable_value_and_consens.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.38495286731912,
+    "source_basis": "abstract",
+    "title": "Flash Boys 2.0: Frontrunning in Decentralized Exchanges, Miner Extractable Value, and Consensus Instability",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2019_optimal_auctions_through_deep_learning.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 6.585085182892022,
+    "source_basis": "text:literature/text/2019_optimal_auctions_through_deep_learning.txt",
+    "title": "Optimal auctions through deep learning",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1996_analyzing_the_airwaves_auction.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.69987555253204,
+    "source_basis": "abstract",
+    "title": "Analyzing the Airwaves Auction",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2023_data_market_design_through_deep_learning.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 7.007759510053367,
+    "source_basis": "text:literature/text/2023_data_market_design_through_deep_learning.txt",
+    "title": "Data Market Design through Deep Learning",
+    "validation_errors": [
+      "missing key: what_we_need_to_reproduce"
+    ],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1994_auctions_vs_negotiations.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 7.102651064509828,
+    "source_basis": "text:literature/text/1994_auctions_vs_negotiations.txt",
+    "title": "Auctions vs. Negotiations",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2021_decentralized_edge_intelligence_a_dynamic_resource_allocation_framework_for_hierarchical_f.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.17777913095559,
+    "source_basis": "abstract",
+    "title": "Decentralized Edge Intelligence: A Dynamic Resource Allocation Framework for Hierarchical Federated Learning",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1988_anomalies_the_winner_s_curse.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.125386062079922,
+    "source_basis": "abstract",
+    "title": "Anomalies: The Winner's Curse",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2021_a_permutation_equivariant_neural_network_architecture_for_auction_design.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 6.749647791106174,
+    "source_basis": "text:literature/text/2021_a_permutation_equivariant_neural_network_architecture_for_auction_design.txt",
+    "title": "A Permutation-Equivariant Neural Network Architecture For Auction Design",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2003_bid_rotation_and_collusion_in_repeated_auctions.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 6.795119696304173,
+    "source_basis": "text:literature/text/2003_bid_rotation_and_collusion_in_repeated_auctions.txt",
+    "title": "Bid rotation and collusion in repeated auctions",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1998_the_michigan_internet_auctionbot.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.813164223400493,
+    "source_basis": "abstract",
+    "title": "The Michigan Internet AuctionBot",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1989_how_auctions_work_for_wine_and_art.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.707255048770108,
+    "source_basis": "abstract",
+    "title": "How Auctions Work for Wine and Art",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2018_transforming_energy_networks_via_peer_to_peer_energy_trading_the_potential_of_game_theoret.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 6.62462964114192,
+    "source_basis": "text:literature/text/2018_transforming_energy_networks_via_peer_to_peer_energy_trading_the_potential_of_game_theoret.txt",
+    "title": "Transforming Energy Networks via Peer-to-Peer Energy Trading: The Potential of Game-Theoretic Approaches",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2017_market_mechanisms_and_funding_dynamics_in_equity_crowdfunding.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.090047518527667,
+    "source_basis": "abstract",
+    "title": "Market mechanisms and funding dynamics in equity crowdfunding",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2011_strategic_supply_function_competition_with_private_information.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.733537446490077,
+    "source_basis": "abstract",
+    "title": "Strategic Supply Function Competition With Private Information",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2005_the_willingness_to_pay_willingness_to_accept_gap_the_endowment_effect_subject_misconceptio.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.104820846106648,
+    "source_basis": "abstract",
+    "title": "The Willingness to Pay\u2013Willingness to Accept Gap, the \u201cEndowment Effect,\u201d Subject Misconceptions, and Experimental Procedures for Eliciting Valuations",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2001_the_theory_of_incentives_the_principal_agent_model.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 5.038427736830593,
+    "source_basis": "text:literature/text/2001_the_theory_of_incentives_the_principal_agent_model.txt",
+    "title": "The Theory of Incentives: The Principal-Agent Model",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2007_asymmetric_information_and_contract_design_for_payments_for_environmental_services.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.795936243296621,
+    "source_basis": "metadata_only",
+    "title": "Asymmetric information and contract design for payments for environmental services",
+    "validation_errors": [
+      "missing key: institution",
+      "missing key: agent_type",
+      "missing key: theoretical_benchmark",
+      "missing key: learning_setup",
+      "missing key: metrics",
+      "missing key: main_result",
+      "missing key: what_they_prove",
+      "missing key: what_they_only_simulate",
+      "missing key: what_they_do_not_test",
+      "missing key: what_we_need_to_reproduce",
+      "missing key: how_our_project_differs"
+    ],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1994_resolving_differences_in_willingness_to_pay_and_willingness_to_accept_reply.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.548935832095816,
+    "source_basis": "abstract",
+    "title": "Resolving Differences in Willingness to Pay and Willingness to Accept: Reply",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2022_a_metaverse_taxonomy_components_applications_and_open_challenges.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.527423858520164,
+    "source_basis": "abstract",
+    "title": "A Metaverse: Taxonomy, Components, Applications, and Open Challenges",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1994_the_interdisciplinary_study_of_coordination.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.495269269880891,
+    "source_basis": "abstract",
+    "title": "The interdisciplinary study of coordination",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2015_cognitive_effort_a_neuroeconomic_approach.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 6.75939892136435,
+    "source_basis": "text:literature/text/2015_cognitive_effort_a_neuroeconomic_approach.txt",
+    "title": "Cognitive effort: A neuroeconomic approach",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2023_unmanned_aerial_vehicles_uavs_practical_aspects_applications_open_challenges_security_issu.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.511925026742555,
+    "source_basis": "metadata_only",
+    "title": "Unmanned aerial vehicles (UAVs): practical aspects, applications, open challenges, security issues, and future trends",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2004_field_experiments.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.263560195769381,
+    "source_basis": "abstract",
+    "title": "Field Experiments",
+    "validation_errors": [
+      "missing key: paper",
+      "missing key: world",
+      "missing key: institution",
+      "missing key: agent_type",
+      "missing key: theoretical_benchmark",
+      "missing key: learning_setup",
+      "missing key: metrics",
+      "missing key: main_result",
+      "missing key: what_they_prove",
+      "missing key: what_they_only_simulate",
+      "missing key: what_they_do_not_test",
+      "missing key: what_we_need_to_reproduce",
+      "missing key: how_our_project_differs"
+    ],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2005_issues_in_multi_agent_resource_allocation.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.724967011418045,
+    "source_basis": "abstract",
+    "title": "ISSUES IN MULTI AGENT RESOURCE ALLOCATION",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2018_blockchain_disruption_and_smart_contracts.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 6.629212204367935,
+    "source_basis": "text:literature/text/2018_blockchain_disruption_and_smart_contracts.txt",
+    "title": "Blockchain Disruption and Smart Contracts",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2008_a_survey_of_dynamic_scheduling_in_manufacturing_systems.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.745884332597818,
+    "source_basis": "metadata_only",
+    "title": "A survey of dynamic scheduling in manufacturing systems",
+    "validation_errors": [
+      "missing key: institution",
+      "missing key: agent_type",
+      "missing key: theoretical_benchmark",
+      "missing key: learning_setup",
+      "missing key: metrics",
+      "missing key: main_result",
+      "missing key: what_they_prove",
+      "missing key: what_they_only_simulate",
+      "missing key: what_they_do_not_test",
+      "missing key: what_we_need_to_reproduce",
+      "missing key: how_our_project_differs"
+    ],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1992_earnings_news_and_small_traders.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 5.770592761832467,
+    "source_basis": "metadata_only",
+    "title": "Earnings news and small traders",
+    "validation_errors": [
+      "missing key: institution",
+      "missing key: agent_type",
+      "missing key: theoretical_benchmark",
+      "missing key: learning_setup",
+      "missing key: metrics",
+      "missing key: main_result",
+      "missing key: what_they_prove",
+      "missing key: what_they_only_simulate",
+      "missing key: what_they_do_not_test",
+      "missing key: what_we_need_to_reproduce",
+      "missing key: how_our_project_differs"
+    ],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/1997_rethinking_federalism.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.847430961139048,
+    "source_basis": "abstract",
+    "title": "Rethinking Federalism",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2020_comprehensive_review_of_deep_reinforcement_learning_methods_and_applications_in_economics.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.584500911057674,
+    "source_basis": "abstract",
+    "title": "Comprehensive Review of Deep Reinforcement Learning Methods and Applications in Economics",
+    "validation_errors": [
+      "missing key: paper",
+      "missing key: world",
+      "missing key: institution",
+      "missing key: agent_type",
+      "missing key: theoretical_benchmark",
+      "missing key: learning_setup",
+      "missing key: metrics",
+      "missing key: main_result",
+      "missing key: what_they_prove",
+      "missing key: what_they_only_simulate",
+      "missing key: what_they_do_not_test",
+      "missing key: what_we_need_to_reproduce",
+      "missing key: how_our_project_differs"
+    ],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2023_breaking_the_traditional_a_survey_of_algorithmic_mechanism_design_applied_to_economic_and_.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.85700627322398,
+    "source_basis": "metadata_only",
+    "title": "Breaking the traditional: a survey of algorithmic mechanism design applied to economic and complex environments",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2004_dealer_behavior_and_trading_systems_in_foreign_exchange_markets.md",
+    "changed": false,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.681326955030885,
+    "source_basis": "metadata_only",
+    "title": "Dealer behavior and trading systems in foreign exchange markets",
+    "validation_errors": [
+      "missing key: institution",
+      "missing key: agent_type",
+      "missing key: theoretical_benchmark",
+      "missing key: learning_setup",
+      "missing key: metrics",
+      "missing key: main_result",
+      "missing key: what_they_prove",
+      "missing key: what_they_only_simulate",
+      "missing key: what_they_do_not_test",
+      "missing key: what_we_need_to_reproduce",
+      "missing key: how_our_project_differs"
+    ],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/paper_cards/2020_artificial_intelligence_and_machine_learning_approaches_to_energy_demand_side_response_a_s.md",
+    "changed": true,
+    "model": "llama3.2:3b",
+    "output_tokens_per_second": 8.19321348621703,
+    "source_basis": "abstract",
+    "title": "Artificial intelligence and machine learning approaches to energy demand-side response: A systematic review",
     "validation_errors": [],
     "world": "auction_house"
   }

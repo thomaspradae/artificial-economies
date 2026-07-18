@@ -11,12 +11,23 @@ from tools.theory_scout.audit_obligations import (
     write_audit_csv,
     write_audit_markdown,
 )
-from tools.theory_scout.fill_paper_cards import fill_cards, parse_markdown_sections
+from tools.theory_scout.fill_paper_cards import (
+    fill_cards,
+    parse_markdown_sections,
+    select_records_for_fill,
+)
 from tools.theory_scout.hydrate_texts import hydrate_texts
 from tools.theory_scout.make_paper_cards import CARD_SECTIONS, make_blank_card
 from tools.theory_scout.models import PaperRecord
 from tools.theory_scout.ollama_client import OllamaResult, extract_json_object
 from tools.theory_scout.query_config import load_queries
+from tools.theory_scout.review_outputs import (
+    build_manual_pdf_queue_rows,
+    build_scholar_comparison_rows,
+    build_theory_coverage_rows,
+    google_scholar_url,
+    write_coverage_markdown,
+)
 from tools.theory_scout.secrets import load_env_file
 from tools.theory_scout.cli import build_parser, dedupe, rank_records, _is_rate_limit_error
 
@@ -266,6 +277,89 @@ worlds:
             self.assertTrue((root / "text/2024_strict_pdf_paper.txt").exists())
             self.assertTrue((root / "pdf_text_report.csv").exists())
 
+    def test_per_world_limit_balances_record_selection(self):
+        records = [
+            {"world": "auction_house", "title": "Auction A", "year": 2024, "doi": "10/a"},
+            {"world": "auction_house", "title": "Auction B", "year": 2024, "doi": "10/b"},
+            {"world": "public_goods", "title": "Goods A", "year": 2024, "doi": "10/c"},
+            {"world": "public_goods", "title": "Goods B", "year": 2024, "doi": "10/d"},
+        ]
+        selected = select_records_for_fill(records, per_world_limit=1)
+        self.assertEqual([row["title"] for row in selected], ["Auction A", "Goods A"])
+
+    def test_review_outputs_make_manual_pdf_and_scholar_worklists(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            queries = root / "queries.yaml"
+            queries.write_text(
+                """
+worlds:
+  public_goods:
+    institutions:
+      - none
+    minds:
+      - q_learning
+    classical_terms:
+      - "public goods game"
+    learning_terms:
+      - "multi agent reinforcement learning public goods"
+""".strip(),
+                encoding="utf-8",
+            )
+            records = root / "papers_ranked.csv"
+            records.write_text(
+                "\n".join(
+                    [
+                        "world,query_group,query,source,source_id,title,year,authors,doi,url,pdf_url,citation_count,has_pdf,relevance_score,rank_score,abstract",
+                        "public_goods,classical_terms,public goods game,test,p1,Public Goods Paper,2024,A,10.1/test,https://example.test,https://example.test/p.pdf,5,True,1,1,abstract",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            card_path = make_blank_card(
+                {
+                    "title": "Public Goods Paper",
+                    "year": 2024,
+                    "authors": ["A"],
+                    "source": "test",
+                    "source_id": "p1",
+                    "world": "public_goods",
+                    "query": "public goods game",
+                    "pdf_url": "https://example.test/p.pdf",
+                },
+                root / "paper_cards",
+            )
+            text = card_path.read_text(encoding="utf-8").replace("TODO", "filled")
+            card_path.write_text(text, encoding="utf-8")
+            (root / "text").mkdir()
+            (root / "text/2024_public_goods_paper.txt").write_text("paper text " * 200, encoding="utf-8")
+
+            manual_rows = build_manual_pdf_queue_rows(
+                records_path=records,
+                text_dir=root / "text",
+                per_world_limit=1,
+            )
+            scholar_rows = build_scholar_comparison_rows(
+                queries_path=queries,
+                records_path=records,
+            )
+            coverage_rows = build_theory_coverage_rows(
+                queries_path=queries,
+                records_path=records,
+                cards_dir=root / "paper_cards",
+                text_dir=root / "text",
+            )
+            write_coverage_markdown(coverage_rows, root / "theory_coverage.md")
+            coverage_markdown_exists = (root / "theory_coverage.md").exists()
+
+        self.assertIn("scholar.google.com", google_scholar_url("public goods game"))
+        self.assertEqual(manual_rows[0]["has_extracted_text"], True)
+        self.assertIn("Public Goods Paper", scholar_rows[0]["api_top_titles"])
+        self.assertEqual(coverage_rows[0].filled_cards, 1)
+        self.assertEqual(coverage_rows[0].extracted_text_records, 1)
+        self.assertTrue(coverage_markdown_exists)
+
     def test_audit_obligations_reports_required_missing_columns(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -304,10 +398,23 @@ worlds:
         hydrate_args = parser.parse_args(["hydrate-text", "--limit", "2", "--resolve-pdfs"])
         self.assertEqual(hydrate_args.limit, 2)
         self.assertTrue(hydrate_args.resolve_pdfs)
-        full_args = parser.parse_args(["full", "--download", "--fill-cards", "--fill-limit", "4"])
+        review_args = parser.parse_args(["review", "--per-world-limit", "3"])
+        self.assertEqual(review_args.per_world_limit, 3)
+        full_args = parser.parse_args(
+            [
+                "full",
+                "--download",
+                "--fill-cards",
+                "--fill-limit",
+                "4",
+                "--fill-per-world-limit",
+                "2",
+            ]
+        )
         self.assertTrue(full_args.download)
         self.assertTrue(full_args.fill_cards)
         self.assertEqual(full_args.fill_limit, 4)
+        self.assertEqual(full_args.fill_per_world_limit, 2)
         audit_args = parser.parse_args(["audit-obligations", "--no-card-obligations"])
         self.assertTrue(audit_args.no_card_obligations)
 

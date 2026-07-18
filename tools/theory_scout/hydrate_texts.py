@@ -169,6 +169,7 @@ def hydrate_texts(
     worlds: set[str] | None = None,
     title_contains: str | None = None,
     limit: int | None = None,
+    per_world_limit: int | None = None,
     resolve_pdfs: bool = False,
     min_text_chars: int = 1000,
     download_func: DownloadFunc = download_pdf,
@@ -180,6 +181,7 @@ def hydrate_texts(
         worlds=worlds,
         title_contains=title_contains,
         limit=limit,
+        per_world_limit=per_world_limit,
     )
     rows = [
         hydrate_record(

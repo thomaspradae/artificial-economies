@@ -337,13 +337,17 @@ def select_records_for_fill(
     worlds: set[str] | None = None,
     title_contains: str | None = None,
     limit: int | None = None,
+    per_world_limit: int | None = None,
 ) -> list[dict[str, Any]]:
     selected = []
     seen = set()
+    per_world_counts: dict[str, int] = {}
     title_filter = title_contains.lower() if title_contains else None
     for record in records:
         world = str(record.get("world") or "")
         if worlds and world not in worlds:
+            continue
+        if per_world_limit is not None and per_world_counts.get(world, 0) >= per_world_limit:
             continue
         title = str(record.get("title") or "")
         if title_filter and title_filter not in title.lower():
@@ -357,6 +361,7 @@ def select_records_for_fill(
             continue
         seen.add(key)
         selected.append(record)
+        per_world_counts[world] = per_world_counts.get(world, 0) + 1
         if limit is not None and len(selected) >= limit:
             break
     return selected
@@ -393,6 +398,7 @@ def fill_cards(
     worlds: set[str] | None = None,
     title_contains: str | None = None,
     limit: int | None = None,
+    per_world_limit: int | None = None,
     force: bool = False,
     dry_run: bool = False,
     num_predict: int = 900,
@@ -405,6 +411,7 @@ def fill_cards(
         worlds=worlds,
         title_contains=title_contains,
         limit=limit,
+        per_world_limit=per_world_limit,
     )
     active_client = client or OllamaClient(base_url=ollama_url)
     results = []

@@ -1,0 +1,312 @@
+# DeepMind Stage 5C Loss Source Report
+
+## Source Search
+
+```text
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/test_gpu:37:agent_params="lr="$lr",ep=1,ep_end="$eps_end",ep_endt="$eps_endt",discount="$discount",hist_len=4,learn_start="$learn_start",replay_memory="$replay_memory",update_freq="$update_freq",n_replay="$n_replay",network="$netfile",preproc="$preproc_net",state_dim="$state_dim",minibatch_size=32,rescale_r=1,ncols="$ncols",bufferSize=512,valid_size=500,target_q=10000,clip_delta=1,min_reward=-1,max_reward=1"
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/run_gpu:31:agent_params="lr="$lr",ep=1,ep_end="$eps_end",ep_endt="$eps_endt",discount="$discount",hist_len=4,learn_start="$learn_start",replay_memory="$replay_memory",update_freq="$update_freq",n_replay="$n_replay",network="$netfile",preproc="$preproc_net",state_dim="$state_dim",minibatch_size=32,rescale_r=1,ncols="$ncols",bufferSize=512,valid_size=500,target_q=10000,clip_delta=1,min_reward=-1,max_reward=1"
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/run_cpu_headless:31:agent_params="lr="$lr",ep=1,ep_end="$eps_end",ep_endt="$eps_endt",discount="$discount",hist_len=4,learn_start="$learn_start",replay_memory="$replay_memory",update_freq="$update_freq",n_replay="$n_replay",network="$netfile",preproc="$preproc_net",state_dim="$state_dim",minibatch_size=32,rescale_r=1,ncols="$ncols",bufferSize=512,valid_size=500,target_q=10000,clip_delta=1,min_reward=-1,max_reward=1"
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/run_cpu_luajit:31:agent_params="lr="$lr",ep=1,ep_end="$eps_end",ep_endt="$eps_endt",discount="$discount",hist_len=4,learn_start="$learn_start",replay_memory="$replay_memory",update_freq="$update_freq",n_replay="$n_replay",network="$netfile",preproc="$preproc_net",state_dim="$state_dim",minibatch_size=32,rescale_r=1,ncols="$ncols",bufferSize=512,valid_size=500,target_q=10000,clip_delta=1,min_reward=-1,max_reward=1"
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/run_cpu_luajit_headless:31:agent_params="lr="$lr",ep=1,ep_end="$eps_end",ep_endt="$eps_endt",discount="$discount",hist_len=4,learn_start="$learn_start",replay_memory="$replay_memory",update_freq="$update_freq",n_replay="$n_replay",network="$netfile",preproc="$preproc_net",state_dim="$state_dim",minibatch_size=32,rescale_r=1,ncols="$ncols",bufferSize=512,valid_size=500,target_q=10000,clip_delta=1,min_reward=-1,max_reward=1"
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/run_cpu:31:agent_params="lr="$lr",ep=1,ep_end="$eps_end",ep_endt="$eps_endt",discount="$discount",hist_len=4,learn_start="$learn_start",replay_memory="$replay_memory",update_freq="$update_freq",n_replay="$n_replay",network="$netfile",preproc="$preproc_net",state_dim="$state_dim",minibatch_size=32,rescale_r=1,ncols="$ncols",bufferSize=512,valid_size=500,target_q=10000,clip_delta=1,min_reward=-1,max_reward=1"
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/luarocks/build/make.lua:83:   -- backwards compatibility 
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/luarocks/deps.lua:38:local deltas = {
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/luarocks/deps.lua:145:         version[i] = deltas[token] or (token:byte() / 1000)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/image/test.lua:404:  local std_err = err:std()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/image/test.lua:406:  tester:assertlt(std_err, precision_std, 'compressJPG error is too high! ')
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/image/test.lua:424:  local std_err_png  = err_png:std()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/image/test.lua:426:  tester:assertlt(std_err_png, precision_std, 'compressPNG error is too high! ')
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/image/test.lua:433:local function testRoundtrip(forward, backward)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/image/test.lua:435:  local actual = backward(forward(expected))
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/image/test.lua:478:local function testByteTensorRoundtrip(forward, backward, cond, msg)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/image/test.lua:481:  local actual = backward(forward(expected))  
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/xlua/Profiler.lua:45:   local delta = os.clock() - self.events[name].cpu
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/xlua/Profiler.lua:46:   if divider then delta = delta / divider end
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/xlua/Profiler.lua:47:   self.events[name].cpud = delta
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/xlua/Profiler.lua:48:   return delta
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/xlua/Profiler.lua:52:   local delta = sys.clock() - self.events[name].real
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/xlua/Profiler.lua:53:   if divider then delta = delta / divider end
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/xlua/Profiler.lua:54:   self.events[name].reald = delta
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/xlua/Profiler.lua:55:   return delta
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Max.lua:7:   -- do not assign default value to nInputDims or it will break backward compatibility
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/SpatialDepthWiseConvolution.lua:57:   -- backward compatibility
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/VolumetricFractionalMaxPooling.lua:158:-- backward compat
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/CReLU.lua:38:function CReLU:backward(input, gradOutput)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Replicate.lua:12:   self.dim = self.dim or 1 --backwards compatible
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Jacobian.lua:3:function nn.Jacobian.backward(module, input, param, dparam)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Jacobian.lua:32:function nn.Jacobian.backwardUpdate(module, input, param)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Jacobian.lua:95:function nn.Jacobian.backwardDiagHessian(module, input, diagHessianParamName)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Jacobian.lua:152:   -- (See the the comment for nn.Jacobian.backwardDiagHessian() for explanation.)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Jacobian.lua:235:   local jac_bprop = nn.Jacobian.backward(module, input)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Jacobian.lua:246:   local jac_bprop = nn.Jacobian.backward(module, input, param, dparam)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Jacobian.lua:258:   local params_bprop = nn.Jacobian.backwardUpdate(module, input, param)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/Jacobian.lua:274:   local h_bprop = nn.Jacobian.backwardDiagHessian(module, input, diagHessianParamName)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:34:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:65:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:96:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:133:Note that this module doesn't work directly with [`ClassNLLCriterion`](criterion.md#nn.ClassNLLCriterion), which expects the `nn.Log` to be computed between the `SoftMax` and itself.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:187:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:215:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:243:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:273:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:301:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:329:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:363:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:398:gi = m:backward(ii, go)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:453:The `backward()` operation assumes that `forward()` has been called before.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:461:gi = m:backward(ii, torch.ones(100))
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:528:function df(a) local m = nn.ELU(a) m:forward(xs) return m:backward(xs, go) end
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:627:In-place mode restores the original input value after the backward pass, allowing its use after other in-place modules, like [`MulConstant`](#nn.MulConstant).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/transfer.md:653:In-place mode restores the original input value after the backward pass, allowing its use after other in-place modules, like [`AddConstant`](#nn.AddConstant).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/convolution.md:215:this is often the case for input padding. During the backward step, there is a separate thread
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/index.md:15:    * [Criterions](criterion.md#nn.Criterions) : a list of all criterions, including [Criterion](criterion.md#nn.Criterion), the abstract class;
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/index.md:16:    * [MSECriterion](criterion.md#nn.MSECriterion) : the Mean Squared Error criterion used for regression; 
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/index.md:17:    * [ClassNLLCriterion](criterion.md#nn.ClassNLLCriterion) : the Negative Log Likelihood criterion used for classification;
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:32:We choose the Mean Squared Error criterion:
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:34:criterion = nn.MSECriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:52:  -- feed it to the neural network and the criterion
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:53:  criterion:forward(mlp:forward(input), output)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:59:  mlp:backward(input, criterion:backward(mlp.output, output))
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:107:### StochasticGradient(module, criterion) ###
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:109:Create a `StochasticGradient` class, using the given [Module](module.md#nn.Module) and [Criterion](criterion.md#nn.Criterion).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:115:Train the module and criterion given in the
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:125:or `2` (corresponding label which will be given to the criterion). 
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:127:like [table layers](table.md#nn.TableLayers)). The label type depends of the criterion.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:128:For example, the [MSECriterion](criterion.md#nn.MSECriterion) expects a Tensor, but the
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:129:[ClassNLLCriterion](criterion.md#nn.ClassNLLCriterion) except a integer number (the class).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:144:  * `hookExample`: A possible hook function which will be called (if non-nil) during training after each example forwarded and backwarded through the network. The function takes `(self, example)` as parameters. Default is `nil`.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:185:We choose the Mean Squared Error criterion and train the dataset.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:187:criterion = nn.MSECriterion()  
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/training.md:188:trainer = nn.StochasticGradient(mlp, criterion)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:7:  * Classification criterions:
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:11:    * [`ClassSimplexCriterion`](#nn.ClassSimplexCriterion): A simplex embedding criterion for classification.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:17:  * Regression criterions:
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:23:  * Embedding criterions (measuring whether two inputs are similar or dissimilar):
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:27:    * [`DistanceRatioCriterion`](#nn.DistanceRatioCriterion): Probabilistic criterion for training siamese model with triplets.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:28:  * Miscelaneus criterions:
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:29:    * [`MultiCriterion`](#nn.MultiCriterion) : a weighted sum of other criterions each applied to the same input and target;
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:30:    * [`ParallelCriterion`](#nn.ParallelCriterion) : a weighted sum of other criterions each applied to a different input and target;
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:32:    * [`ModuleCriterion`](#nn.ModuleCriterion) : adds an optional `inputModule` and `targetModule` before a decorated criterion;
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:37:This is an abstract class which declares methods defined in all criterions.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:43:Given an `input` and a `target`, compute the loss function associated to the criterion and return the result.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:44:In general `input` and `target` are [`Tensor`s](https://github.com/torch/torch7/blob/master/doc/tensor.md), but some specific criterions might require some other type of object.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:51:<a name="nn.Criterion.backward"></a>
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:52:### [gradInput] backward(input, target) ###
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:54:Given an `input` and a `target`, compute the gradients of the loss function associated to the criterion and return the result.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:55:In general `input`, `target` and `gradInput` are [`Tensor`s](..:torch:tensor), but some specific criterions might require some other type of object.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:57:The state variable [`self.gradInput`](#nn.Criterion.gradInput) should be updated after a call to `backward()`.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:69:State variable which contains the result of the last [`backward(input, target)`](#nn.Criterion.backward) call.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:76:criterion = nn.AbsCriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:79:Creates a criterion that measures the mean absolute value of the element-wise difference between input `x` and target `y`:
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:90:criterion = nn.AbsCriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:91:criterion.sizeAverage = false
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:99:criterion = nn.ClassNLLCriterion([weights, sizeAverage, ignoreIndex])
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:102:The negative log likelihood (NLL) criterion. It is useful to train a classification problem with `n` classes.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:109:This criterion expects a class index (1 to the number of class) as `target` when calling [`forward(input, target`)](#nn.CriterionForward) and [`backward(input, target)`](#nn.CriterionBackward).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:137:   local criterion = nn.ClassNLLCriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:139:   local err = criterion:forward(pred, y)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:141:   local t = criterion:backward(pred, y)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:142:   mlp:backward(x, t)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:154:criterion = nn.CrossEntropyCriterion([weights])
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:157:This criterion combines [`LogSoftMax`](#nn.LogSoftMax) and [`ClassNLLCriterion`](#nn.ClassNLLCriterion) in one single class.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:163:This criterion expect a class index (1 to the number of class) as `target` when calling [`forward(input, target)`](#nn.CriterionForward) and [`backward(input, target)`](#nn.CriterionBackward).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:188:criterion = nn.ClassSimplexCriterion(nClasses)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:191:ClassSimplexCriterion implements a criterion for classification.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:217:criterion = nn.ClassSimplexCriterion(nClasses)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:221:   local err = criterion:forward(pred, y)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:223:   local t = criterion:backward(pred, y)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:224:   mlp:backward(x, t)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:229:This criterion also provides two helper functions `getPredictions(input)` and `getTopPrediction(input)` that return the raw predictions and the top prediction index respectively, given an input sample.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:235:criterion = nn.DistKLDivCriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:238:The [Kullback–Leibler divergence](http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence) criterion.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:240:As with ClassNLLCriterion, the `input` given through a `forward()` is expected to contain _log-probabilities_, however unlike ClassNLLCriterion, `input` is not restricted to a 1D or 2D vector (as the criterion is applied element-wise).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:242:This criterion expect a `target` `Tensor` of the same size as the `input` `Tensor` when calling [`forward(input, target)`](#nn.CriterionForward) and [`backward(input, target)`](#nn.CriterionBackward).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:257:criterion = nn.BCECriterion([weights])
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:260:Creates a criterion that measures the Binary Cross Entropy between the target and the output:
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:281:criterion = nn.MarginCriterion([margin])
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:284:Creates a criterion that optimizes a two-class classification hinge loss (margin-based loss) between input `x` (a `Tensor` of dimension `1`) and output `y` (which is a tensor containing either `1`s or `-1`s).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:297:function gradUpdate(mlp, x, y, criterion, learningRate)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:299:   local err = criterion:forward(pred, y)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:300:   local gradCriterion = criterion:backward(pred, y)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:302:   mlp:backward(x, gradCriterion)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:313:criterion=nn.MarginCriterion(1)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:316:   gradUpdate(mlp, x1, x1_target, criterion, 0.01)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:317:   gradUpdate(mlp, x2, x2_target, criterion, 0.01)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:323:print(criterion:forward(mlp:forward(x1), x1_target))
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:324:print(criterion:forward(mlp:forward(x2), x2_target))
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:349:criterion = nn.SoftMarginCriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:352:Creates a criterion that optimizes a two-class classification logistic loss between input `x` (a `Tensor` of dimension `1`) and output `y` (which is a tensor containing either `1`s or `-1`s).
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:364:function gradUpdate(mlp, x, y, criterion, learningRate)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:366:   local err = criterion:forward(pred, y)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:367:   local gradCriterion = criterion:backward(pred, y)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:369:   mlp:backward(x, gradCriterion)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:380:criterion=nn.SoftMarginCriterion(1)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:383:   gradUpdate(mlp, x1, x1_target, criterion, 0.01)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:384:   gradUpdate(mlp, x2, x2_target, criterion, 0.01)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:390:print(criterion:forward(mlp:forward(x1), x1_target))
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:391:print(criterion:forward(mlp:forward(x2), x2_target))
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:417:criterion = nn.MultiMarginCriterion(p, [weights], [margin])
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:420:Creates a criterion that optimizes a multi-class classification hinge loss (margin-based loss) between input `x`  (a `Tensor` of dimension 1) and output `y` (which is a target class index, `1` <= `y` <= `x:size(1)`):
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:427:Note that this criterion also works with 2D inputs and 1D targets.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:436:This criterion is especially useful for classification when used in conjunction with a module ending in the following output layer:
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:451:criterion = nn.MultiLabelMarginCriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:454:Creates a criterion that optimizes a multi-class multi-classification hinge loss (margin-based loss) between input `x`  (a 1D `Tensor`) and output `y` (which is a 1D `Tensor` of target class indices):
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:461:Note that this criterion also works with 2D inputs and targets.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:464:The criterion only considers the first non zero `y[j]` targets.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:468:criterion = nn.MultiLabelMarginCriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:471:criterion:forward(input, target)
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:478:criterion = nn.MultiLabelSoftMarginCriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:481:Creates a criterion that optimizes a multi-label one-versus-all loss based on max-entropy, between input `x`  (a 1D `Tensor`) and target `y` (a binary 1D `Tensor`):
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:488:Note that this criterion also works with 2D inputs and targets.
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:496:criterion = nn.MSECriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:499:Creates a criterion that measures the mean squared error between `n` elements in the input `x` and output `y`:
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:511:criterion = nn.MSECriterion()
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:512:criterion.sizeAverage = false
+/home/uace/dqn/reference/DeepMind-Atari-Deep-Q-Learner/torch/share/lua/5.1/nn/doc/criterion.md:522:criterion = nn.SpatialAutoCropMSECriterion()
+```
+
+## NeuralQLearner:getQUpdate
+
+```lua
+function nql:getQUpdate(args)
+    local s, a, r, s2, term, delta
+    local q, q2, q2_max
+
+    s = args.s
+    a = args.a
+    r = args.r
+    s2 = args.s2
+    term = args.term
+
+    -- The order of calls to forward is a bit odd in order
+    -- to avoid unnecessary calls (we only need 2).
+
+    -- delta = r + (1-terminal) * gamma * max_a Q(s2, a) - Q(s, a)
+    term = term:clone():float():mul(-1):add(1)
+
+    local target_q_net
+    if self.target_q then
+        target_q_net = self.target_network
+    else
+        target_q_net = self.network
+    end
+
+    -- Compute max_a Q(s_2, a).
+    q2_max = target_q_net:forward(s2):float():max(2)
+
+    -- Compute q2 = (1-terminal) * gamma * max_a Q(s2, a)
+    q2 = q2_max:clone():mul(self.discount):cmul(term)
+
+    delta = r:clone():float()
+
+    if self.rescale_r then
+        delta:div(self.r_max)
+    end
+    delta:add(q2)
+
+    -- q = Q(s,a)
+    local q_all = self.network:forward(s):float()
+    q = torch.FloatTensor(q_all:size(1))
+    for i=1,q_all:size(1) do
+        q[i] = q_all[i][a[i]]
+    end
+    delta:add(-1, q)
+
+    if self.clip_delta then
+        delta[delta:ge(self.clip_delta)] = self.clip_delta
+        delta[delta:le(-self.clip_delta)] = -self.clip_delta
+    end
+
+    local targets = torch.zeros(self.minibatch_size, self.n_actions):float()
+    for i=1,math.min(self.minibatch_size,a:size(1)) do
+        targets[i][a[i]] = delta[i]
+    end
+
+    if self.gpu >= 0 then targets = targets:cuda() end
+
+```
+
+## NeuralQLearner:qLearnMinibatch
+
+```lua
+    local targets, delta, q2_max = self:getQUpdate{s=s, a=a, r=r, s2=s2,
+        term=term, update_qmax=true}
+
+    -- zero gradients of parameters
+    self.dw:zero()
+
+    -- get new gradient
+    self.network:backward(s, targets)
+
+    -- add weight cost to gradient
+    self.dw:add(-self.wc, self.w)
+
+    -- compute linearly annealed learning rate
+    local t = math.max(0, self.numSteps - self.learn_start)
+    self.lr = (self.lr_start - self.lr_end) * (self.lr_endt - t)/self.lr_endt +
+                self.lr_end
+    self.lr = math.max(self.lr, self.lr_end)
+
+    -- use gradients
+    self.g:mul(0.95):add(0.05, self.dw)
+    self.tmp:cmul(self.dw, self.dw)
+    self.g2:mul(0.95):add(0.05, self.tmp)
+    self.tmp:cmul(self.g, self.g)
+    self.tmp:mul(-1)
+    self.tmp:add(self.g2)
+    self.tmp:add(0.01)
+    self.tmp:sqrt()
+
+    -- accumulate update
+    self.deltas:mul(0):addcdiv(self.lr, self.dw, self.tmp)
+    self.w:add(self.deltas)
+end
+
+
+function nql:sample_validation_data()
+    local s, a, r, s2, term = self.transitions:sample(self.valid_size)
+    self.valid_s    = s:clone()
+    self.valid_a    = a:clone()
+    self.valid_r    = r:clone()
+    self.valid_s2   = s2:clone()
+    self.valid_term = term:clone()
+end
+
+
+function nql:compute_validation_statistics()
+    local targets, delta, q2_max = self:getQUpdate{s=self.valid_s,
+        a=self.valid_a, r=self.valid_r, s2=self.valid_s2, term=self.valid_term}
+
+    self.v_avg = self.q_max * q2_max:mean()
+    self.tderr_avg = delta:clone():abs():mean()
+end
+
+
+function nql:perceive(reward, rawstate, terminal, testing, testing_ep)
+    -- Preprocess state (will be set to nil if terminal)
+    local state = self:preprocess(rawstate):float()
+    local curState
+
+    if self.max_reward then
+        reward = math.min(reward, self.max_reward)
+    end
+    if self.min_reward then
+        reward = math.max(reward, self.min_reward)
+    end
+    if self.rescale_r then
+        self.r_max = math.max(self.r_max, reward)
+    end
+
+    self.transitions:add_recent_state(state, terminal)
+```
+
+## Findings
+
+- Raw TD error convention: `target - Q(s,a)`.
+- `target` is `r + gamma * (1 - terminal) * max_a Q_target(s2,a)` before clipping.
+- `clip_delta=1` clamps the TD error in place to `[-1, 1]`.
+- No explicit Huber scalar criterion is computed in the released learner path.
+- The clamped TD error is written into a sparse `targets` tensor with nonzero value only at the selected action.
+- `network:backward(s, targets)` receives that sparse clipped-delta tensor directly.
+- There is no division by minibatch size in `getQUpdate` or before `network:backward`.
+- The optimizer update is outside Stage 5C and is not executed by this runner.
