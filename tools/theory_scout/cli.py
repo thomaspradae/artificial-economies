@@ -9,9 +9,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
+from .audit_obligations import (
+    audit_obligations,
+    write_audit_csv,
+    write_audit_markdown,
+    write_gap_status_report,
+)
 from .build_gap_table import build_gap_rows, write_gap_table, write_theory_obligations
 from .download_pdfs import download_pdf
 from .extract_text import extract_pdf_text
+from .fill_paper_cards import fill_cards
 from .http import read_jsonl, write_jsonl
 from .make_paper_cards import make_blank_card
 from .models import PaperRecord, record_key
@@ -283,6 +290,80 @@ def rerank_command(args: argparse.Namespace) -> None:
     print(f"[wrote] {args.out} ({len(ranked)} rows)")
 
 
+def fill_cards_command(args: argparse.Namespace) -> None:
+    worlds = set(args.world) if args.world else None
+    results = fill_cards(
+        raw_path=Path(args.records),
+        cards_dir=Path(args.cards_dir),
+        text_dir=Path(args.text_dir),
+        model=args.model,
+        ollama_url=args.ollama_url,
+        worlds=worlds,
+        title_contains=args.title_contains,
+        limit=args.limit,
+        force=args.force,
+        dry_run=args.dry_run,
+        num_predict=args.num_predict,
+        num_ctx=args.num_ctx,
+        num_thread=args.num_thread,
+    )
+    manifest_rows = []
+    for result in results:
+        status = "changed" if result.changed else "skipped"
+        if result.validation_errors:
+            status = "error"
+        speed = (
+            f"{result.output_tokens_per_second:.2f} tok/s"
+            if result.output_tokens_per_second is not None
+            else "unknown speed"
+        )
+        print(f"[card {status}] {result.world}: {result.card_path} ({speed})")
+        for error in result.validation_errors:
+            print(f"  - {error}")
+        manifest_rows.append(
+            {
+                "card_path": str(result.card_path),
+                "title": result.title,
+                "world": result.world,
+                "source_basis": result.source_basis,
+                "model": result.model,
+                "output_tokens_per_second": result.output_tokens_per_second,
+                "changed": result.changed,
+                "validation_errors": result.validation_errors,
+            }
+        )
+    out_path = Path(args.out_manifest)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(manifest_rows, indent=2, sort_keys=True), encoding="utf-8")
+    print(f"[wrote] {out_path}")
+
+
+def audit_obligations_command(args: argparse.Namespace) -> None:
+    rows = audit_obligations(
+        repo_root=Path(args.repo_root),
+        literature_dir=Path(args.literature_dir),
+        include_card_obligations=not args.no_card_obligations,
+    )
+    csv_path = Path(args.out_csv)
+    md_path = Path(args.out_md)
+    write_audit_csv(rows, csv_path)
+    write_audit_markdown(rows, md_path)
+    gap_path = write_gap_status_report(Path(args.literature_dir), Path(args.repo_root))
+    status_counts = {
+        status: sum(1 for row in rows if row.status == status)
+        for status in ("pass", "partial", "missing")
+    }
+    print(f"[wrote] {csv_path} ({len(rows)} rows)")
+    print(f"[wrote] {md_path}")
+    print(f"[wrote] {gap_path}")
+    print(
+        "[audit] "
+        + ", ".join(f"{status}={count}" for status, count in status_counts.items())
+    )
+    if args.fail_on_missing and status_counts.get("missing", 0):
+        raise SystemExit("obligation audit has missing rows")
+
+
 def full_command(args: argparse.Namespace) -> None:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -403,6 +484,44 @@ def build_parser() -> argparse.ArgumentParser:
     rerank.add_argument("--raw", default="literature/papers_raw.jsonl")
     rerank.add_argument("--out", default="literature/papers_ranked.csv")
     rerank.set_defaults(func=rerank_command)
+
+    fill = subparsers.add_parser(
+        "fill-cards",
+        help="fill strict paper-card sections using a local Ollama model and cached source text",
+    )
+    fill.add_argument(
+        "--records",
+        "--raw",
+        dest="records",
+        default="literature/papers_ranked.csv",
+        help="Ranked CSV or raw JSONL metadata cache to fill from.",
+    )
+    fill.add_argument("--cards-dir", default="literature/paper_cards")
+    fill.add_argument("--text-dir", default="literature/text")
+    fill.add_argument("--ollama-url", default=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"))
+    fill.add_argument("--model", default=os.getenv("THEORY_SCOUT_LLM_MODEL", "llama3.2:3b"))
+    fill.add_argument("--world", action="append", help="Limit to one world; repeat for multiple worlds.")
+    fill.add_argument("--title-contains", help="Only fill records whose title contains this text.")
+    fill.add_argument("--limit", type=int, default=5)
+    fill.add_argument("--force", action="store_true", help="Overwrite cards that no longer contain TODOs.")
+    fill.add_argument("--dry-run", action="store_true")
+    fill.add_argument("--num-predict", type=int, default=900)
+    fill.add_argument("--num-ctx", type=int, default=4096)
+    fill.add_argument("--num-thread", type=int, default=None)
+    fill.add_argument("--out-manifest", default="literature/card_fill_manifest.json")
+    fill.set_defaults(func=fill_cards_command)
+
+    audit = subparsers.add_parser(
+        "audit-obligations",
+        help="compare theory/card obligations to implemented code and result schemas",
+    )
+    audit.add_argument("--repo-root", default=".")
+    audit.add_argument("--literature-dir", default="literature")
+    audit.add_argument("--out-csv", default="literature/obligation_audit.csv")
+    audit.add_argument("--out-md", default="literature/obligation_audit.md")
+    audit.add_argument("--no-card-obligations", action="store_true")
+    audit.add_argument("--fail-on-missing", action="store_true")
+    audit.set_defaults(func=audit_obligations_command)
 
     full = subparsers.add_parser("full", help="run the overnight metadata scout pipeline")
     full.add_argument("--queries", default="literature/queries.yaml")

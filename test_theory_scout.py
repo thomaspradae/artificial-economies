@@ -6,11 +6,46 @@ import unittest
 from pathlib import Path
 
 from tools.theory_scout.build_gap_table import build_gap_rows, write_gap_table
+from tools.theory_scout.audit_obligations import (
+    audit_obligations,
+    write_audit_csv,
+    write_audit_markdown,
+)
+from tools.theory_scout.fill_paper_cards import fill_cards, parse_markdown_sections
 from tools.theory_scout.make_paper_cards import CARD_SECTIONS, make_blank_card
 from tools.theory_scout.models import PaperRecord
+from tools.theory_scout.ollama_client import OllamaResult, extract_json_object
 from tools.theory_scout.query_config import load_queries
 from tools.theory_scout.secrets import load_env_file
 from tools.theory_scout.cli import build_parser, dedupe, rank_records, _is_rate_limit_error
+
+
+class FakeOllamaClient:
+    def chat(self, **kwargs):
+        content = json.dumps(
+            {
+                "paper": "Strict Test Paper",
+                "world": "public_goods",
+                "institution": "contribution matching",
+                "agent_type": "Q-learning agents",
+                "theoretical_benchmark": "free-rider and social optimum brackets",
+                "learning_setup": "multi-agent public goods game",
+                "metrics": ["contribution", "welfare", "sustainability"],
+                "main_result": "matching changes contribution incentives",
+                "what_they_prove": "Not stated in supplied text.",
+                "what_they_only_simulate": "learning behavior",
+                "what_they_do_not_test": "cross-world capability ladder",
+                "what_we_need_to_reproduce": "free-rider bracket and contribution metrics",
+                "how_our_project_differs": "shared world/mind/institution interface",
+                "source_evidence": "Abstract mentions public goods and contributions.",
+                "confidence": "medium",
+            }
+        )
+        return OllamaResult(
+            model=kwargs.get("model", "fake"),
+            content=content,
+            raw={"eval_count": 20, "eval_duration": 1_000_000_000},
+        )
 
 
 class TheoryScoutTests(unittest.TestCase):
@@ -144,6 +179,88 @@ worlds:
     def test_rate_limit_error_detection(self):
         self.assertTrue(_is_rate_limit_error(RuntimeError("HTTP 429: rate limit exceeded")))
         self.assertFalse(_is_rate_limit_error(RuntimeError("connection reset")))
+
+    def test_extract_json_object_accepts_fenced_or_prose_wrapped_json(self):
+        parsed = extract_json_object('Here:\n```json\n{"a": 1}\n```')
+        self.assertEqual(parsed["a"], 1)
+        parsed = extract_json_object('prefix {"b": 2} suffix')
+        self.assertEqual(parsed["b"], 2)
+
+    def test_fill_cards_rewrites_todo_sections_with_validated_model_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            raw = root / "papers_raw.jsonl"
+            raw.write_text(
+                json.dumps(
+                    {
+                        "source": "test",
+                        "source_id": "paper-1",
+                        "title": "Strict Test Paper",
+                        "year": 2024,
+                        "authors": ["A"],
+                        "abstract": "A public goods paper about contribution matching.",
+                        "doi": "10.1/test",
+                        "url": "https://example.test",
+                        "pdf_url": None,
+                        "citation_count": 1,
+                        "world": "public_goods",
+                        "query": "public goods",
+                        "query_group": "learning_terms",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            results = fill_cards(
+                raw_path=raw,
+                cards_dir=root / "paper_cards",
+                text_dir=root / "text",
+                client=FakeOllamaClient(),  # type: ignore[arg-type]
+                limit=1,
+            )
+            self.assertTrue(results[0].changed)
+            text = results[0].card_path.read_text(encoding="utf-8")
+            sections = parse_markdown_sections(text)
+        self.assertEqual(sections["Theoretical benchmark"], "free-rider and social optimum brackets")
+        self.assertIn("Abstract mentions", sections["Extraction evidence"])
+
+    def test_audit_obligations_reports_required_missing_columns(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "literature/paper_cards").mkdir(parents=True)
+            (root / "worlds/pricing_arena").mkdir(parents=True)
+            (root / "worlds/pricing_arena/benchmarks.py").write_text("nash joint", encoding="utf-8")
+            (root / "outputs/full_v0_multiseed").mkdir(parents=True)
+            (root / "outputs/full_v0_multiseed/summary_aggregate.csv").write_text(
+                "nash_price\n1\n",
+                encoding="utf-8",
+            )
+            rows = audit_obligations(
+                repo_root=root,
+                literature_dir=root / "literature",
+                include_card_obligations=False,
+            )
+            out_csv = root / "literature/obligation_audit.csv"
+            out_md = root / "literature/obligation_audit.md"
+            write_audit_csv(rows, out_csv)
+            write_audit_markdown(rows, out_md)
+            pricing_benchmark = [
+                row
+                for row in rows
+                if row.world == "pricing_arena" and row.category == "benchmark"
+            ][0]
+            self.assertEqual(pricing_benchmark.status, "partial")
+            self.assertIn("monopoly_price", pricing_benchmark.missing)
+            self.assertTrue(out_csv.exists())
+            self.assertTrue(out_md.exists())
+
+    def test_new_cli_subcommands_are_registered(self):
+        parser = build_parser()
+        fill_args = parser.parse_args(["fill-cards", "--limit", "2", "--model", "llama3.2:3b"])
+        self.assertEqual(fill_args.limit, 2)
+        self.assertEqual(fill_args.model, "llama3.2:3b")
+        audit_args = parser.parse_args(["audit-obligations", "--no-card-obligations"])
+        self.assertTrue(audit_args.no_card_obligations)
 
 
 if __name__ == "__main__":

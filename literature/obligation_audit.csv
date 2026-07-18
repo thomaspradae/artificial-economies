@@ -1,0 +1,13 @@
+world,category,obligation,status,code_evidence,output_evidence,missing
+pricing_arena,benchmark,Report Nash and joint-profit price benchmarks.,pass,worlds/pricing_arena/benchmarks.py,outputs/full_v0_multiseed/summary_aggregate.csv,
+pricing_arena,metrics,"Report price-normalized and profit-normalized collusion, exploitability, welfare, price, and profit.",pass,core/metrics.py; build_combined_table.py,outputs/phase3_full/mind_comparison.csv,
+resource_island,activation,Report trade/property activation before interpreting Resource Island institutions.,pass,worlds/resource_island/env.py; worlds/resource_island/training.py,outputs/resource_island_v1_full/summary_aggregate.csv,
+resource_island,benchmark,Provide oracle/greedy gather benchmarks for scale and sanity.,pass,worlds/resource_island/benchmarks.py,outputs/resource_island_v1_full/summary_aggregate.csv,
+auction_house,benchmark,"Compare learned bidding to truthful second-price, shaded first-price, and reserve benchmarks.",pass,worlds/auction_house/benchmarks.py,outputs/auction_house_full/summary_aggregate.csv,
+auction_house,metrics,"Report revenue, allocative efficiency, welfare/surplus, regret, and bid-shading diagnostics.",pass,worlds/auction_house/env.py; worlds/auction_house/training.py,outputs/auction_house_phase3_full/mind_comparison.csv,
+public_goods,benchmark,Compare learned commons behavior to free-rider and social-optimum brackets.,pass,worlds/public_goods/benchmarks.py,outputs/public_goods_full/summary_aggregate.csv,
+public_goods,metrics,Separate state-changing institutions from reward/accounting-only effects.,pass,validate_public_goods_effects.py; worlds/public_goods/training.py,outputs/public_goods_full/summary_aggregate.csv; outputs/public_goods_full/institution_effect_validation.json,
+labor_market,benchmark,Verify deferred-acceptance stability and proposing-side strategy-proofness cases.,pass,worlds/labor_market/benchmarks.py; run_labor_market_benchmark_cases.py,outputs/labor_market_benchmark_cases.json,
+labor_market,metrics,"Report match rate, stability, truthfulness, welfare, and manipulation diagnostics.",pass,worlds/labor_market/env.py; worlds/labor_market/training.py,outputs/labor_market_phase3_full/mind_comparison.csv,
+auction_house,paper_benchmark,2023_optimal_auctions_through_deep_learning_advances_in_differentiable_economics.md: Myerson (1981),partial,worlds/auction_house,61 matching output paths,human review required: compare filled card obligation to exact code/results
+auction_house,paper_reproduce,2023_optimal_auctions_through_deep_learning_advances_in_differentiable_economics.md: Classical benchmark,partial,worlds/auction_house,61 matching output paths,human review required: compare filled card obligation to exact code/results

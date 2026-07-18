@@ -123,6 +123,50 @@ Rebuild the gap table and theory obligations without network:
 python -m tools.theory_scout.cli obligations
 ```
 
+Fill strict paper cards using the local Ollama extractor. The recommended
+default from the `ofi1` benchmark is `llama3.2:3b`:
+
+```bash
+python -m tools.theory_scout.cli fill-cards --limit 10 --model llama3.2:3b
+```
+
+To use `ofi1`'s user-local Ollama server from this local checkout, use the SSH
+tunnel helper:
+
+```bash
+scripts/run_theory_llm_fill_ofi1.sh --limit 10
+```
+
+By default, `fill-cards` reads `literature/papers_ranked.csv`, so it fills
+high-scoring papers first. You can target a canonical paper explicitly:
+
+```bash
+scripts/run_theory_llm_fill_ofi1.sh --world auction_house --title-contains "optimal auctions through deep learning" --limit 1
+```
+
+The filler uses cached PDF text from `literature/text/` when available and
+falls back to metadata abstracts. It writes `literature/card_fill_manifest.json`
+and rewrites only cards that still contain TODOs unless `--force` is passed.
+The model is instructed to write `Not stated in supplied text.` when the
+provided source does not support a field.
+
+Audit whether theory obligations are represented in code/results:
+
+```bash
+python -m tools.theory_scout.cli audit-obligations
+```
+
+This writes:
+
+- `literature/obligation_audit.csv`
+- `literature/obligation_audit.md`
+- `literature/theory_gap_report.csv`
+
+The audit is deterministic. It checks for expected world files, benchmark
+helpers, tests/output files, and result columns/terms. Filled paper-card fields
+are added as review rows; unfilled TODO templates are skipped rather than
+counted as failures. It does not replace human review of filled paper cards.
+
 API configuration:
 
 - `OPENALEX_API_KEY`: optional OpenAlex key.
@@ -137,6 +181,6 @@ Do not commit API keys.
 The first cache was populated from OpenAlex. Semantic Scholar support is wired
 with a default delay of 1.1 seconds between requests, matching the approved
 1-request/second key limit. arXiv support exists but is optional because broad
-query runs can time out or rate-limit. The generated paper cards are templates;
-a card is thesis-ready only after its TODO fields are filled from the paper
-text.
+query runs can time out or rate-limit. The generated paper cards can now be
+filled by a local LLM, but a card is thesis-ready only after its extracted
+claims are checked against the cited source text.
