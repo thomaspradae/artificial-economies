@@ -1,0 +1,118 @@
+worlds:
+  pricing_arena:
+    institutions:
+      - none
+      - price_cap
+      - tax_high_price
+      - random_audit
+      - anti_collusion
+      - demand_shock
+    minds:
+      - q_learning
+      - dqn
+      - ppo
+      - independent_dqn
+      - centralized_critic
+    classical_terms:
+      - "Artificial Intelligence Algorithmic Pricing and Collusion Calvano"
+      - "Bertrand competition repeated pricing collusion"
+      - "algorithmic collusion price caps regulation"
+      - "Calvano algorithmic pricing Q learning"
+    learning_terms:
+      - "deep reinforcement learning pricing competition collusion"
+      - "multi agent reinforcement learning price competition"
+      - "algorithmic collusion exploitability reinforcement learning"
+
+  resource_island:
+    institutions:
+      - none
+      - property_rights
+      - redistribution
+      - trade_price_controls
+      - reputation_system
+    minds:
+      - q_learning
+      - dqn
+      - ppo
+      - independent_dqn
+      - centralized_critic
+    classical_terms:
+      - "A multi-agent reinforcement learning model of common-pool resource appropriation"
+      - "Multi-agent Reinforcement Learning in Sequential Social Dilemmas"
+      - "common pool resource property rights trade specialization"
+      - "Ostrom governing the commons property rights sanctions"
+      - "spatial resource economy agents trade property rights"
+    learning_terms:
+      - "multi agent reinforcement learning common pool resource"
+      - "sequential social dilemma reinforcement learning commons"
+      - "reinforcement learning resource gathering trade agents"
+
+  auction_house:
+    institutions:
+      - second_price
+      - first_price
+      - second_price_reserve
+      - clock
+      - public_signal
+      - noisy_signal
+    minds:
+      - q_learning
+      - dqn
+      - ppo
+      - independent_dqn
+      - centralized_critic
+    classical_terms:
+      - "Auctions and Bidding Vickrey 1961"
+      - "Optimal Auction Design Myerson 1981"
+      - "Vickrey second price auction truthful bidding"
+      - "first price auction bid shading equilibrium"
+      - "Myerson optimal auction reserve price revenue"
+    learning_terms:
+      - "reinforcement learning auction bidding agents"
+      - "multi agent reinforcement learning auctions bidding"
+      - "RegretNet auction design incentive compatibility regret"
+
+  public_goods:
+    institutions:
+      - none
+      - penalty_schedule
+      - contribution_matching
+      - reputation
+      - information_restriction
+      - tax_schedule
+    minds:
+      - q_learning
+      - dqn
+      - ppo
+      - independent_dqn
+      - centralized_critic
+    classical_terms:
+      - "Cooperation and Punishment in Public Goods Experiments Fehr Gachter"
+      - "The voluntary provision of public goods Isaac Walker Williams"
+      - "public goods game free rider equilibrium punishment"
+      - "common pool resource contribution extraction regeneration"
+      - "public goods reputation contribution matching"
+    learning_terms:
+      - "multi agent reinforcement learning public goods game"
+      - "reinforcement learning common pool resource sustainability"
+      - "multi agent reinforcement learning tragedy of the commons"
+
+  labor_market:
+    institutions:
+      - deferred_acceptance
+    minds:
+      - q_learning
+      - dqn
+      - ppo
+      - independent_dqn
+      - centralized_critic
+    classical_terms:
+      - "College Admissions and the Stability of Marriage Gale Shapley"
+      - "Deferred Acceptance Algorithms History Theory Practice Open Questions Roth"
+      - "Gale Shapley deferred acceptance stable matching"
+      - "matching markets strategy proof deferred acceptance"
+      - "two sided matching stability truthfulness"
+    learning_terms:
+      - "reinforcement learning matching markets"
+      - "multi agent learning matching markets"
+      - "strategic behavior learning agents matching market"

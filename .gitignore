@@ -9,3 +9,4 @@ outputs/
 *.log
 *.pid
 .DS_Store
+literature/secrets.env
