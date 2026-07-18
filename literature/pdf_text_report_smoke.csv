@@ -1,0 +1,2 @@
+world,title,year,source,source_id,doi,original_pdf_url,resolved_pdf_url,pdf_path,text_path,pdf_status,text_status,text_chars,error
+auction_house,Optimal-er Auctions through Attention,2022,openalex,https://openalex.org/W4225651345,10.48550/arxiv.2202.13110,https://arxiv.org/pdf/2202.13110,https://arxiv.org/pdf/2202.13110,literature/pdfs/2022_Optimal-er_Auctions_through_Attention_1cb066458843.pdf,literature/text/2022_optimal_er_auctions_through_attention.txt,downloaded,extracted,70209,

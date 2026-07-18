@@ -2,7 +2,7 @@
 
 This is a deterministic coverage check. `pass` means required files/columns/terms were observed. `partial` means there is implementation evidence but the obligation still needs human review. `missing` means the evidence was not found.
 
-Summary: pass=10, partial=2, missing=0.
+Summary: pass=10, partial=5, missing=0.
 
 ## auction_house
 
@@ -19,6 +19,27 @@ Summary: pass=10, partial=2, missing=0.
 - Code evidence: worlds/auction_house/env.py; worlds/auction_house/training.py
 - Output evidence: outputs/auction_house_phase3_full/mind_comparison.csv
 - Missing/review: none
+
+### paper_benchmark: partial
+
+- Obligation: 2022_optimal_er_auctions_through_attention.md: Myerson [47]
+- Code evidence: worlds/auction_house
+- Output evidence: 61 matching output paths
+- Missing/review: human review required: compare filled card obligation to exact code/results
+
+### paper_metrics: partial
+
+- Obligation: 2022_optimal_er_auctions_through_attention.md: Revenue and regret.
+- Code evidence: worlds/auction_house
+- Output evidence: 61 matching output paths
+- Missing/review: human review required: compare filled card obligation to exact code/results
+
+### paper_reproduce: partial
+
+- Obligation: 2022_optimal_er_auctions_through_attention.md: The classical benchmark, prior learning setup, metrics, and what this project must reproduce.
+- Code evidence: worlds/auction_house
+- Output evidence: 61 matching output paths
+- Missing/review: human review required: compare filled card obligation to exact code/results
 
 ### paper_benchmark: partial
 

@@ -3,14 +3,15 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def extract_pdf_text(pdf_path: Path, out_dir: Path) -> Path | None:
+def extract_pdf_text(pdf_path: Path, out_dir: Path, out_path: Path | None = None) -> Path | None:
     try:
         import fitz  # type: ignore
     except ImportError:
         print("[text skipped] PyMuPDF is not installed; install pymupdf to extract PDF text")
         return None
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / f"{pdf_path.stem}.txt"
+    out_path = out_path or out_dir / f"{pdf_path.stem}.txt"
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     if out_path.exists() and out_path.stat().st_size > 1_000:
         return out_path
     document = fitz.open(pdf_path)

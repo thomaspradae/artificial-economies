@@ -1,11 +1,11 @@
 [
   {
-    "card_path": "literature/paper_cards/2023_optimal_auctions_through_deep_learning_advances_in_differentiable_economics.md",
+    "card_path": "literature/paper_cards/2022_optimal_er_auctions_through_attention.md",
     "changed": true,
     "model": "llama3.2:3b",
-    "output_tokens_per_second": 8.168098448592644,
-    "source_basis": "abstract",
-    "title": "Optimal Auctions through Deep Learning: Advances in Differentiable Economics",
+    "output_tokens_per_second": 6.595297484430306,
+    "source_basis": "text:literature/text/2022_optimal_er_auctions_through_attention.txt",
+    "title": "Optimal-er Auctions through Attention",
     "validation_errors": [],
     "world": "auction_house"
   }

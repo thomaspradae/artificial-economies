@@ -12,6 +12,7 @@ from tools.theory_scout.audit_obligations import (
     write_audit_markdown,
 )
 from tools.theory_scout.fill_paper_cards import fill_cards, parse_markdown_sections
+from tools.theory_scout.hydrate_texts import hydrate_texts
 from tools.theory_scout.make_paper_cards import CARD_SECTIONS, make_blank_card
 from tools.theory_scout.models import PaperRecord
 from tools.theory_scout.ollama_client import OllamaResult, extract_json_object
@@ -37,7 +38,7 @@ class FakeOllamaClient:
                 "what_they_do_not_test": "cross-world capability ladder",
                 "what_we_need_to_reproduce": "free-rider bracket and contribution metrics",
                 "how_our_project_differs": "shared world/mind/institution interface",
-                "source_evidence": "Abstract mentions public goods and contributions.",
+                "source_evidence": "text:/tmp/not-real.txt",
                 "confidence": "medium",
             }
         )
@@ -222,7 +223,48 @@ worlds:
             text = results[0].card_path.read_text(encoding="utf-8")
             sections = parse_markdown_sections(text)
         self.assertEqual(sections["Theoretical benchmark"], "free-rider and social optimum brackets")
-        self.assertIn("Abstract mentions", sections["Extraction evidence"])
+        self.assertIn("A public goods paper about contribution matching.", sections["Extraction evidence"])
+
+    def test_hydrate_texts_downloads_pdf_and_writes_canonical_text_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            records = root / "papers_ranked.csv"
+            records.write_text(
+                "\n".join(
+                    [
+                        "world,query_group,query,source,source_id,title,year,authors,doi,url,pdf_url,citation_count,has_pdf,relevance_score,rank_score,abstract",
+                        "auction_house,learning_terms,q,test,p1,Strict PDF Paper,2024,A,10.1/test,https://example.test,https://example.test/p.pdf,1,True,1,1,abstract",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            def fake_download(pdf_url, title, year, out_dir):
+                out_dir.mkdir(parents=True)
+                path = out_dir / "downloaded.pdf"
+                path.write_bytes(b"%PDF fake")
+                return path
+
+            def fake_extract(pdf_path, out_dir, out_path=None):
+                target = out_path or out_dir / "downloaded.txt"
+                target.parent.mkdir(parents=True)
+                target.write_text("full paper text " * 200, encoding="utf-8")
+                return target
+
+            rows = hydrate_texts(
+                records_path=records,
+                pdf_dir=root / "pdfs",
+                text_dir=root / "text",
+                report_path=root / "pdf_text_report.csv",
+                limit=1,
+                download_func=fake_download,
+                extract_func=fake_extract,
+            )
+            self.assertEqual(rows[0].pdf_status, "downloaded")
+            self.assertEqual(rows[0].text_status, "extracted")
+            self.assertTrue((root / "text/2024_strict_pdf_paper.txt").exists())
+            self.assertTrue((root / "pdf_text_report.csv").exists())
 
     def test_audit_obligations_reports_required_missing_columns(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -259,6 +301,13 @@ worlds:
         fill_args = parser.parse_args(["fill-cards", "--limit", "2", "--model", "llama3.2:3b"])
         self.assertEqual(fill_args.limit, 2)
         self.assertEqual(fill_args.model, "llama3.2:3b")
+        hydrate_args = parser.parse_args(["hydrate-text", "--limit", "2", "--resolve-pdfs"])
+        self.assertEqual(hydrate_args.limit, 2)
+        self.assertTrue(hydrate_args.resolve_pdfs)
+        full_args = parser.parse_args(["full", "--download", "--fill-cards", "--fill-limit", "4"])
+        self.assertTrue(full_args.download)
+        self.assertTrue(full_args.fill_cards)
+        self.assertEqual(full_args.fill_limit, 4)
         audit_args = parser.parse_args(["audit-obligations", "--no-card-obligations"])
         self.assertTrue(audit_args.no_card_obligations)
 

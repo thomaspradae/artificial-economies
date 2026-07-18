@@ -10,8 +10,11 @@ results, creates strict paper-card templates, and generates obligation tables.
 - `papers_raw.jsonl`: cached metadata records from scholarly APIs.
 - `papers_ranked.csv`: relevance-ranked metadata view.
 - `paper_cards/`: strict extraction templates for individual papers.
+- `pdf_text_report.csv`: per-paper PDF discovery/download/text-extraction status.
+- `card_fill_manifest.json`: per-card local-LLM fill status.
 - `novelty_gap_table.csv`: `world | institution | mind | closest paper | theory benchmark | their metric | our metric | gap`.
 - `theory_obligations.md`: world-level theory obligations.
+- `obligation_audit.md`: deterministic check that theory obligations have code/result evidence.
 
 ## One-Command Pipeline
 
@@ -32,6 +35,19 @@ merges with the existing cache, rebuilds `papers_ranked.csv`, creates/updates
 paper-card templates, writes `novelty_gap_table.csv`, writes
 `theory_obligations.md`, and records `scout_manifest.json`.
 
+Full overnight run with PDF hydration and `ofi1` local-LLM card filling:
+
+```bash
+scripts/run_theory_scout_overnight_ofi1.sh
+```
+
+This opens an SSH tunnel to `ofi1`'s Ollama server, runs metadata search,
+creates paper-card templates, resolves/downloads open-access PDFs from metadata
+or Unpaywall, extracts canonical text into `literature/text/`, fills the first
+ranked cards with `llama3.2:3b`, rebuilds obligation tables, and writes the
+deterministic obligation audit. It is the default “leave it running at night”
+pipeline.
+
 Equivalent direct Python command:
 
 ```bash
@@ -51,8 +67,10 @@ Optional legal PDF resolution/download:
 python -m tools.theory_scout.cli full --resolve-pdfs --download
 ```
 
-Use PDF download sparingly. Metadata and obligations are the main thesis-safety
-layer; paper cards still need manual extraction before claims are final.
+With `full`, `--download` now runs the reporting hydration stage and writes
+`literature/pdf_text_report.csv`. Use PDF download sparingly. The pipeline only
+uses PDF URLs returned by scholarly metadata APIs or Unpaywall; it is not a
+general web scraper.
 
 ## Secrets
 
@@ -122,6 +140,16 @@ Rebuild the gap table and theory obligations without network:
 ```bash
 python -m tools.theory_scout.cli obligations
 ```
+
+Hydrate cached PDFs/text from the ranked metadata cache without rerunning search:
+
+```bash
+python -m tools.theory_scout.cli hydrate-text --limit 25 --resolve-pdfs
+```
+
+This writes `literature/pdf_text_report.csv`. Status rows make the failure mode
+explicit: existing text, no PDF URL, download failure, extraction failure, or
+extracted text size.
 
 Fill strict paper cards using the local Ollama extractor. The recommended
 default from the `ofi1` benchmark is `llama3.2:3b`:

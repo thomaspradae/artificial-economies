@@ -14,7 +14,7 @@ Status rule: an item is checked only if it is implemented in this repo, covered 
 - [x] Auction House mechanics/economics tests pass: `test_auction_house.py` ran 15 tests, all passing, covering allocation, first-price, second-price, clock-auction payment resolution, reserve/no-sale behavior, information-policy observation transforms, deterministic tie-breaking, registry construction, truthful second-price benchmarks, first-price bid-shading benchmarks, ex-post regret, Q-learning training smoke, fixed-width structured observations, neural/MARL mind wiring, and generic mind-comparison construction.
 - [x] Public Goods / Commons tests pass: `test_public_goods.py` ran 13 tests, all passing, covering extraction rationing, contribution/extraction accounting, penalty binding, contribution matching, information restriction, tax schedule redistribution, benchmark brackets, registry construction, Q-learning training, smoke output, institution-effect classification, fixed-width structured observations, and neural/MARL mind wiring.
 - [x] Labor Market tests pass: `test_labor_market.py` ran 14 tests, all passing, covering deferred acceptance, blocking-pair detection, report-top preference construction, truthful matching stability, payoff accounting, canonical fixed preference profiles, strategy-proof worker report enumeration, registry construction, Q-learning training, smoke output, fixed-width structured worker observations, and neural/MARL mind wiring for the asymmetric worker-only learner setup.
-- [x] Full unittest discovery passes: 142 tests, all passing.
+- [x] Full unittest discovery passes: 143 tests, all passing.
 - [x] Python compile check passes for the legacy v0 module, experiment scripts, new `core/`, `worlds/`, `minds/`, `institutions/`, Resource Island modules, Auction House modules/training runner, Public Goods modules/training runner, Labor Market modules/training runner, deep-RL/MARL modules, validation runners, combined-table builder, and all test files.
 - [x] Phase 0 hot-path parity smoke check passes: old-path vs new-architecture multiseed CSVs are byte-identical for fixed seeds.
 - [x] Phase 0 hot-path parity smoke check passes: old-path vs new-architecture exploitability CSVs are byte-identical for fixed seeds.
@@ -414,16 +414,18 @@ Phase 3 notes:
 - [x] Local LLM host benchmark exists at `literature/local_llm_benchmark_ofi1.md`: `ofi1` has a user-local Ollama `0.32.1` install, `llama3.2:3b` is the recommended bulk JSON extractor, and `qwen3:8b` is reserved for slower audit passes.
 - [x] `tools/theory_scout/fill_paper_cards.py` and `ollama_client.py`: local-LLM paper-card filler exists, uses Ollama `/api/chat` JSON mode with `think=false`, falls back from extracted text to abstracts, records source basis/model/speed metadata, and fails closed on invalid JSON.
 - [x] `scripts/run_theory_llm_fill_ofi1.sh`: SSH-tunnel helper exists for using `ofi1`'s Ollama server from this local checkout.
+- [x] `tools/theory_scout/hydrate_texts.py`: ranked-paper PDF/text hydration stage exists; it resolves open-access PDF URLs from metadata/Unpaywall, downloads PDFs, extracts canonical text files, and writes per-paper status rows to `literature/pdf_text_report.csv`.
+- [x] `scripts/run_theory_scout_overnight_ofi1.sh`: one-command overnight pipeline exists for metadata search, PDF/text hydration, local-LLM card filling through `ofi1`, obligation table rebuilds, and deterministic obligation audit.
 - [x] `tools/theory_scout/audit_obligations.py`: deterministic obligation checker exists and writes `literature/obligation_audit.csv`, `literature/obligation_audit.md`, and `literature/theory_gap_report.csv`.
-- [x] Theory-engine validation observed: `test_theory_scout.py` runs 14 tests, compile check passes for `tools/theory_scout`, one real `ofi1` LLM card-fill smoke succeeded, and `audit-obligations` reports `pass=10`, `partial=2`, `missing=0`.
+- [x] Theory-engine validation observed: `test_theory_scout.py` runs 15 tests, compile check passes for `tools/theory_scout`, a real PDF hydration smoke downloaded/extracted `Optimal-er Auctions through Attention` (`text_chars=70209`), one real full-text `ofi1` LLM card-fill smoke succeeded, and `audit-obligations` reports `pass=10`, `partial=5`, `missing=0`.
 - [ ] Run the full Semantic Scholar-enriched scout with the configured secrets and refresh the cached literature outputs after rate limits clear.
 - [ ] Bulk-fill the main paper cards from paper text or abstracts: Pricing RL collusion, auctions/deep-RL auction design, public goods/MARL, matching/strategy-proofness, common-pool resources/property rights, and LLM economic agents.
-- [ ] Validate PDF downloading/text extraction at scale and prefer full-paper text over abstracts for high-value cards.
+- [ ] Validate PDF downloading/text extraction at scale across the top-ranked papers for every world and prefer full-paper text over abstracts for high-value cards.
 - [ ] Add stronger citation/evidence guards: each filled paper-card claim should cite a metadata id, DOI/arXiv id when available, and a short source excerpt tied to the exact extracted claim.
 
 Theory Engine note:
 
-- The current system now finds, structures, fills, and audits theory obligations, but it is still not a finished deep-reading system. Most paper cards remain templates, PDF/text extraction has not been validated at scale, and filled cards require human review before citation. The important change is that related work now produces concrete code/result obligations instead of generic summaries.
+- The current system now finds, structures, hydrates source text, fills cards, and audits theory obligations. It is still not a finished deep-reading system: most paper cards remain templates, PDF/text extraction has only been smoke-validated rather than validated at scale, and filled cards require human review before citation. The important change is that related work now produces concrete code/result obligations instead of generic summaries.
 
 ## Phase 7 - Visualization Layer
 

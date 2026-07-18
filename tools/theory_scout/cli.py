@@ -19,6 +19,7 @@ from .build_gap_table import build_gap_rows, write_gap_table, write_theory_oblig
 from .download_pdfs import download_pdf
 from .extract_text import extract_pdf_text
 from .fill_paper_cards import fill_cards
+from .hydrate_texts import hydrate_texts, hydration_summary
 from .http import read_jsonl, write_jsonl
 from .make_paper_cards import make_blank_card
 from .models import PaperRecord, record_key
@@ -338,6 +339,24 @@ def fill_cards_command(args: argparse.Namespace) -> None:
     print(f"[wrote] {out_path}")
 
 
+def hydrate_text_command(args: argparse.Namespace) -> None:
+    worlds = set(args.world) if args.world else None
+    rows = hydrate_texts(
+        records_path=Path(args.records),
+        pdf_dir=Path(args.pdf_dir),
+        text_dir=Path(args.text_dir),
+        report_path=Path(args.report),
+        worlds=worlds,
+        title_contains=args.title_contains,
+        limit=args.limit,
+        resolve_pdfs=args.resolve_pdfs,
+        min_text_chars=args.min_text_chars,
+    )
+    summary = hydration_summary(rows)
+    print(f"[wrote] {args.report} ({len(rows)} rows)")
+    print("[hydrate] " + ", ".join(f"{key}={value}" for key, value in sorted(summary.items())))
+
+
 def audit_obligations_command(args: argparse.Namespace) -> None:
     rows = audit_obligations(
         repo_root=Path(args.repo_root),
@@ -384,8 +403,11 @@ def full_command(args: argparse.Namespace) -> None:
             "raw": str(out_dir / "papers_raw.jsonl"),
             "ranked": str(out_dir / "papers_ranked.csv"),
             "cards": str(out_dir / "paper_cards"),
+            "pdf_text_report": str(out_dir / "pdf_text_report.csv"),
+            "card_fill_manifest": str(out_dir / "card_fill_manifest.json"),
             "gap_table": str(out_dir / "novelty_gap_table.csv"),
             "obligations": str(out_dir / "theory_obligations.md"),
+            "obligation_audit": str(out_dir / "obligation_audit.md"),
         },
     }
 
@@ -401,13 +423,14 @@ def full_command(args: argparse.Namespace) -> None:
         sources.append("arxiv")
     manifest["sources_requested"] = sources
 
+    run_hydrate = args.hydrate_text or args.download
     search_args = argparse.Namespace(
         queries=args.queries,
         out_dir=args.out_dir,
         per_query=args.per_query,
         sources=sources,
         resolve_pdfs=args.resolve_pdfs,
-        download=args.download,
+        download=False,
         make_cards=True,
         card_limit=args.card_limit,
         semantic_delay_seconds=args.semantic_delay_seconds,
@@ -424,7 +447,53 @@ def full_command(args: argparse.Namespace) -> None:
             out=str(out_dir / "papers_ranked.csv"),
         )
     )
+
+    if run_hydrate:
+        hydrate_text_command(
+            argparse.Namespace(
+                records=str(out_dir / "papers_ranked.csv"),
+                pdf_dir=str(out_dir / "pdfs"),
+                text_dir=str(out_dir / "text"),
+                report=str(out_dir / "pdf_text_report.csv"),
+                world=None,
+                title_contains=None,
+                limit=args.text_limit,
+                resolve_pdfs=args.resolve_pdfs,
+                min_text_chars=args.min_text_chars,
+            )
+        )
+
+    if args.fill_cards:
+        fill_cards_command(
+            argparse.Namespace(
+                records=str(out_dir / "papers_ranked.csv"),
+                cards_dir=str(out_dir / "paper_cards"),
+                text_dir=str(out_dir / "text"),
+                ollama_url=args.ollama_url,
+                model=args.model,
+                world=None,
+                title_contains=None,
+                limit=args.fill_limit,
+                force=args.force_fill,
+                dry_run=False,
+                num_predict=args.num_predict,
+                num_ctx=args.num_ctx,
+                num_thread=args.num_thread,
+                out_manifest=str(out_dir / "card_fill_manifest.json"),
+            )
+        )
+
     obligations_command(argparse.Namespace(queries=args.queries, out_dir=args.out_dir))
+    audit_obligations_command(
+        argparse.Namespace(
+            repo_root=".",
+            literature_dir=args.out_dir,
+            out_csv=str(out_dir / "obligation_audit.csv"),
+            out_md=str(out_dir / "obligation_audit.md"),
+            no_card_obligations=False,
+            fail_on_missing=False,
+        )
+    )
 
     manifest["finished_at"] = datetime.now(timezone.utc).isoformat()
     manifest["duration_seconds"] = (
@@ -511,6 +580,27 @@ def build_parser() -> argparse.ArgumentParser:
     fill.add_argument("--out-manifest", default="literature/card_fill_manifest.json")
     fill.set_defaults(func=fill_cards_command)
 
+    hydrate = subparsers.add_parser(
+        "hydrate-text",
+        help="download open-access PDFs from metadata and extract canonical text files",
+    )
+    hydrate.add_argument(
+        "--records",
+        "--raw",
+        dest="records",
+        default="literature/papers_ranked.csv",
+        help="Ranked CSV or raw JSONL metadata cache to hydrate from.",
+    )
+    hydrate.add_argument("--pdf-dir", default="literature/pdfs")
+    hydrate.add_argument("--text-dir", default="literature/text")
+    hydrate.add_argument("--report", default="literature/pdf_text_report.csv")
+    hydrate.add_argument("--world", action="append", help="Limit to one world; repeat for multiple worlds.")
+    hydrate.add_argument("--title-contains", help="Only hydrate records whose title contains this text.")
+    hydrate.add_argument("--limit", type=int, default=20)
+    hydrate.add_argument("--resolve-pdfs", action="store_true", help="Use Unpaywall when metadata lacks a PDF URL.")
+    hydrate.add_argument("--min-text-chars", type=int, default=1000)
+    hydrate.set_defaults(func=hydrate_text_command)
+
     audit = subparsers.add_parser(
         "audit-obligations",
         help="compare theory/card obligations to implemented code and result schemas",
@@ -533,6 +623,17 @@ def build_parser() -> argparse.ArgumentParser:
     full.add_argument("--include-arxiv", action="store_true")
     full.add_argument("--resolve-pdfs", action="store_true")
     full.add_argument("--download", action="store_true")
+    full.add_argument("--hydrate-text", action="store_true")
+    full.add_argument("--text-limit", type=int, default=50)
+    full.add_argument("--min-text-chars", type=int, default=1000)
+    full.add_argument("--fill-cards", action="store_true")
+    full.add_argument("--fill-limit", type=int, default=25)
+    full.add_argument("--force-fill", action="store_true")
+    full.add_argument("--ollama-url", default=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"))
+    full.add_argument("--model", default=os.getenv("THEORY_SCOUT_LLM_MODEL", "llama3.2:3b"))
+    full.add_argument("--num-predict", type=int, default=900)
+    full.add_argument("--num-ctx", type=int, default=4096)
+    full.add_argument("--num-thread", type=int, default=None)
     full.add_argument("--require-semantic", action="store_true")
     full.set_defaults(func=full_command)
     return parser

@@ -93,6 +93,19 @@ def _evidence_excerpt(source_context: str, max_chars: int = 700) -> str:
     return excerpt or NOT_STATED
 
 
+def _evidence_needs_fallback(evidence: str) -> bool:
+    normalized = evidence.strip().lower()
+    if normalized in {"abstract", "source text", "metadata", NOT_STATED.lower()}:
+        return True
+    if len(normalized) < 40:
+        return True
+    if normalized.startswith(("text:", "file:", "path:")):
+        return True
+    if (".txt" in normalized or ".pdf" in normalized) and "/" in normalized:
+        return True
+    return False
+
+
 def _record_card_path(record: dict[str, Any], cards_dir: Path) -> Path:
     title = record.get("title") or "Untitled"
     year = record.get("year") or "unknown"
@@ -107,6 +120,7 @@ def _text_candidates(record: dict[str, Any], text_dir: Path) -> list[Path]:
         text_dir / f"{stem}.txt",
         text_dir / f"{slugify(title)}.txt",
     ]
+    candidates.extend(sorted(text_dir.glob(f"{stem}*.txt")))
     source_id = str(record.get("source_id") or "")
     if source_id:
         candidates.append(text_dir / f"{slugify(source_id)}.txt")
@@ -289,8 +303,8 @@ def fill_card_for_record(
             changed=False,
             validation_errors=[f"llm extraction failed: {exc}"],
         )
-    evidence = _stringify(fields.get("source_evidence")).strip().lower()
-    if evidence in {"abstract", "source text", "metadata", NOT_STATED.lower()} or len(evidence) < 40:
+    evidence = _stringify(fields.get("source_evidence"))
+    if _evidence_needs_fallback(evidence):
         fields["source_evidence"] = _evidence_excerpt(context)
     confidence = _stringify(fields.get("confidence")).strip()
     if confidence == NOT_STATED:
