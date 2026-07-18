@@ -404,6 +404,25 @@ Phase 3 notes:
 - [ ] Head-to-head: LLM mind vs Q-learning/DQN mind
 - [ ] Investigate whether LLM agents collude via different mechanisms than Q-learners
 
+## Phase 6.5 - Theory Engine / Paper Scout
+
+- [x] `tools/theory_scout/`: reproducible literature metadata pipeline exists with OpenAlex, Semantic Scholar, arXiv, optional PDF resolution/download, text extraction, paper-card generation, ranking, and novelty-gap table construction.
+- [x] `literature/queries.yaml`: world-specific literature queries exist for Pricing Arena, Resource Island, Auction House, Public Goods, and Labor Market.
+- [x] `literature/secrets.env.example`: ignored secrets-file template exists for OpenAlex and Semantic Scholar credentials.
+- [x] Local `literature/secrets.env` is configured outside git and test calls against OpenAlex and Semantic Scholar succeeded.
+- [x] First cached outputs exist: `literature/papers_raw.jsonl`, `literature/papers_ranked.csv`, `literature/novelty_gap_table.csv`, strict paper-card templates, and `literature/theory_obligations.md`.
+- [ ] Run the full Semantic Scholar-enriched scout with the configured secrets and refresh the cached literature outputs after rate limits clear.
+- [ ] Fill the main paper cards from paper text or abstracts: Pricing RL collusion, auctions/deep-RL auction design, public goods/MARL, matching/strategy-proofness, common-pool resources/property rights, and LLM economic agents.
+- [ ] Add an LLM-assisted extractor that turns paper text into strict card fields without inventing claims: theoretical benchmark, learning setup, metrics, main result, what is proved, what is simulated, what is not tested, and what this repo must reproduce.
+- [ ] Add a cached local-LLM backend option, preferably Ollama on `ofi1` if installed there or `old1` with `qwen3:1.7b` for smaller extraction passes.
+- [ ] Add citation/evidence guards: each filled paper-card claim must cite a metadata id, DOI/arXiv id when available, and a short source excerpt or abstract-derived note.
+- [ ] Add code/result obligation checker: compare paper-card obligations against implemented benchmarks, metrics, tests, and output CSV columns for each world.
+- [ ] Add a thesis-facing theory gap report that answers, per world: classical prediction, known RL/MARL result, benchmark to reproduce, prior metric, our metric, and remaining gap.
+
+Theory Engine note:
+
+- The current system finds and structures literature obligations, but it is not yet a deep reading system. Paper cards are still mostly templates, PDF/text extraction has not been validated at scale, and no LLM extractor or automatic code/result comparison is wired yet. This track exists to turn related work into concrete obligations for the worlds, not to produce generic summaries.
+
 ## Phase 7 - Visualization Layer
 
 - [ ] `trajectory_to_json.py`
