@@ -142,6 +142,39 @@ class MultiSeedEndToEndTests(unittest.TestCase):
             self.assertEqual(payload["mechanisms"], ["none", "price_cap"])
             self.assertEqual(payload["ci_method"], "Student-t two-sided 95% confidence interval over seed-level means")
 
+    def test_small_n_firm_run_writes_core_outputs(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            args = parse_args(
+                [
+                    "--steps",
+                    "12",
+                    "--n-seeds",
+                    "1",
+                    "--final-window",
+                    "4",
+                    "--save-dir",
+                    tmpdir,
+                    "--mechanisms",
+                    "none",
+                    "--mind",
+                    "random",
+                    "--n-firms",
+                    "3",
+                    "--no-plots",
+                ]
+            )
+            with redirect_stdout(io.StringIO()):
+                run_experiment(args)
+
+            by_seed = Path(tmpdir) / "summary_by_seed.csv"
+            manifest = json.loads((Path(tmpdir) / "experiment_manifest.json").read_text())
+            with by_seed.open(newline="") as handle:
+                rows = list(csv.DictReader(handle))
+            self.assertEqual(len(rows), 1)
+            self.assertEqual(manifest["config"]["n_firms"], 3)
+            self.assertTrue(math.isfinite(float(rows[0]["profit_total"])))
+            self.assertTrue(math.isfinite(float(rows[0]["quantity_total"])))
+
     def test_small_plot_run_writes_expected_pngs(self):
         if importlib.util.find_spec("matplotlib") is None:
             self.skipTest("matplotlib is not installed")

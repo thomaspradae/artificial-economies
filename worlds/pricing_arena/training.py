@@ -35,8 +35,9 @@ class TrainingRun:
     benchmarks: dict[str, object]
     agent1: Any
     agent2: Any
+    agents: list[Any]
     config: MarketConfig
-    final_state: tuple[int, int]
+    final_state: tuple[int, ...]
     final_epsilon: float
 
 
@@ -67,14 +68,20 @@ def _build_pricing_world(
     seed: int,
     agents: list[Any] | None = None,
     mind: str = "q_learning",
+    n_firms: int = 2,
 ) -> PricingArenaWorld:
-    config = MarketConfig(mechanism=mechanism)
+    if agents is not None:
+        n_firms = len(agents)
+    if n_firms < 2:
+        raise ValueError("n_firms must be at least 2")
+    config = MarketConfig(mechanism=mechanism, quality=np.full(n_firms, 8.0, dtype=float))
+    obs_dim = n_firms * len(config.price_grid)
     if agents is None:
         if mind == "independent_dqn":
             joint_learner = IndependentDQNLearners(
-                n_agents=2,
-                action_dim=19,
-                obs_dim=38,
+                n_agents=n_firms,
+                action_dim=len(config.price_grid),
+                obs_dim=obs_dim,
                 base_seed=seed,
                 hidden_dim=32,
                 batch_size=16,
@@ -97,9 +104,9 @@ def _build_pricing_world(
 
         if mind == "centralized_critic":
             joint_learner = CentralizedCriticLearners(
-                n_agents=2,
-                action_dim=19,
-                obs_dim=38,
+                n_agents=n_firms,
+                action_dim=len(config.price_grid),
+                obs_dim=obs_dim,
                 seed=seed,
                 hidden_dim=32,
                 rollout_steps=16,
@@ -120,8 +127,8 @@ def _build_pricing_world(
             return world
 
         agents_config = [
-            {"mind": mind, "params": _mind_params(mind, seed)},
-            {"mind": mind, "params": _mind_params(mind, seed + 1)},
+            {"mind": mind, "params": _mind_params(mind, seed + agent_id, n_firms=n_firms)}
+            for agent_id in range(n_firms)
         ]
         return build_experiment(
             {
@@ -148,15 +155,15 @@ def _build_pricing_world(
     return institution_world
 
 
-def _mind_params(mind: str, seed: int) -> dict[str, int]:
+def _mind_params(mind: str, seed: int, n_firms: int = 2) -> dict[str, Any]:
     if mind == "q_learning":
-        return {"n_prices": 19, "seed": seed}
+        return {"n_prices": 19, "seed": seed, "state_shape": (19,) * n_firms}
     if mind in {"random", "heuristic_pricing"}:
         return {"n_actions": 19, "seed": seed} if mind == "random" else {"n_actions": 19}
     if mind in {"dqn", "simple_dqn"}:
         return {
             "action_dim": 19,
-            "obs_dim": 38,
+            "obs_dim": 19 * n_firms,
             "hidden_dim": 32,
             "batch_size": 16,
             "min_replay_size": 16,
@@ -166,7 +173,7 @@ def _mind_params(mind: str, seed: int) -> dict[str, int]:
     if mind in {"ppo", "simple_ppo"}:
         return {
             "action_dim": 19,
-            "obs_dim": 38,
+            "obs_dim": 19 * n_firms,
             "hidden_dim": 32,
             "rollout_steps": 16,
             "batch_size": 16,
@@ -177,7 +184,7 @@ def _mind_params(mind: str, seed: int) -> dict[str, int]:
 
 def _policy_action(
     agent: Any,
-    state: tuple[int, int],
+    state: tuple[int, ...],
     epsilon: float | None = None,
     greedy: bool = False,
 ) -> int:
@@ -188,7 +195,7 @@ def _policy_action(
     return int(agent.act(state))
 
 
-def _maybe_update(agent: Any, state: tuple[int, int], action: int, reward: float, next_state: tuple[int, int]) -> None:
+def _maybe_update(agent: Any, state: tuple[int, ...], action: int, reward: float, next_state: tuple[int, ...]) -> None:
     if isinstance(agent, QLearningMind):
         agent.update(state, action, reward, next_state, done=False)
     else:
@@ -197,10 +204,10 @@ def _maybe_update(agent: Any, state: tuple[int, int], action: int, reward: float
 
 def _update_world_agents(
     world: PricingArenaWorld,
-    state: tuple[int, int],
+    state: tuple[int, ...],
     actions: list[int],
     rewards: np.ndarray,
-    next_state: tuple[int, int],
+    next_state: tuple[int, ...],
 ) -> None:
     joint_learner = getattr(world, "joint_learner", None)
     if joint_learner is not None:
@@ -236,23 +243,34 @@ def train_market_with_agents(
     epsilon_min: float = 0.03,
     epsilon_decay: float = 0.99985,
     mind: str = "q_learning",
+    n_firms: int = 2,
 ) -> TrainingRun:
     if steps < 1:
         raise ValueError("steps must be positive")
 
-    world = _build_pricing_world(mechanism=mechanism, seed=seed, mind=mind)
+    world = _build_pricing_world(mechanism=mechanism, seed=seed, mind=mind, n_firms=n_firms)
     config = world.config
-    benchmarks = compute_static_benchmarks(config.price_grid)
+    benchmarks = compute_static_benchmarks(
+        config.price_grid,
+        n_firms=len(config.quality),
+        cost=config.cost,
+        market_size=config.market_size,
+        alpha=config.alpha,
+        tau=config.tau,
+        quality=config.quality,
+    )
     state = world.state
     epsilon = epsilon_start
     records: list[dict[str, float]] = []
 
     for t in range(steps):
-        a1 = _policy_action(world.agents[0], state, epsilon if mind == "q_learning" else None)
-        a2 = _policy_action(world.agents[1], state, epsilon if mind == "q_learning" else None)
-        next_state, rewards, _, info = world.step([a1, a2])
+        actions = [
+            _policy_action(agent, state, epsilon if mind == "q_learning" else None)
+            for agent in world.agents
+        ]
+        next_state, rewards, _, info = world.step(actions)
 
-        _update_world_agents(world, state, [a1, a2], rewards, next_state)
+        _update_world_agents(world, state, actions, rewards, next_state)
 
         state = next_state
         epsilon = max(epsilon_min, epsilon * epsilon_decay)
@@ -264,6 +282,7 @@ def train_market_with_agents(
         benchmarks=benchmarks,
         agent1=world.agents[0],
         agent2=world.agents[1],
+        agents=list(world.agents),
         config=config,
         final_state=state,
         final_epsilon=epsilon,
@@ -278,6 +297,7 @@ def train_market(
     epsilon_min: float = 0.03,
     epsilon_decay: float = 0.99985,
     mind: str = "q_learning",
+    n_firms: int = 2,
 ) -> tuple[dict[str, np.ndarray], dict[str, object]]:
     run = train_market_with_agents(
         mechanism=mechanism,
@@ -287,6 +307,7 @@ def train_market(
         epsilon_min=epsilon_min,
         epsilon_decay=epsilon_decay,
         mind=mind,
+        n_firms=n_firms,
     )
     return run.data, run.benchmarks
 
@@ -299,21 +320,38 @@ def evaluate_policy_pair(
     seed: int = 10_000,
     initial_state: tuple[int, int] | None = None,
 ) -> dict[str, np.ndarray]:
+    return evaluate_policy_profile(
+        [agent1, agent2],
+        mechanism=mechanism,
+        steps=steps,
+        seed=seed,
+        initial_state=initial_state,
+    )
+
+
+def evaluate_policy_profile(
+    agents: list[Any],
+    mechanism: str = "none",
+    steps: int = 5_000,
+    seed: int = 10_000,
+    initial_state: tuple[int, ...] | None = None,
+) -> dict[str, np.ndarray]:
     if steps < 1:
         raise ValueError("steps must be positive")
+    if len(agents) < 2:
+        raise ValueError("at least two pricing agents are required")
 
-    world = _build_pricing_world(mechanism=mechanism, seed=seed, agents=[agent1, agent2])
+    world = _build_pricing_world(mechanism=mechanism, seed=seed, agents=agents)
     if initial_state is not None:
         world.state = initial_state
-    agent1.reset()
-    agent2.reset()
+    for agent in agents:
+        agent.reset()
     state = world.state
     records: list[dict[str, float]] = []
 
     for t in range(steps):
-        a1 = _policy_action(agent1, state, greedy=True)
-        a2 = _policy_action(agent2, state, greedy=True)
-        next_state, _, _, info = world.step([a1, a2])
+        actions = [_policy_action(agent, state, greedy=True) for agent in agents]
+        next_state, _, _, info = world.step(actions)
         state = next_state
         _add_learning_metrics(info, t, 0.0)
         records.append(info)
@@ -331,23 +369,61 @@ def train_adversary_against_frozen_firm1(
     epsilon_decay: float = 0.99985,
     initial_state: tuple[int, int] | None = None,
 ) -> TrainingRun:
+    return train_single_adversary_against_frozen_profile(
+        [frozen_agent1, None],
+        adversary_index=1,
+        mechanism=mechanism,
+        steps=steps,
+        seed=seed,
+        epsilon_start=epsilon_start,
+        epsilon_min=epsilon_min,
+        epsilon_decay=epsilon_decay,
+        initial_state=initial_state,
+    )
+
+
+def train_single_adversary_against_frozen_profile(
+    frozen_agents: list[Any],
+    adversary_index: int,
+    mechanism: str = "none",
+    steps: int = 20_000,
+    seed: int = 20_000,
+    epsilon_start: float = 1.0,
+    epsilon_min: float = 0.03,
+    epsilon_decay: float = 0.99985,
+    initial_state: tuple[int, ...] | None = None,
+) -> TrainingRun:
     if steps < 1:
         raise ValueError("steps must be positive")
+    if len(frozen_agents) < 2:
+        raise ValueError("at least two pricing-agent slots are required")
+    if adversary_index < 0 or adversary_index >= len(frozen_agents):
+        raise ValueError("adversary_index outside frozen profile")
 
-    adversary = QLearningMind(n_prices=19, seed=seed)
-    world = _build_pricing_world(mechanism=mechanism, seed=seed, agents=[frozen_agent1, adversary])
+    adversary = QLearningMind(n_prices=19, seed=seed, state_shape=(19,) * len(frozen_agents))
+    agents = list(frozen_agents)
+    agents[adversary_index] = adversary
+    if any(agent is None for agent in agents):
+        raise ValueError("frozen_agents may contain None only at adversary_index")
+    world = _build_pricing_world(mechanism=mechanism, seed=seed, agents=agents)
     if initial_state is not None:
         world.state = initial_state
-    frozen_agent1.reset()
+    for index, agent in enumerate(agents):
+        if index != adversary_index:
+            agent.reset()
     state = world.state
     epsilon = epsilon_start
     records: list[dict[str, float]] = []
 
     for t in range(steps):
-        a1 = _policy_action(frozen_agent1, state, greedy=True)
-        a2 = adversary.act(state, epsilon=epsilon)
-        next_state, rewards, _, info = world.step([a1, a2])
-        adversary.update(state, a2, float(rewards[1]), next_state, done=False)
+        actions = [
+            int(adversary.act(state, epsilon=epsilon))
+            if index == adversary_index
+            else _policy_action(agent, state, greedy=True)
+            for index, agent in enumerate(agents)
+        ]
+        next_state, rewards, _, info = world.step(actions)
+        adversary.update(state, actions[adversary_index], float(rewards[adversary_index]), next_state, done=False)
 
         state = next_state
         epsilon = max(epsilon_min, epsilon * epsilon_decay)
@@ -357,8 +433,9 @@ def train_adversary_against_frozen_firm1(
     return TrainingRun(
         data=records_to_arrays(records),
         benchmarks=world.benchmarks,
-        agent1=frozen_agent1,
+        agent1=agents[0],
         agent2=adversary,
+        agents=agents,
         config=world.config,
         final_state=state,
         final_epsilon=epsilon,

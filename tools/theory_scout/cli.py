@@ -16,9 +16,21 @@ from .audit_obligations import (
     write_gap_status_report,
 )
 from .build_gap_table import build_gap_rows, write_gap_table, write_theory_obligations
+from .citation_audit import (
+    build_citation_audit,
+    write_citation_audit_csv,
+    write_citation_audit_markdown,
+    write_citation_patch_suggestions,
+)
 from .download_pdfs import download_pdf
 from .extract_text import extract_pdf_text
 from .fill_paper_cards import fill_cards
+from .foundation_papers import (
+    build_foundation_matches,
+    write_foundation_csv,
+    write_foundation_markdown,
+    write_foundation_pdf_queue,
+)
 from .hydrate_texts import hydrate_texts, hydration_summary
 from .http import read_jsonl, write_jsonl
 from .make_paper_cards import make_blank_card
@@ -31,11 +43,18 @@ from .review_outputs import (
     write_coverage_markdown,
     write_csv,
 )
+from .scholar_compare import compare_worksheet
 from .resolve_pdf import resolve_unpaywall_pdf
 from .search_arxiv import search_arxiv
 from .search_openalex import search_openalex
 from .search_semantic_scholar import search_semantic_scholar
 from .secrets import load_env_file, secret_presence
+from .theory_code_audit import (
+    build_theory_code_audit,
+    write_theory_code_audit_csv,
+    write_theory_code_audit_markdown,
+)
+from .world_obligation_bridge import write_world_obligation_bridge
 
 
 WORLD_KEYWORDS = {
@@ -396,6 +415,38 @@ def theory_review_command(args: argparse.Namespace) -> None:
     print(f"[wrote] {args.scholar_csv} ({len(scholar_rows)} rows)")
 
 
+def scholar_compare_command(args: argparse.Namespace) -> None:
+    rows = compare_worksheet(
+        worksheet_path=Path(args.worksheet),
+        out_csv=Path(args.out_csv),
+        out_md=Path(args.out_md),
+        threshold=args.threshold,
+    )
+    statuses: dict[str, int] = {}
+    for row in rows:
+        status = str(row.get("comparison_status") or "")
+        statuses[status] = statuses.get(status, 0) + 1
+    status_text = ", ".join(f"{key}={value}" for key, value in sorted(statuses.items()))
+    print(f"[wrote] {args.out_csv} ({len(rows)} rows; {status_text})")
+    print(f"[wrote] {args.out_md}")
+
+
+def foundation_papers_command(args: argparse.Namespace) -> None:
+    rows = build_foundation_matches(
+        records_path=Path(args.records),
+        text_dir=Path(args.text_dir),
+    )
+    write_foundation_csv(rows, Path(args.out_csv))
+    write_foundation_markdown(rows, Path(args.out_md))
+    write_foundation_pdf_queue(rows, Path(args.pdf_queue_csv))
+    ready = sum(1 for row in rows if row.manual_action == "ready_for_llm")
+    needs_pdf = len(rows) - ready
+    not_found = sum(1 for row in rows if row.cache_status == "not_found_in_cache")
+    print(f"[wrote] {args.out_csv} ({len(rows)} rows; ready={ready}, needs_pdf_or_text={needs_pdf}, not_found={not_found})")
+    print(f"[wrote] {args.out_md}")
+    print(f"[wrote] {args.pdf_queue_csv}")
+
+
 def audit_obligations_command(args: argparse.Namespace) -> None:
     rows = audit_obligations(
         repo_root=Path(args.repo_root),
@@ -420,6 +471,61 @@ def audit_obligations_command(args: argparse.Namespace) -> None:
     )
     if args.fail_on_missing and status_counts.get("missing", 0):
         raise SystemExit("obligation audit has missing rows")
+
+
+def world_obligation_bridge_command(args: argparse.Namespace) -> None:
+    text = write_world_obligation_bridge(
+        cards_dir=Path(args.cards_dir),
+        theory_gap_report=Path(args.theory_gap_report),
+        novelty_gap_table=Path(args.novelty_gap_table),
+        out_path=Path(args.out_md),
+    )
+    worlds = sum(1 for line in text.splitlines() if line.startswith("## "))
+    print(f"[wrote] {args.out_md} ({worlds} worlds)")
+
+
+def theory_code_audit_command(args: argparse.Namespace) -> None:
+    rows = build_theory_code_audit(Path(args.repo_root))
+    write_theory_code_audit_csv(rows, Path(args.out_csv))
+    write_theory_code_audit_markdown(rows, Path(args.out_md))
+    counts = {
+        status: sum(1 for row in rows if row.status == status)
+        for status in ("pass", "partial", "missing")
+    }
+    print(f"[wrote] {args.out_csv} ({len(rows)} rows)")
+    print(f"[wrote] {args.out_md}")
+    print("[theory-code] " + ", ".join(f"{key}={value}" for key, value in counts.items()))
+    if args.fail_on_action and any(
+        row.status != "pass"
+        and row.rerun_required not in {"no", "optional_before_spatial_claim"}
+        for row in rows
+    ):
+        raise SystemExit("theory-code audit has required rerun/rebuild actions")
+
+
+def citation_audit_command(args: argparse.Namespace) -> None:
+    rows = build_citation_audit(
+        repo_root=Path(args.repo_root),
+        tex_path=Path(args.tex),
+        bib_path=Path(args.bib),
+    )
+    write_citation_audit_csv(rows, Path(args.out_csv))
+    write_citation_audit_markdown(rows, Path(args.out_md))
+    write_citation_patch_suggestions(rows, Path(args.patch_md))
+    counts = {
+        status: sum(1 for row in rows if row.status == status)
+        for status in sorted({row.status for row in rows})
+    }
+    print(f"[wrote] {args.out_csv} ({len(rows)} rows)")
+    print(f"[wrote] {args.out_md}")
+    print(f"[wrote] {args.patch_md}")
+    print("[citation-audit] " + ", ".join(f"{key}={value}" for key, value in counts.items()))
+    if args.fail_on_needs_work and any(
+        row.status
+        in {"needs_citation", "needs_artifact", "citation_key_missing", "manual_verify"}
+        for row in rows
+    ):
+        raise SystemExit("citation audit has claims needing citation/artifact/manual review")
 
 
 def full_command(args: argparse.Namespace) -> None:
@@ -454,6 +560,7 @@ def full_command(args: argparse.Namespace) -> None:
             "gap_table": str(out_dir / "novelty_gap_table.csv"),
             "obligations": str(out_dir / "theory_obligations.md"),
             "obligation_audit": str(out_dir / "obligation_audit.md"),
+            "theory_code_audit": str(out_dir / "theory_code_audit.md"),
         },
     }
 
@@ -540,6 +647,14 @@ def full_command(args: argparse.Namespace) -> None:
             out_md=str(out_dir / "obligation_audit.md"),
             no_card_obligations=False,
             fail_on_missing=False,
+        )
+    )
+    theory_code_audit_command(
+        argparse.Namespace(
+            repo_root=".",
+            out_csv=str(out_dir / "theory_code_audit.csv"),
+            out_md=str(out_dir / "theory_code_audit.md"),
+            fail_on_action=False,
         )
     )
     theory_review_command(
@@ -644,8 +759,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     fill.add_argument("--force", action="store_true", help="Overwrite cards that no longer contain TODOs.")
     fill.add_argument("--dry-run", action="store_true")
-    fill.add_argument("--num-predict", type=int, default=900)
-    fill.add_argument("--num-ctx", type=int, default=4096)
+    fill.add_argument("--num-predict", type=int, default=1400)
+    fill.add_argument("--num-ctx", type=int, default=8192)
     fill.add_argument("--num-thread", type=int, default=None)
     fill.add_argument("--out-manifest", default="literature/card_fill_manifest.json")
     fill.set_defaults(func=fill_cards_command)
@@ -707,6 +822,73 @@ def build_parser() -> argparse.ArgumentParser:
     review.add_argument("--scholar-top-n", type=int, default=10)
     review.set_defaults(func=theory_review_command)
 
+    scholar_compare = subparsers.add_parser(
+        "scholar-compare",
+        help="compare manual Google Scholar top-title entries against API top-title results",
+    )
+    scholar_compare.add_argument(
+        "--worksheet",
+        default="literature/scholar_comparison_worksheet.csv",
+        help="CSV produced by `review`; fill `scholar_top_titles_manual` before comparison.",
+    )
+    scholar_compare.add_argument("--out-csv", default="literature/scholar_comparison_report.csv")
+    scholar_compare.add_argument("--out-md", default="literature/scholar_comparison_report.md")
+    scholar_compare.add_argument(
+        "--threshold",
+        type=float,
+        default=0.72,
+        help="Token-overlap threshold for matching a Scholar title to an API title.",
+    )
+    scholar_compare.set_defaults(func=scholar_compare_command)
+
+    foundation = subparsers.add_parser(
+        "foundation-papers",
+        help="write a simplified curated foundation-paper list and PDF queue",
+    )
+    foundation.add_argument("--records", default="literature/papers_ranked.csv")
+    foundation.add_argument("--text-dir", default="literature/text")
+    foundation.add_argument("--out-csv", default="literature/foundation_papers.csv")
+    foundation.add_argument("--out-md", default="literature/foundation_papers.md")
+    foundation.add_argument("--pdf-queue-csv", default="literature/foundation_pdf_queue.csv")
+    foundation.set_defaults(func=foundation_papers_command)
+
+    bridge = subparsers.add_parser(
+        "world-obligation-bridge",
+        help="write the six-question theory-to-results bridge used for paper drafting",
+    )
+    bridge.add_argument("--cards-dir", default="literature/foundation_paper_cards")
+    bridge.add_argument("--theory-gap-report", default="literature/theory_gap_report.csv")
+    bridge.add_argument("--novelty-gap-table", default="literature/novelty_gap_table.csv")
+    bridge.add_argument("--out-md", default="paper/theory_obligations_by_world.generated.md")
+    bridge.set_defaults(func=world_obligation_bridge_command)
+
+    theory_code = subparsers.add_parser(
+        "theory-code-audit",
+        help="write the theory-to-code decision audit: patch/rerun/write gates by world",
+    )
+    theory_code.add_argument("--repo-root", default=".")
+    theory_code.add_argument("--out-csv", default="literature/theory_code_audit.csv")
+    theory_code.add_argument("--out-md", default="literature/theory_code_audit.md")
+    theory_code.add_argument(
+        "--fail-on-action",
+        action="store_true",
+        help="Exit nonzero when a non-optional rerun/rebuild gate is not passing.",
+    )
+    theory_code.set_defaults(func=theory_code_audit_command)
+
+    citation_audit = subparsers.add_parser(
+        "citation-audit",
+        help="audit paper claims for citation, output-artifact, and manual-review support",
+    )
+    citation_audit.add_argument("--repo-root", default=".")
+    citation_audit.add_argument("--tex", default="paper/main.tex")
+    citation_audit.add_argument("--bib", default="paper/references.bib")
+    citation_audit.add_argument("--out-csv", default="paper/citation_audit.csv")
+    citation_audit.add_argument("--out-md", default="paper/citation_audit.md")
+    citation_audit.add_argument("--patch-md", default="paper/main_citation_patches.md")
+    citation_audit.add_argument("--fail-on-needs-work", action="store_true")
+    citation_audit.set_defaults(func=citation_audit_command)
+
     full = subparsers.add_parser("full", help="run the overnight metadata scout pipeline")
     full.add_argument("--queries", default="literature/queries.yaml")
     full.add_argument("--out-dir", default="literature")
@@ -737,8 +919,8 @@ def build_parser() -> argparse.ArgumentParser:
     full.add_argument("--force-fill", action="store_true")
     full.add_argument("--ollama-url", default=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"))
     full.add_argument("--model", default=os.getenv("THEORY_SCOUT_LLM_MODEL", "llama3.2:3b"))
-    full.add_argument("--num-predict", type=int, default=900)
-    full.add_argument("--num-ctx", type=int, default=4096)
+    full.add_argument("--num-predict", type=int, default=1400)
+    full.add_argument("--num-ctx", type=int, default=8192)
     full.add_argument("--num-thread", type=int, default=None)
     full.add_argument("--require-semantic", action="store_true")
     full.set_defaults(func=full_command)

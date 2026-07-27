@@ -1,0 +1,332 @@
+[
+  {
+    "card_path": "literature/foundation_paper_cards/1992_q_learning.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.1036583744607986,
+    "source_basis": "text:literature/text/manual/cross_world_methods__1992__q_learning.txt",
+    "title": "Q-learning",
+    "validation_errors": [],
+    "world": "cross_world_methods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2015_human_level_control_through_deep_reinforcement_learning.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 1.9625960021575017,
+    "source_basis": "text:literature/text/manual/cross_world_methods__2015__human_level_control_through_deep_reinforcement_learning.txt",
+    "title": "Human-level control through deep reinforcement learning",
+    "validation_errors": [],
+    "world": "cross_world_methods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2017_proximal_policy_optimization_algorithms.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 1.930975713487171,
+    "source_basis": "text:literature/text/manual/cross_world_methods__2017__proximal_policy_optimization_algorithms.txt",
+    "title": "Proximal Policy Optimization Algorithms",
+    "validation_errors": [],
+    "world": "cross_world_methods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1993_multi_agent_reinforcement_learning_independent_versus_cooperative_agents.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 1.928147473014055,
+    "source_basis": "text:literature/text/manual/cross_world_methods__1993__multi_agent_reinforcement_learning_independent_versus_cooperative_agents.txt",
+    "title": "Multi-Agent Reinforcement Learning: Independent versus Cooperative Agents",
+    "validation_errors": [],
+    "world": "cross_world_methods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2017_multi_agent_actor_critic_for_mixed_cooperative_competitive_environments.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 1.9800157704144261,
+    "source_basis": "text:literature/text/manual/cross_world_methods__2017__multi_agent_actor_critic_for_mixed_cooperative_competitive_environments.txt",
+    "title": "Multi-Agent Actor-Critic for Mixed Cooperative-Competitive Environments",
+    "validation_errors": [],
+    "world": "cross_world_methods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1988_the_theory_of_industrial_organization.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.30803549993841,
+    "source_basis": "text:literature/text/manual/pricing_arena__1988__the_theory_of_industrial_organization.txt",
+    "title": "The Theory of Industrial Organization",
+    "validation_errors": [],
+    "world": "pricing_arena"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2020_artificial_intelligence_algorithmic_pricing_and_collusion.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.2050360353486194,
+    "source_basis": "text:literature/text/2020_artificial_intelligence_algorithmic_pricing_and_collusion.txt",
+    "title": "Artificial Intelligence, Algorithmic Pricing, and Collusion",
+    "validation_errors": [],
+    "world": "pricing_arena"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2021_algorithmic_collusion_with_imperfect_monitoring.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.245481994235985,
+    "source_basis": "text:literature/text/manual/pricing_arena__2021__algorithmic_collusion_with_imperfect_monitoring.txt",
+    "title": "Algorithmic collusion with imperfect monitoring",
+    "validation_errors": [],
+    "world": "pricing_arena"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2022_artificial_intelligence_algorithm_design_and_pricing.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.5071139680819576,
+    "source_basis": "text:literature/text/manual/pricing_arena__2022__artificial_intelligence_algorithm_design_and_pricing.txt",
+    "title": "Artificial Intelligence, Algorithm Design, and Pricing",
+    "validation_errors": [],
+    "world": "pricing_arena"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2021_autonomous_algorithmic_collusion_q_learning_under_sequential_pricing.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.259776032705382,
+    "source_basis": "text:literature/text/manual/pricing_arena__2021__autonomous_algorithmic_collusion_q_learning_under_sequential_pricing.txt",
+    "title": "Autonomous algorithmic collusion: Q-learning under sequential pricing",
+    "validation_errors": [],
+    "world": "pricing_arena"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2024_algorithmic_collusion_in_dynamic_pricing_with_deep_reinforcement_learning.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.3261248221432718,
+    "source_basis": "text:literature/text/manual/pricing_arena__2024__algorithmic_collusion_in_dynamic_pricing_with_deep_reinforcement_learning.txt",
+    "title": "Algorithmic Collusion in Dynamic Pricing with Deep Reinforcement Learning",
+    "validation_errors": [],
+    "world": "pricing_arena"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1961_counterspeculation_auctions_and_competitive_sealed_tenders.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 1.8907862724814868,
+    "source_basis": "text:literature/text/manual/auction_house__1961__counterspeculation_auctions_and_competitive_sealed_tenders.txt",
+    "title": "Counterspeculation, Auctions, and Competitive Sealed Tenders",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1981_optimal_auction_design.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.1768821143380617,
+    "source_basis": "text:literature/text/manual/auction_house__1981__optimal_auction_design.txt",
+    "title": "Optimal Auction Design",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2019_optimal_auctions_through_deep_learning.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 1.966149955614648,
+    "source_basis": "text:literature/text/2019_optimal_auctions_through_deep_learning.txt",
+    "title": "Optimal auctions through deep learning",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2022_artificial_intelligence_and_auction_design.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.3800154482042712,
+    "source_basis": "text:literature/text/manual/auction_house__2022__artificial_intelligence_and_auction_design.txt",
+    "title": "Artificial Intelligence and Auction Design",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2020_learning_in_repeated_auctions.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.0806577868682496,
+    "source_basis": "text:literature/text/2020_learning_in_repeated_auctions.txt",
+    "title": "Learning in repeated auctions",
+    "validation_errors": [],
+    "world": "auction_house"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1954_the_pure_theory_of_public_expenditure.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.1408687098726564,
+    "source_basis": "text:literature/text/manual/public_goods__1954__the_pure_theory_of_public_expenditure.txt",
+    "title": "The Pure Theory of Public Expenditure",
+    "validation_errors": [],
+    "world": "public_goods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1965_the_logic_of_collective_action.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.1197816300908756,
+    "source_basis": "text:literature/text/manual/public_goods__1965__the_logic_of_collective_action.txt",
+    "title": "The Logic of Collective Action",
+    "validation_errors": [],
+    "world": "public_goods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2000_cooperation_and_punishment_in_public_goods_experiments.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.159992159730784,
+    "source_basis": "text:literature/text/manual/public_goods__2000__cooperation_and_punishment_in_public_goods_experiments.txt",
+    "title": "Cooperation and Punishment in Public Goods Experiments",
+    "validation_errors": [],
+    "world": "public_goods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2000_conditional_cooperation_and_voluntary_contributions_to_public_goods.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.605199603573989,
+    "source_basis": "text:literature/text/manual/public_goods__2000__conditional_cooperation_and_voluntary_contributions_to_public_goods.txt",
+    "title": "Conditional Cooperation and Voluntary Contributions to Public Goods",
+    "validation_errors": [],
+    "world": "public_goods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2007_the_effect_of_rewards_and_sanctions_in_provision_of_public_goods.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.5007774428226326,
+    "source_basis": "text:literature/text/2007_the_effect_of_rewards_and_sanctions_in_provision_of_public_goods.txt",
+    "title": "The Effect of Rewards and Sanctions in Provision of Public Goods",
+    "validation_errors": [],
+    "world": "public_goods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2011_cooperation_and_contagion_in_web_based_networked_public_goods_experiments.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.1411226845350044,
+    "source_basis": "text:literature/text/manual/public_goods__2011__cooperation_and_contagion_in_web_based_networked_public_goods_experiments.txt",
+    "title": "Cooperation and Contagion in Web-Based, Networked Public Goods Experiments",
+    "validation_errors": [],
+    "world": "public_goods"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1968_the_tragedy_of_the_commons.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.5435559135007355,
+    "source_basis": "text:literature/text/manual/resource_island__1968__the_tragedy_of_the_commons.txt",
+    "title": "The Tragedy of the Commons",
+    "validation_errors": [],
+    "world": "resource_island"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1990_governing_the_commons.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.2434376488358985,
+    "source_basis": "text:literature/text/manual/resource_island__1990__governing_the_commons.txt",
+    "title": "Governing the Commons",
+    "validation_errors": [],
+    "world": "resource_island"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2010_a_review_of_design_principles_for_community_based_natural_resource_management.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.2298795130068707,
+    "source_basis": "text:literature/text/2010_a_review_of_design_principles_for_community_based_natural_resource_management.txt",
+    "title": "A Review of Design Principles for Community-based Natural Resource Management",
+    "validation_errors": [],
+    "world": "resource_island"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2017_multi_agent_reinforcement_learning_in_sequential_social_dilemmas.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.3855009265450318,
+    "source_basis": "text:literature/text/manual/resource_island__2017__multi_agent_reinforcement_learning_in_sequential_social_dilemmas.txt",
+    "title": "Multi-agent Reinforcement Learning in Sequential Social Dilemmas",
+    "validation_errors": [],
+    "world": "resource_island"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2018_inequity_aversion_improves_cooperation_in_intertemporal_social_dilemmas.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.2917880076284525,
+    "source_basis": "text:literature/text/manual/resource_island__2018__inequity_aversion_improves_cooperation_in_intertemporal_social_dilemmas.txt",
+    "title": "Inequity aversion improves cooperation in intertemporal social dilemmas",
+    "validation_errors": [],
+    "world": "resource_island"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2021_scalable_evaluation_of_multi_agent_reinforcement_learning_with_melting_pot.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.3523682104457477,
+    "source_basis": "text:literature/text/manual/resource_island__2021__scalable_evaluation_of_multi_agent_reinforcement_learning_with_melting_pot.txt",
+    "title": "Scalable Evaluation of Multi-Agent Reinforcement Learning with Melting Pot",
+    "validation_errors": [],
+    "world": "resource_island"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1962_college_admissions_and_the_stability_of_marriage.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 1.9034335764761148,
+    "source_basis": "text:literature/text/manual/labor_market__1962__college_admissions_and_the_stability_of_marriage.txt",
+    "title": "College Admissions and the Stability of Marriage",
+    "validation_errors": [],
+    "world": "labor_market"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/1982_the_economics_of_matching_stability_and_incentives.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.2116563651199828,
+    "source_basis": "text:literature/text/manual/labor_market__1982__the_economics_of_matching_stability_and_incentives.txt",
+    "title": "The Economics of Matching: Stability and Incentives",
+    "validation_errors": [],
+    "world": "labor_market"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2006_changing_the_boston_school_choice_mechanism.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.2170635480823355,
+    "source_basis": "text:literature/text/2006_changing_the_boston_school_choice_mechanism.txt",
+    "title": "Changing the Boston School Choice Mechanism",
+    "validation_errors": [],
+    "world": "labor_market"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2007_deferred_acceptance_algorithms_history_theory_practice_and_open_questions.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.2975258273136188,
+    "source_basis": "text:literature/text/2007_deferred_acceptance_algorithms_history_theory_practice_and_open_questions.txt",
+    "title": "Deferred Acceptance Algorithms: History, Theory, Practice, and Open Questions",
+    "validation_errors": [],
+    "world": "labor_market"
+  },
+  {
+    "card_path": "literature/foundation_paper_cards/2022_learn_to_match_with_no_regret_reinforcement_learning_in_markov_matching_markets.md",
+    "changed": true,
+    "model": "qwen3:8b",
+    "output_tokens_per_second": 2.2934839307536365,
+    "source_basis": "text:literature/text/manual/labor_market__2022__learn_to_match_with_no_regret_reinforcement_learning_in_markov_matching_markets.txt",
+    "title": "Learn to Match with No Regret: Reinforcement Learning in Markov Matching Markets",
+    "validation_errors": [],
+    "world": "labor_market"
+  }
+]

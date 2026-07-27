@@ -34,7 +34,7 @@ class OllamaClient:
         self,
         base_url: str = DEFAULT_OLLAMA_URL,
         *,
-        timeout_seconds: int = 240,
+        timeout_seconds: int = 900,
         opener: Callable[[urllib.request.Request, int], Any] | None = None,
     ) -> None:
         self.base_url = base_url.rstrip("/")

@@ -27,7 +27,7 @@ class AntiCollusion(Institution):
         penalties = np.asarray(out.get("penalties", np.zeros_like(prices)), dtype=float).copy()
         rewards = np.asarray(out["rewards"], dtype=float).copy()
         both_high = float(np.mean(prices)) >= self.collusion_threshold
-        close_prices = abs(float(prices[0] - prices[1])) <= self.collusion_window
+        close_prices = float(np.max(prices) - np.min(prices)) <= self.collusion_window
         if both_high and close_prices:
             penalties[:] += self.collusion_penalty
             rewards[:] -= self.collusion_penalty

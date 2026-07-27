@@ -36,15 +36,26 @@ class PricingArenaWorld(World):
         self.config = config
         self.institution = institution if institution is not None else NoInstitution()
         self.rng = np.random.default_rng(0 if seed is None else seed)
-        self.benchmarks = compute_static_benchmarks(self.config.price_grid)
+        self.n_firms = int(len(np.asarray(self.config.quality, dtype=float)))
+        if self.n_firms < 2:
+            raise ValueError("PricingArenaWorld requires at least two firms")
+        self.benchmarks = compute_static_benchmarks(
+            self.config.price_grid,
+            n_firms=self.n_firms,
+            cost=self.config.cost,
+            market_size=self.config.market_size,
+            alpha=self.config.alpha,
+            tau=self.config.tau,
+            quality=np.asarray(self.config.quality, dtype=float),
+        )
         self.n_prices = len(self.config.price_grid)
-        self.state = (self.n_prices // 2, self.n_prices // 2)
+        self.state = tuple(self.n_prices // 2 for _ in range(self.n_firms))
         self.step_idx = 0
         self.history: list[dict[str, float]] = []
 
-    def reset(self) -> tuple[int, int]:
+    def reset(self) -> tuple[int, ...]:
         self.rng = np.random.default_rng(0 if self.seed is None else self.seed)
-        self.state = (self.n_prices // 2, self.n_prices // 2)
+        self.state = tuple(self.n_prices // 2 for _ in range(self.n_firms))
         self.step_idx = 0
         self.history = []
         if self.institution is not None:
@@ -68,10 +79,10 @@ class PricingArenaWorld(World):
         logits = np.concatenate(([0.0], utilities)) / self.config.tau
         return float(size * (self.config.tau / self.config.alpha) * logsumexp(logits))
 
-    def step(self, actions: list[Any]) -> tuple[tuple[int, int], np.ndarray, bool, dict[str, Any]]:
-        if len(actions) != 2:
-            raise ValueError("PricingArenaWorld expects exactly two firm actions")
-        action_pair = (int(actions[0]), int(actions[1]))
+    def step(self, actions: list[Any]) -> tuple[tuple[int, ...], np.ndarray, bool, dict[str, Any]]:
+        if len(actions) != self.n_firms:
+            raise ValueError(f"PricingArenaWorld expects {self.n_firms} firm actions")
+        action_pair = tuple(int(action) for action in actions)
         raw_prices = self.config.price_grid[np.array(action_pair, dtype=int)]
         prices = raw_prices.copy()
         market_size = self.config.market_size
@@ -91,7 +102,7 @@ class PricingArenaWorld(World):
 
         quantities = self.demand(prices, market_size=market_size)
         profits = (prices - self.config.cost) * quantities
-        penalties = np.zeros(2)
+        penalties = np.zeros_like(prices, dtype=float)
         rewards = profits.copy()
 
         post_state = {
@@ -117,24 +128,26 @@ class PricingArenaWorld(World):
         welfare = float(np.sum(profits) + consumer_surplus)
         next_state = tuple(int(i) for i in action_pair)
         info = {
-            "p1": float(prices[0]),
-            "p2": float(prices[1]),
-            "raw_p1": float(raw_prices[0]),
-            "raw_p2": float(raw_prices[1]),
             "avg_price": float(np.mean(prices)),
-            "quantity1": float(quantities[0]),
-            "quantity2": float(quantities[1]),
-            "profit1": float(profits[0]),
-            "profit2": float(profits[1]),
-            "reward1": float(rewards[0]),
-            "reward2": float(rewards[1]),
+            "price_dispersion": float(abs(prices[0] - prices[1])) if self.n_firms == 2 else float(np.std(prices)),
+            "profit_total": float(np.sum(profits)),
+            "reward_total": float(np.sum(rewards)),
+            "quantity_total": float(np.sum(quantities)),
+            "penalty_total": float(np.sum(penalties)),
             "consumer_surplus": consumer_surplus,
             "welfare": welfare,
-            "penalty1": float(penalties[0]),
-            "penalty2": float(penalties[1]),
             "market_size": float(market_size),
             "audit_hit": audit_hit,
+            "n_firms": float(self.n_firms),
         }
+        for index in range(self.n_firms):
+            suffix = index + 1
+            info[f"p{suffix}"] = float(prices[index])
+            info[f"raw_p{suffix}"] = float(raw_prices[index])
+            info[f"quantity{suffix}"] = float(quantities[index])
+            info[f"profit{suffix}"] = float(profits[index])
+            info[f"reward{suffix}"] = float(rewards[index])
+            info[f"penalty{suffix}"] = float(penalties[index])
         info["step"] = float(self.step_idx)
         info["collusion_index"] = collusion_index(
             info["avg_price"],

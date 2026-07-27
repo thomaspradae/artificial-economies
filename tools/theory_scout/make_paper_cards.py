@@ -18,6 +18,10 @@ CARD_SECTIONS = [
     "What they do NOT test",
     "What we need to reproduce",
     "How our project differs",
+    "Implementation obligations",
+    "Metrics to compare in our repo",
+    "Failure modes to audit",
+    "Project code comparison",
 ]
 
 

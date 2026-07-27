@@ -8,6 +8,7 @@ from typing import Any, Callable, Iterable
 
 from .http import read_jsonl
 from .make_paper_cards import CARD_SECTIONS, make_blank_card, slugify
+from .obligation_templates import apply_obligation_template
 from .ollama_client import DEFAULT_OLLAMA_URL, OllamaClient, extract_json_object
 
 
@@ -30,6 +31,10 @@ MODEL_KEYS = {
     "What they do NOT test": "what_they_do_not_test",
     "What we need to reproduce": "what_we_need_to_reproduce",
     "How our project differs": "how_our_project_differs",
+    "Implementation obligations": "implementation_obligations",
+    "Metrics to compare in our repo": "metrics_to_compare_in_our_repo",
+    "Failure modes to audit": "failure_modes_to_audit",
+    "Project code comparison": "project_code_comparison",
 }
 
 REQUIRED_MODEL_KEYS = list(MODEL_KEYS.values()) + [
@@ -76,6 +81,10 @@ def _stringify(value: Any) -> str:
     return text or NOT_STATED
 
 
+def _blankish(value: Any) -> bool:
+    return _stringify(value).strip().lower() == NOT_STATED.lower()
+
+
 def _validate_fields(fields: dict[str, Any]) -> list[str]:
     errors = []
     for key in REQUIRED_MODEL_KEYS:
@@ -84,6 +93,45 @@ def _validate_fields(fields: dict[str, Any]) -> list[str]:
         elif not _stringify(fields[key]):
             errors.append(f"blank key: {key}")
     return errors
+
+
+def _apply_metadata_defaults(fields: dict[str, Any], record: dict[str, Any], source_context: str) -> None:
+    if "paper" not in fields or _blankish(fields.get("paper")):
+        fields["paper"] = record.get("title") or NOT_STATED
+    if "world" not in fields or _blankish(fields.get("world")):
+        fields["world"] = record.get("world") or NOT_STATED
+    if "source_evidence" not in fields or _evidence_needs_fallback(_stringify(fields.get("source_evidence"))):
+        fields["source_evidence"] = _evidence_excerpt(source_context)
+    if "confidence" not in fields or _blankish(fields.get("confidence")):
+        fields["confidence"] = "low"
+    if "what_they_do_not_test" not in fields or _blankish(fields.get("what_they_do_not_test")):
+        fields["what_they_do_not_test"] = NOT_STATED
+    if "implementation_obligations" not in fields or _blankish(fields.get("implementation_obligations")):
+        obligation = record.get("theory_obligation") or NOT_STATED
+        fields["implementation_obligations"] = obligation
+    if "metrics_to_compare_in_our_repo" not in fields or _blankish(fields.get("metrics_to_compare_in_our_repo")):
+        check = record.get("code_result_check") or NOT_STATED
+        fields["metrics_to_compare_in_our_repo"] = check
+    if "failure_modes_to_audit" not in fields or _blankish(fields.get("failure_modes_to_audit")):
+        fields["failure_modes_to_audit"] = (
+            "Implementation may reproduce the label of the method without reproducing the paper's "
+            "core benchmark, metric, or validation protocol."
+        )
+    if "project_code_comparison" not in fields or _blankish(fields.get("project_code_comparison")):
+        check = record.get("code_result_check") or NOT_STATED
+        obligation = record.get("theory_obligation") or NOT_STATED
+        fields["project_code_comparison"] = (
+            f"Compare the paper obligation against this repo evidence: {check}. "
+            f"The relevant obligation is: {obligation}."
+        )
+    if str(record.get("world") or "") == "cross_world_methods":
+        reproduce = _stringify(fields.get("what_we_need_to_reproduce"))
+        if any(term in reproduce.lower() for term in ("atari", "mujoco", "robotic", "benchmark tasks")):
+            fields["what_we_need_to_reproduce"] = (
+                f"Inside this repo, reproduce the method-level obligation rather than the original benchmark suite: "
+                f"{record.get('theory_obligation') or NOT_STATED} Evidence should come from {record.get('code_result_check') or NOT_STATED}."
+            )
+    apply_obligation_template(fields, record)
 
 
 def _evidence_excerpt(source_context: str, max_chars: int = 700) -> str:
@@ -115,28 +163,159 @@ def _record_card_path(record: dict[str, Any], cards_dir: Path) -> Path:
 def _text_candidates(record: dict[str, Any], text_dir: Path) -> list[Path]:
     title = record.get("title") or "Untitled"
     year = record.get("year") or "unknown"
+    world = str(record.get("world") or "").strip()
     stem = f"{year}_{slugify(title)}"
     candidates = [
         text_dir / f"{stem}.txt",
         text_dir / f"{slugify(title)}.txt",
     ]
+    if world:
+        candidates.extend(
+            [
+                text_dir / "manual" / f"{world}__{year}__{slugify(title)}.txt",
+                text_dir / "manual" / f"{world}__{slugify(title)}.txt",
+            ]
+        )
+    candidates.extend(
+        [
+            text_dir / "manual" / f"{stem}.txt",
+            text_dir / "manual" / f"{slugify(title)}.txt",
+        ]
+    )
     candidates.extend(sorted(text_dir.glob(f"{stem}*.txt")))
+    candidates.extend(sorted((text_dir / "manual").glob(f"*{slugify(title)}*.txt")))
     source_id = str(record.get("source_id") or "")
     if source_id:
         candidates.append(text_dir / f"{slugify(source_id)}.txt")
     return candidates
 
 
+def _context_keywords(record: dict[str, Any]) -> list[str]:
+    fields = [
+        "title",
+        "role",
+        "mind",
+        "institution",
+        "why_it_matters",
+        "theory_obligation",
+        "code_result_check",
+    ]
+    text = " ".join(str(record.get(field) or "") for field in fields).lower()
+    generic = [
+        "algorithm",
+        "objective",
+        "benchmark",
+        "metric",
+        "experiment",
+        "result",
+        "evaluation",
+        "regret",
+        "welfare",
+        "collusion",
+        "stability",
+        "truthful",
+        "contribution",
+        "sustainability",
+        "theorem",
+        "proof",
+        "limitation",
+    ]
+    method = []
+    if "ppo" in text or "proximal policy" in text:
+        method.extend(
+            [
+                "clipped surrogate",
+                "probability ratio",
+                "advantage",
+                "value function",
+                "entropy",
+                "minibatch",
+                "epochs",
+                "atari",
+                "mujoco",
+            ]
+        )
+    if "dqn" in text or "deep q" in text:
+        method.extend(["replay", "target network", "q-learning", "td error", "atari"])
+    if "auction" in text:
+        method.extend(["incentive", "regret", "revenue", "efficiency", "truthful"])
+    return method + generic
+
+
+def _source_selection(text: str, record: dict[str, Any], max_chars: int) -> str:
+    clean = "\n".join(line.rstrip() for line in text.splitlines())
+    if len(clean) <= max_chars:
+        return clean
+    chunks: list[str] = []
+    head_chars = min(4500, max_chars // 2)
+    chunks.append(clean[:head_chars])
+    remaining = max_chars - sum(len(chunk) for chunk in chunks) - 200
+    seen_ranges: list[tuple[int, int]] = [(0, head_chars)]
+    lower = clean.lower()
+    for keyword in _context_keywords(record):
+        if remaining <= 0:
+            break
+        idx = lower.find(keyword.lower())
+        if idx < 0:
+            continue
+        start = max(0, idx - 900)
+        end = min(len(clean), idx + 1700)
+        if any(abs(start - old_start) < 500 or (start < old_end and end > old_start) for old_start, old_end in seen_ranges):
+            continue
+        snippet = clean[start:end]
+        if len(snippet) > remaining:
+            snippet = snippet[:remaining]
+        chunks.append(f"\n\n--- Targeted excerpt around `{keyword}` ---\n\n{snippet}")
+        seen_ranges.append((start, end))
+        remaining = max_chars - sum(len(chunk) for chunk in chunks) - 200
+    return "\n".join(chunks)[:max_chars]
+
+
+def _repo_code_context(record: dict[str, Any], *, repo_root: Path | None = None, max_chars: int = 5000) -> str:
+    repo_root = repo_root or Path(".")
+    check = str(record.get("code_result_check") or "")
+    chunks: list[str] = []
+    remaining = max_chars
+    for part in check.split(";"):
+        candidate = part.strip()
+        if not candidate:
+            continue
+        path_text = candidate.split()[0].strip("`.,")
+        path = repo_root / path_text
+        if not path.exists() or not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        lines = text.splitlines()
+        needles = _context_keywords(record)
+        selected: list[str] = []
+        for i, line in enumerate(lines, start=1):
+            lower = line.lower()
+            if any(needle.lower() in lower for needle in needles) or line.startswith(("class ", "def ", "    def ")):
+                start = max(1, i - 2)
+                end = min(len(lines), i + 8)
+                selected.extend(f"{j}: {lines[j-1]}" for j in range(start, end + 1))
+                selected.append("")
+        snippet = "\n".join(selected[:220]) if selected else "\n".join(lines[:120])
+        block = f"\n\n--- Repo code excerpt: {path_text} ---\n\n{snippet}"
+        if len(block) > remaining:
+            block = block[:remaining]
+        chunks.append(block)
+        remaining -= len(block)
+        if remaining <= 0:
+            break
+    return "\n".join(chunks).strip()
+
+
 def source_context_for_record(
     record: dict[str, Any],
     *,
     text_dir: Path,
-    max_chars: int = 7000,
+    max_chars: int = 12000,
 ) -> tuple[str, str]:
     for path in _text_candidates(record, text_dir):
         if path.exists() and path.stat().st_size > 200:
             text = path.read_text(encoding="utf-8", errors="replace")
-            return text[:max_chars], f"text:{path}"
+            return _source_selection(text, record, max_chars), f"text:{path}"
     abstract = str(record.get("abstract") or "").strip()
     if abstract:
         return abstract[:max_chars], "abstract"
@@ -155,14 +334,64 @@ def source_context_for_record(
 
 def build_extraction_prompt(record: dict[str, Any], source_context: str, source_basis: str) -> tuple[str, str]:
     system = (
-        "You are a conservative literature extraction engine. "
+        "You are a conservative paper-to-code audit engine. "
         "Use only the supplied metadata/text. Do not use outside knowledge. "
         "If a field is not stated, write exactly 'Not stated in supplied text.' "
+        "Prefer concrete obligations, metrics, and code checks over broad summary. "
         "Return only valid compact JSON. No markdown and no prose."
     )
     user = {
         "task": "Fill a strict paper card for an economics/learning-agents thesis.",
         "required_json_keys": REQUIRED_MODEL_KEYS,
+        "field_rules": {
+            "paper": "Paper title only.",
+            "world": "Use the supplied project world label exactly.",
+            "institution": (
+                "Economic/regulatory/mechanism institution studied by the paper. "
+                "Do not put author affiliation, lab, university, or company here. "
+                "For pure RL algorithm papers, write 'Not applicable: method paper.'"
+            ),
+            "agent_type": "Type of agent or learning method studied, e.g. Q-learning, DQN, PPO, human bidders, firms.",
+            "theoretical_benchmark": "Classical theory or algorithmic benchmark used by the paper; if none, say so.",
+            "learning_setup": (
+                "Concrete environment/task, policy/value method, update rule, training protocol, "
+                "and baselines if stated. For method papers, include the algorithmic update ingredients."
+            ),
+            "metrics": "Concrete reported metrics only; include benchmark domains when available.",
+            "main_result": "Main supported result in one or two concrete sentences.",
+            "what_they_prove": "Only formal theorem/proof claims. If empirical only, write exactly 'Not stated in supplied text.'",
+            "what_they_only_simulate": "Empirical/simulation evidence that is not formally proven.",
+            "what_they_do_not_test": "Limitations or omitted tests visible from the supplied text.",
+            "what_we_need_to_reproduce": (
+                "Specific benchmark/metric/protocol obligation for this repo. "
+                "Use project_comparison_context.theory_obligation when it is supplied, "
+                "then refine it using the paper text. For method papers, translate the original benchmark "
+                "into validation obligations inside this repo; do not say the repo must reproduce Atari, MuJoCo, "
+                "or robotics unless the project context explicitly says that is the goal."
+            ),
+            "how_our_project_differs": (
+                "Compare this repo to the paper using project_comparison_context. "
+                "Say what our code implements, what evidence file/result should be checked, "
+                "and what remains weaker than the paper. Do not just restate the paper's advantage."
+            ),
+            "implementation_obligations": (
+                "Semicolon-separated checklist of implementation features our code must contain to claim this paper as an anchor. "
+                "For PPO, examples are clipped policy objective, old-policy probability ratio, advantage estimates, value loss, "
+                "entropy term, minibatch epochs, and on-policy rollouts when supported by text."
+            ),
+            "metrics_to_compare_in_our_repo": (
+                "Semicolon-separated repo metrics/results to compare against this paper's metrics. "
+                "Use code_result_check when supplied and map paper metrics to repo outputs."
+            ),
+            "failure_modes_to_audit": (
+                "Semicolon-separated ways our implementation/result could fail to satisfy the paper obligation."
+            ),
+            "project_code_comparison": (
+                "One concrete paragraph comparing the paper obligation to this repo's named files/results from "
+                "project_comparison_context.code_result_check and repo_code_context. Mention what is implemented, "
+                "what is only smoke/full-run evidence, and what is not reproduced from the original paper."
+            ),
+        },
         "paper_metadata": {
             "title": record.get("title"),
             "year": record.get("year"),
@@ -176,11 +405,24 @@ def build_extraction_prompt(record: dict[str, Any], source_context: str, source_
             "query": record.get("query"),
             "query_group": record.get("query_group"),
         },
+        "project_comparison_context": {
+            "foundation_role": record.get("role"),
+            "foundation_priority": record.get("priority"),
+            "project_institution_target": record.get("institution"),
+            "project_mind_target": record.get("mind"),
+            "why_this_paper_matters": record.get("why_it_matters"),
+            "theory_obligation": record.get("theory_obligation"),
+            "code_result_check": record.get("code_result_check"),
+        },
         "project_context": (
             "This repo compares learning-agent behavior across Pricing Arena, Resource Island, "
             "Auction House, Public Goods, and Labor Market worlds. The card should identify "
-            "the classical benchmark, prior learning setup, metrics, and what this project must reproduce."
+            "the classical benchmark, prior learning setup, metrics, and what this project must reproduce. "
+            "For cross_world_methods papers, the goal is not to reproduce Atari or MuJoCo exactly; "
+            "the goal is to identify the algorithmic structure and validation evidence our implementation "
+            "must show inside the artificial-economies worlds."
         ),
+        "repo_code_context": _repo_code_context(record),
         "source_basis": source_basis,
         "source_text": source_context,
     }
@@ -303,6 +545,7 @@ def fill_card_for_record(
             changed=False,
             validation_errors=[f"llm extraction failed: {exc}"],
         )
+    _apply_metadata_defaults(fields, record, context)
     evidence = _stringify(fields.get("source_evidence"))
     if _evidence_needs_fallback(evidence):
         fields["source_evidence"] = _evidence_excerpt(context)

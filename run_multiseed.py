@@ -185,14 +185,24 @@ def summarize_final_window(
         "nash_price": float(nash_price) if nash_price is not None else float("nan"),
         "monopoly_price": float(benchmarks["monopoly_price"]),
         "avg_price": avg_price,
-        "price_dispersion": finite_mean(np.abs(data["p1"][sl] - data["p2"][sl])),
-        "profit_total": finite_mean(data["profit1"][sl] + data["profit2"][sl]),
-        "reward_total": finite_mean(data["reward1"][sl] + data["reward2"][sl]),
+        "price_dispersion": finite_mean(data["price_dispersion"][sl])
+        if "price_dispersion" in data
+        else finite_mean(np.abs(data["p1"][sl] - data["p2"][sl])),
+        "profit_total": finite_mean(data["profit_total"][sl])
+        if "profit_total" in data
+        else finite_mean(data["profit1"][sl] + data["profit2"][sl]),
+        "reward_total": finite_mean(data["reward_total"][sl])
+        if "reward_total" in data
+        else finite_mean(data["reward1"][sl] + data["reward2"][sl]),
         "consumer_surplus": finite_mean(data["consumer_surplus"][sl]),
         "welfare": finite_mean(data["welfare"][sl]),
         "collusion_index": finite_mean(data["collusion_index"][sl]),
-        "penalty_total": finite_mean(data["penalty1"][sl] + data["penalty2"][sl]),
-        "quantity_total": finite_mean(data["quantity1"][sl] + data["quantity2"][sl]),
+        "penalty_total": finite_mean(data["penalty_total"][sl])
+        if "penalty_total" in data
+        else finite_mean(data["penalty1"][sl] + data["penalty2"][sl]),
+        "quantity_total": finite_mean(data["quantity_total"][sl])
+        if "quantity_total" in data
+        else finite_mean(data["quantity1"][sl] + data["quantity2"][sl]),
         "audit_rate": finite_mean(data["audit_hit"][sl]) if "audit_hit" in data else float("nan"),
         "mean_market_size": finite_mean(data["market_size"][sl]) if "market_size" in data else float("nan"),
         "nash_price_gap": nash_gap,
@@ -443,6 +453,8 @@ def validate_args(args: argparse.Namespace) -> None:
         raise ValueError("--seed-stride must be positive")
     if args.final_window < 1:
         raise ValueError("--final-window must be positive")
+    if args.n_firms < 2:
+        raise ValueError("--n-firms must be at least 2")
     if args.smoothing < 1:
         raise ValueError("--smoothing must be positive")
     unknown = sorted(set(args.mechanisms) - set(MECHANISMS))
@@ -462,7 +474,7 @@ def run_experiment(args: argparse.Namespace) -> dict[str, Path]:
         mechanism: {metric: [] for metric in args.plot_metrics}
         for mechanism in args.mechanisms
     }
-    final_benchmarks = compute_static_benchmarks(np.linspace(1.0, 10.0, 19))
+    final_benchmarks = compute_static_benchmarks(np.linspace(1.0, 10.0, 19), n_firms=args.n_firms)
 
     for mechanism in args.mechanisms:
         print(f"\n=== Mechanism: {mechanism} ===", flush=True)
@@ -470,7 +482,13 @@ def run_experiment(args: argparse.Namespace) -> dict[str, Path]:
             seed = args.seed_start + seed_index * args.seed_stride
             seed_start_time = time.time()
             print(f"seed_index={seed_index:03d} seed={seed}", flush=True)
-            data, benchmarks = train_market(mechanism=mechanism, steps=args.steps, seed=seed, mind=args.mind)
+            data, benchmarks = train_market(
+                mechanism=mechanism,
+                steps=args.steps,
+                seed=seed,
+                mind=args.mind,
+                n_firms=args.n_firms,
+            )
             final_benchmarks = benchmarks
             summary = summarize_final_window(data, benchmarks, args.final_window)
 
@@ -564,7 +582,7 @@ def run_experiment(args: argparse.Namespace) -> dict[str, Path]:
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Run replicated duopoly-learning experiments across paired random seeds."
+        description="Run replicated pricing-arena learning experiments across paired random seeds."
     )
     parser.add_argument("--steps", type=int, default=40_000, help="Training steps per mechanism and seed.")
     parser.add_argument("--n-seeds", type=int, default=20, help="Number of paired seeds per mechanism.")
@@ -575,6 +593,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--save-dir", type=Path, default=Path("outputs/full_v0_multiseed"))
     parser.add_argument("--mechanisms", nargs="+", choices=MECHANISMS, default=list(DEFAULT_MECHANISMS))
     parser.add_argument("--mind", choices=SUPPORTED_MINDS, default="q_learning")
+    parser.add_argument("--n-firms", type=int, default=2)
     parser.add_argument("--plot-metrics", nargs="+", choices=PLOT_METRICS, default=list(PLOT_METRICS))
     parser.add_argument("--no-plots", action="store_true", help="Write CSV/JSON outputs without generating PNGs.")
     parser.add_argument("--show", action="store_true", help="Show Matplotlib windows after saving plots.")

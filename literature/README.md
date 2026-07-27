@@ -15,9 +15,31 @@ results, creates strict paper-card templates, and generates obligation tables.
 - `theory_coverage.csv` / `theory_coverage.md`: per-world coverage report for metadata leads, PDF/text availability, and filled paper cards.
 - `manual_pdf_queue.csv`: balanced per-world link list for manually finding PDFs and recording status.
 - `scholar_comparison_worksheet.csv`: Google Scholar query worksheet comparing API top titles against manual Scholar checks.
+- `foundation_papers.md` / `foundation_papers.csv`: curated must-read/core/supporting theory anchors matched against the local metadata cache.
+- `foundation_pdf_queue.csv`: small manual queue of foundation papers whose full text is not extracted yet.
 - `novelty_gap_table.csv`: `world | institution | mind | closest paper | theory benchmark | their metric | our metric | gap`.
 - `theory_obligations.md`: world-level theory obligations.
 - `obligation_audit.md`: deterministic check that theory obligations have code/result evidence.
+- `theory_code_audit.md`: decision audit mapping theory obligations to code fixes, rerun gates, obsolete outputs, and safe claim boundaries.
+
+## Paper-To-Code Obligation Layer
+
+The card filler has two jobs, and they are deliberately separated:
+
+1. The local LLM reads the supplied paper text/metadata and extracts paper-specific claims: main result, proof claims, simulations, omitted tests, and source evidence.
+2. `tools/theory_scout/obligation_templates.py` injects deterministic thesis obligations keyed by foundation-paper role.
+
+That second layer is what turns a paper from “related work” into a code audit.
+For example, PPO papers create method obligations around clipped surrogate
+updates and actor-critic validation, auction-design papers create obligations
+around truthfulness/revenue/efficiency/regret, commons papers create
+activation-diagnostic obligations, and matching papers create stability and
+side-specific incentive obligations.
+
+The role-template layer is unit-tested against every curated foundation paper:
+if a new foundation-paper role is added without an obligation template, the
+test suite fails. This prevents one-off special prompts where one paper gets a
+strong project comparison and the rest become generic summaries.
 
 ## One-Command Pipeline
 
@@ -144,6 +166,32 @@ Rebuild the gap table and theory obligations without network:
 python -m tools.theory_scout.cli obligations
 ```
 
+Build the paper-facing six-question bridge from foundation cards and result-gap
+tables:
+
+```bash
+python -m tools.theory_scout.cli world-obligation-bridge
+```
+
+This writes `paper/theory_obligations_by_world.generated.md`. It is not meant to
+replace human prose. It forces each world to answer: classical benchmark, known
+RL/MARL result, metric obligation, repo reproduction, repo addition, and claim
+boundary.
+
+Build the theory-to-code decision audit:
+
+```bash
+python -m tools.theory_scout.cli theory-code-audit
+```
+
+This writes `literature/theory_code_audit.csv` and
+`literature/theory_code_audit.md`. Use it before launching more full runs. It
+separates three cases that should not be confused:
+
+- code/result evidence is already strong enough and the result should be written,
+- a structural theory gap needs a patch and rerun,
+- an optional ablation is needed only before making a stronger claim.
+
 Hydrate cached PDFs/text from the ranked metadata cache without rerunning search:
 
 ```bash
@@ -221,6 +269,36 @@ This writes:
   with the API top titles next to a Google Scholar search URL and blank columns
   for manual Scholar results. This is how to compare OpenAlex/Semantic
   Scholar/arXiv coverage against Scholar without scraping Google Scholar.
+
+Generate the simplified thesis foundation list without network access:
+
+```bash
+python -m tools.theory_scout.cli foundation-papers
+```
+
+This writes:
+
+- `literature/foundation_papers.md`: the small curated list of papers that
+  should ground the thesis, grouped by world/topic.
+- `literature/foundation_papers.csv`: machine-readable version of the same list.
+- `literature/foundation_pdf_queue.csv`: only the foundation papers that still
+  need a PDF or pasted full text before LLM card extraction.
+
+Use this when the goal is theory coverage, not broad ranking. The command
+includes canonical papers even when the metadata scout missed them, and marks
+those rows as `not_found_in_cache`.
+
+
+After filling `scholar_top_titles_manual` with the first 5-10 Scholar titles
+for priority queries, run:
+
+```bash
+python -m tools.theory_scout.cli scholar-compare
+```
+
+This writes `literature/scholar_comparison_report.csv` and `.md`, including
+matched titles, Scholar hits missing from the API cache, API false positives,
+and an overlap status per query.
 
 If you have a SerpAPI key and want an automated Google Scholar snapshot for
 review only, `scripts/serpapi_scholar_lit.py` exists, but it is intentionally

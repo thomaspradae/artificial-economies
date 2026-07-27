@@ -1,9 +1,14 @@
-\begin{thebibliography}{9}
+\begin{thebibliography}{21}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Banchio and Skrzypacz(2022)]{banchio2022}
+Martino Banchio and Andrzej Skrzypacz.
+\newblock Artificial intelligence and auction design.
+\newblock \emph{arXiv preprint arXiv:2202.05947}, 2022.
 
 \bibitem[Calvano et~al.(2020)Calvano, Calzolari, Denicolo, and
   Pastorello]{calvano2020}
@@ -18,6 +23,45 @@ Emilio Calvano, Giacomo Calzolari, Vincenzo Denicolo, and Sergio Pastorello.
 \newblock Algorithmic collusion with imperfect monitoring.
 \newblock \emph{International Journal of Industrial Organization}, 2021.
 \newblock Bibliographic details to verify in literature pass.
+
+\bibitem[D{\"u}tting et~al.(2019)D{\"u}tting, Feng, Narasimhan, Parkes, and
+  Ravindranath]{dutting2019}
+Paul D{\"u}tting, Zhe Feng, Harikrishna Narasimhan, David~C. Parkes, and
+  Sai~Srivatsa Ravindranath.
+\newblock Optimal auctions through deep learning.
+\newblock In \emph{Proceedings of the 36th International Conference on Machine
+  Learning}, 2019.
+
+\bibitem[Fehr and G{\"a}chter(2000)]{fehrgachter2000}
+Ernst Fehr and Simon G{\"a}chter.
+\newblock Cooperation and punishment in public goods experiments.
+\newblock \emph{American Economic Review}, 90\penalty0 (4):\penalty0 980--994,
+  2000.
+
+\bibitem[Gale and Shapley(1962)]{galeshapley1962}
+David Gale and Lloyd~S. Shapley.
+\newblock College admissions and the stability of marriage.
+\newblock \emph{The American Mathematical Monthly}, 69\penalty0 (1):\penalty0
+  9--15, 1962.
+
+\bibitem[Hardin(1968)]{hardin1968}
+Garrett Hardin.
+\newblock The tragedy of the commons.
+\newblock \emph{Science}, 162\penalty0 (3859):\penalty0 1243--1248, 1968.
+
+\bibitem[Isaac et~al.(1994)Isaac, Walker, and Williams]{isaac1994}
+R.~Mark Isaac, James~M. Walker, and Arlington~W. Williams.
+\newblock Group size and the voluntary provision of public goods: Experimental
+  evidence utilizing large groups.
+\newblock \emph{Journal of Public Economics}, 54\penalty0 (1):\penalty0 1--36,
+  1994.
+
+\bibitem[Lowe et~al.(2017)Lowe, Wu, Tamar, Harb, Abbeel, and
+  Mordatch]{lowe2017}
+Ryan Lowe, Yi~Wu, Aviv Tamar, Jean Harb, Pieter Abbeel, and Igor Mordatch.
+\newblock Multi-agent actor-critic for mixed cooperative-competitive
+  environments.
+\newblock In \emph{Advances in Neural Information Processing Systems}, 2017.
 
 \bibitem[Milgrom(2004)]{milgrom2004}
 Paul Milgrom.
@@ -40,6 +84,37 @@ Roger~B. Myerson.
 \newblock Optimal auction design.
 \newblock \emph{Mathematics of Operations Research}, 6\penalty0 (1):\penalty0
   58--73, 1981.
+
+\bibitem[Olson(1965)]{olson1965}
+Mancur Olson.
+\newblock \emph{The Logic of Collective Action: Public Goods and the Theory of
+  Groups}.
+\newblock Harvard University Press, 1965.
+
+\bibitem[Ostrom(1990)]{ostrom1990}
+Elinor Ostrom.
+\newblock \emph{Governing the Commons: The Evolution of Institutions for
+  Collective Action}.
+\newblock Cambridge University Press, 1990.
+
+\bibitem[Roth(1984)]{roth1984}
+Alvin~E. Roth.
+\newblock The evolution of the labor market for medical interns and residents:
+  A case study in game theory.
+\newblock \emph{Journal of Political Economy}, 92\penalty0 (6):\penalty0
+  991--1016, 1984.
+
+\bibitem[Roth and Sotomayor(1990)]{rothsotomayor1990}
+Alvin~E. Roth and Marilda A.~Oliveira Sotomayor.
+\newblock \emph{Two-Sided Matching: A Study in Game-Theoretic Modeling and
+  Analysis}.
+\newblock Cambridge University Press, 1990.
+
+\bibitem[Samuelson(1954)]{samuelson1954}
+Paul~A. Samuelson.
+\newblock The pure theory of public expenditure.
+\newblock \emph{The Review of Economics and Statistics}, 36\penalty0
+  (4):\penalty0 387--389, 1954.
 
 \bibitem[Schulman et~al.(2017)Schulman, Wolski, Dhariwal, Radford, and
   Klimov]{schulman2017}

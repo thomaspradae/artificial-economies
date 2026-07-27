@@ -200,6 +200,35 @@ def _term_present(term: str, texts: Iterable[str]) -> bool:
     return any(normalized in text.lower().replace("_", " ") for text in texts)
 
 
+def _world_code_and_outputs(world: str, repo_root: Path) -> tuple[list[Path], list[Path]]:
+    if world == "cross_world_methods":
+        code_paths = [
+            repo_root / "minds",
+            repo_root / "worlds" / "mind_ladder.py",
+        ]
+        output_paths = []
+        if (repo_root / "outputs").exists():
+            for pattern in (
+                "phase3_full/**/*",
+                "resource_island_phase3_full/**/*",
+                "auction_house_phase3_full/**/*",
+                "public_goods_phase3_full/**/*",
+                "labor_market_phase3_full/**/*",
+            ):
+                output_paths.extend((repo_root / "outputs").glob(pattern))
+        return code_paths, [path for path in output_paths if path.is_file()]
+
+    world_root = repo_root / "worlds" / world
+    output_paths = []
+    if (repo_root / "outputs").exists():
+        output_paths = [
+            path
+            for path in (repo_root / "outputs").glob(f"{world}*/**/*")
+            if path.is_file()
+        ]
+    return [world_root], output_paths
+
+
 def audit_requirement(requirement: Requirement, repo_root: Path) -> AuditRow:
     code_paths = [repo_root / path for path in requirement.code_paths]
     output_paths = [repo_root / path for path in requirement.output_paths]
@@ -262,13 +291,14 @@ def card_obligation_rows(cards_dir: Path, repo_root: Path) -> list[AuditRow]:
             ("paper_metrics", sections.get("Metrics", "")),
             ("paper_reproduce", sections.get("What we need to reproduce", "")),
         ]
-        world_root = repo_root / "worlds" / world
-        output_glob = list((repo_root / "outputs").glob(f"{world}*/**/*")) if (repo_root / "outputs").exists() else []
+        code_paths, output_paths = _world_code_and_outputs(world, repo_root)
+        existing_code = [path for path in code_paths if path.exists()]
+        existing_outputs = [path for path in output_paths if path.exists()]
         for category, obligation in obligations:
             text = obligation.strip()
             if not text or text == "TODO" or "Not stated in supplied text" in text:
                 continue
-            elif world_root.exists() or output_glob:
+            elif existing_code or existing_outputs:
                 status = "partial"
                 missing = "human review required: compare filled card obligation to exact code/results"
             else:
@@ -280,8 +310,16 @@ def card_obligation_rows(cards_dir: Path, repo_root: Path) -> list[AuditRow]:
                     category=category,
                     obligation=f"{path.name}: {text}",
                     status=status,
-                    code_evidence=str(world_root.relative_to(repo_root)) if world_root.exists() else "none",
-                    output_evidence=f"{len(output_glob)} matching output paths" if output_glob else "none",
+                    code_evidence=(
+                        "; ".join(str(code_path.relative_to(repo_root)) for code_path in existing_code)
+                        if existing_code
+                        else "none"
+                    ),
+                    output_evidence=(
+                        f"{len(existing_outputs)} matching output paths"
+                        if existing_outputs
+                        else "none"
+                    ),
                     missing=missing,
                 )
             )
@@ -296,7 +334,11 @@ def audit_obligations(
 ) -> list[AuditRow]:
     rows = [audit_requirement(requirement, repo_root) for requirement in WORLD_REQUIREMENTS]
     if include_card_obligations:
-        rows.extend(card_obligation_rows(literature_dir / "paper_cards", repo_root))
+        foundation_cards = literature_dir / "foundation_paper_cards"
+        if foundation_cards.exists() and any(foundation_cards.glob("*.md")):
+            rows.extend(card_obligation_rows(foundation_cards, repo_root))
+        else:
+            rows.extend(card_obligation_rows(literature_dir / "paper_cards", repo_root))
     return rows
 
 

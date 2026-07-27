@@ -9,6 +9,8 @@ import numpy as np
 from core.registry import build_experiment
 from institutions.public_goods import ContributionMatching, InformationRestriction, PublicGoodsPenalty
 from institutions.tax_schedule import TaxSchedule
+from run_public_goods_group_size_sweep import parse_args as parse_group_size_args
+from run_public_goods_group_size_sweep import run as run_group_size_sweep
 from run_public_goods_smoke import parse_args, run
 from validate_public_goods_effects import validate_effects
 from worlds.public_goods.benchmarks import (
@@ -131,6 +133,36 @@ class PublicGoodsTests(unittest.TestCase):
                 rows = list(csv.DictReader(handle))
             self.assertEqual(len(rows), 4)
             self.assertTrue(Path(outputs["summary_aggregate"]).exists())
+
+    def test_group_size_sweep_runner_writes_scaling_outputs(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            args = parse_group_size_args(
+                [
+                    "--steps",
+                    "8",
+                    "--n-seeds",
+                    "1",
+                    "--final-window",
+                    "4",
+                    "--agent-counts",
+                    "2",
+                    "3",
+                    "--minds",
+                    "q_learning",
+                    "--institutions",
+                    "none",
+                    "contribution_matching",
+                    "--save-dir",
+                    tmp,
+                ]
+            )
+            outputs = run_group_size_sweep(args)
+            with Path(outputs["summary_by_seed"]).open() as handle:
+                rows = list(csv.DictReader(handle))
+            self.assertEqual(len(rows), 4)
+            self.assertEqual({row["n_agents"] for row in rows}, {"2", "3"})
+            self.assertTrue(Path(outputs["summary_aggregate"]).exists())
+            self.assertTrue(Path(outputs["scaling_effects"]).exists())
 
     def test_effect_validator_distinguishes_state_from_reward_accounting(self):
         with tempfile.TemporaryDirectory() as tmp:

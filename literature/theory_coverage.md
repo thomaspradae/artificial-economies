@@ -4,20 +4,20 @@ This is a coverage/review report, not a citation-quality ranking. It answers whe
 
 | World | Scope | Queries | API records | PDF links | Extracted text | Filled cards | TODO cards | Status |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| auction_house | all | 8 | 41 | 38 | 1 | 32 | 9 | covered_review_needed |
-| auction_house | classical_terms | 5 | 31 | 28 | 0 | 32 | 9 | covered_review_needed |
-| auction_house | learning_terms | 3 | 10 | 10 | 1 | 32 | 9 | covered_review_needed |
-| labor_market | all | 8 | 41 | 37 | 0 | 0 | 42 | needs_filled_cards |
-| labor_market | classical_terms | 5 | 28 | 26 | 0 | 0 | 42 | covered_review_needed |
-| labor_market | learning_terms | 3 | 13 | 11 | 0 | 0 | 42 | covered_review_needed |
-| pricing_arena | all | 7 | 41 | 34 | 0 | 0 | 41 | needs_filled_cards |
-| pricing_arena | classical_terms | 4 | 25 | 18 | 0 | 0 | 41 | covered_review_needed |
-| pricing_arena | learning_terms | 3 | 16 | 16 | 0 | 0 | 41 | covered_review_needed |
-| public_goods | all | 8 | 48 | 40 | 0 | 0 | 39 | needs_filled_cards |
-| public_goods | classical_terms | 5 | 29 | 24 | 0 | 0 | 39 | covered_review_needed |
-| public_goods | learning_terms | 3 | 19 | 16 | 0 | 0 | 39 | covered_review_needed |
-| resource_island | all | 8 | 57 | 49 | 0 | 0 | 34 | needs_filled_cards |
-| resource_island | classical_terms | 5 | 38 | 33 | 0 | 0 | 34 | covered_review_needed |
-| resource_island | learning_terms | 3 | 19 | 16 | 0 | 0 | 34 | covered_review_needed |
+| auction_house | all | 8 | 55 | 52 | 17 | 33 | 22 | covered_review_needed |
+| auction_house | classical_terms | 5 | 41 | 38 | 10 | 33 | 22 | covered_review_needed |
+| auction_house | learning_terms | 3 | 14 | 14 | 7 | 33 | 22 | covered_review_needed |
+| labor_market | all | 8 | 49 | 43 | 13 | 13 | 37 | covered_review_needed |
+| labor_market | classical_terms | 5 | 34 | 31 | 8 | 13 | 37 | covered_review_needed |
+| labor_market | learning_terms | 3 | 15 | 12 | 5 | 13 | 37 | covered_review_needed |
+| pricing_arena | all | 7 | 96 | 59 | 7 | 6 | 90 | covered_review_needed |
+| pricing_arena | classical_terms | 4 | 68 | 37 | 6 | 6 | 90 | covered_review_needed |
+| pricing_arena | learning_terms | 3 | 28 | 22 | 1 | 6 | 90 | covered_review_needed |
+| public_goods | all | 8 | 56 | 48 | 13 | 13 | 40 | covered_review_needed |
+| public_goods | classical_terms | 5 | 34 | 29 | 9 | 13 | 40 | covered_review_needed |
+| public_goods | learning_terms | 3 | 22 | 19 | 4 | 13 | 40 | covered_review_needed |
+| resource_island | all | 8 | 70 | 60 | 14 | 13 | 28 | covered_review_needed |
+| resource_island | classical_terms | 5 | 47 | 40 | 9 | 13 | 28 | covered_review_needed |
+| resource_island | learning_terms | 3 | 23 | 20 | 5 | 13 | 28 | covered_review_needed |
 
 Manual checks should prioritize rows with `metadata_only`, low extracted-text counts, or obviously irrelevant top titles.

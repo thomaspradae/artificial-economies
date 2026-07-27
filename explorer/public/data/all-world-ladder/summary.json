@@ -1,0 +1,1860 @@
+{
+  "architectureAxis": [
+    {
+      "assumption": "finite table; no function approximation",
+      "label": "Q-learning",
+      "mind": "q_learning",
+      "role": "tabular control",
+      "whatItTests": "whether the world reproduces clean tabular learning behavior before neural approximation is introduced"
+    },
+    {
+      "assumption": "neural Q approximation with replay and target networks",
+      "label": "DQN",
+      "mind": "dqn",
+      "role": "value approximation",
+      "whatItTests": "whether institution effects survive approximate off-policy value learning"
+    },
+    {
+      "assumption": "stochastic clipped policy-gradient updates instead of replayed value learning",
+      "label": "PPO",
+      "mind": "ppo",
+      "role": "on-policy policy optimization",
+      "whatItTests": "whether the same economic incentives remain discoverable under on-policy optimization"
+    },
+    {
+      "assumption": "each agent learns separately with decorrelated stochastic streams",
+      "label": "Independent DQN",
+      "mind": "independent_dqn",
+      "role": "independent learners",
+      "whatItTests": "whether DQN-like results persist once agents are independent learners rather than an alias condition"
+    },
+    {
+      "assumption": "centralized value information during learning with decentralized actions",
+      "label": "Centralized critic",
+      "mind": "centralized_critic",
+      "role": "centralized-training scaffold",
+      "whatItTests": "whether coordination signals improve outcomes or create metric tradeoffs"
+    }
+  ],
+  "coverage": {
+    "fullRunScale": "n=20 where applicable, 40k training steps in thesis-facing full runs",
+    "mindCount": 5,
+    "rowCount": 112,
+    "worldCount": 5
+  },
+  "generatedAt": "2026-07-25T21:48:12.999839+00:00",
+  "id": "all-world-ladder",
+  "sourceArtifacts": [
+    "outputs/pricing_arena_phase3_full/mind_comparison.csv",
+    "outputs/resource_island_v1_phase3_full/mind_comparison.csv",
+    "outputs/auction_house_phase3_full/mind_comparison.csv",
+    "outputs/public_goods_phase3_full/mind_comparison.csv",
+    "outputs/labor_market_phase3_full/mind_comparison.csv"
+  ],
+  "subtitle": "The project is not just DQN in Pricing Arena. These are the thesis-facing full-ladder outputs for Pricing Arena, Resource Island v1, Auction House, Public Goods, and Labor Market.",
+  "title": "Five Worlds, Five Learner Architectures",
+  "version": "1.0.0",
+  "worlds": [
+    {
+      "baselineInstitution": "none",
+      "id": "pricing_arena",
+      "institutionLabel": "mechanism",
+      "institutions": [
+        "none",
+        "price_cap",
+        "tax_high_price",
+        "random_audit",
+        "anti_collusion",
+        "demand_shock"
+      ],
+      "interpretation": "The price-cap result is not a generic DQN anecdote: Q-learning, PPO, independent-DQN, and centralized-critic are all in the table, and the safe claim is budget-dependent. DQN-family learners can recover profits under the cap after enough training while exploitability falls.",
+      "metrics": [
+        {
+          "better": "higher",
+          "key": "welfare_mean",
+          "label": "welfare"
+        },
+        {
+          "better": "context",
+          "key": "profit_total_mean",
+          "label": "firm profit"
+        },
+        {
+          "better": "lower",
+          "key": "profit_collusion_index_mean",
+          "label": "profit collusion"
+        },
+        {
+          "better": "lower",
+          "key": "exploitability_mean",
+          "label": "exploitability"
+        }
+      ],
+      "minds": [
+        "q_learning",
+        "dqn",
+        "ppo",
+        "independent_dqn",
+        "centralized_critic"
+      ],
+      "rows": [
+        {
+          "institution": "anti_collusion",
+          "metrics": {
+            "exploitability_mean": 127.619377,
+            "profit_collusion_index_mean": 0.469986,
+            "profit_total_mean": 363.237289,
+            "welfare_mean": 812.445387
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/full_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "demand_shock",
+          "metrics": {
+            "exploitability_mean": 107.10225,
+            "profit_collusion_index_mean": 0.483446,
+            "profit_total_mean": 369.344685,
+            "welfare_mean": 810.774676
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/full_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "exploitability_mean": 95.68514,
+            "profit_collusion_index_mean": 0.474615,
+            "profit_total_mean": 365.337589,
+            "welfare_mean": 810.426561
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/full_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "price_cap",
+          "metrics": {
+            "exploitability_mean": 40.319155,
+            "profit_collusion_index_mean": 0.424112,
+            "profit_total_mean": 342.421643,
+            "welfare_mean": 829.993221
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/full_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "random_audit",
+          "metrics": {
+            "exploitability_mean": 127.659475,
+            "profit_collusion_index_mean": 0.499095,
+            "profit_total_mean": 376.445791,
+            "welfare_mean": 809.093801
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/full_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "tax_high_price",
+          "metrics": {
+            "exploitability_mean": 88.044584,
+            "profit_collusion_index_mean": 0.479354,
+            "profit_total_mean": 367.488291,
+            "welfare_mean": 814.628056
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/full_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "anti_collusion",
+          "metrics": {
+            "exploitability_mean": 20.269182,
+            "profit_collusion_index_mean": 0.191473,
+            "profit_total_mean": 236.861262,
+            "welfare_mean": 832.787007
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/dqn_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "demand_shock",
+          "metrics": {
+            "exploitability_mean": 21.52723,
+            "profit_collusion_index_mean": 0.193254,
+            "profit_total_mean": 237.669503,
+            "welfare_mean": 834.555511
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/dqn_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "exploitability_mean": 20.269182,
+            "profit_collusion_index_mean": 0.190337,
+            "profit_total_mean": 236.345482,
+            "welfare_mean": 832.795224
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/dqn_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "price_cap",
+          "metrics": {
+            "exploitability_mean": 8.650115,
+            "profit_collusion_index_mean": 0.312336,
+            "profit_total_mean": 291.703303,
+            "welfare_mean": 839.089622
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/dqn_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "random_audit",
+          "metrics": {
+            "exploitability_mean": 19.767293,
+            "profit_collusion_index_mean": 0.199796,
+            "profit_total_mean": 240.637727,
+            "welfare_mean": 833.13589
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/dqn_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "tax_high_price",
+          "metrics": {
+            "exploitability_mean": 21.461825,
+            "profit_collusion_index_mean": 0.191677,
+            "profit_total_mean": 236.953937,
+            "welfare_mean": 832.790472
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/dqn_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "anti_collusion",
+          "metrics": {
+            "exploitability_mean": 8.764096,
+            "profit_collusion_index_mean": 0.226092,
+            "profit_total_mean": 252.569648,
+            "welfare_mean": 838.97441
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/ppo_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "demand_shock",
+          "metrics": {
+            "exploitability_mean": 8.19771,
+            "profit_collusion_index_mean": 0.241695,
+            "profit_total_mean": 259.649601,
+            "welfare_mean": 840.642727
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/ppo_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "exploitability_mean": 14.234669,
+            "profit_collusion_index_mean": 0.242417,
+            "profit_total_mean": 259.977305,
+            "welfare_mean": 839.284969
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/ppo_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "price_cap",
+          "metrics": {
+            "exploitability_mean": 8.530939,
+            "profit_collusion_index_mean": 0.227965,
+            "profit_total_mean": 253.419657,
+            "welfare_mean": 838.086485
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/ppo_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "random_audit",
+          "metrics": {
+            "exploitability_mean": 11.53115,
+            "profit_collusion_index_mean": 0.240157,
+            "profit_total_mean": 258.951833,
+            "welfare_mean": 839.054685
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/ppo_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "tax_high_price",
+          "metrics": {
+            "exploitability_mean": 9.03061,
+            "profit_collusion_index_mean": 0.234397,
+            "profit_total_mean": 256.338246,
+            "welfare_mean": 838.730495
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/ppo_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "anti_collusion",
+          "metrics": {
+            "exploitability_mean": 26.551888,
+            "profit_collusion_index_mean": 0.264601,
+            "profit_total_mean": 270.043317,
+            "welfare_mean": 827.958405
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/independent_dqn_v0_multiseed_fixed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "demand_shock",
+          "metrics": {
+            "exploitability_mean": 28.31197,
+            "profit_collusion_index_mean": 0.265424,
+            "profit_total_mean": 270.416822,
+            "welfare_mean": 829.175595
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/independent_dqn_v0_multiseed_fixed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "exploitability_mean": 26.551888,
+            "profit_collusion_index_mean": 0.2642,
+            "profit_total_mean": 269.861055,
+            "welfare_mean": 827.937692
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/independent_dqn_v0_multiseed_fixed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "price_cap",
+          "metrics": {
+            "exploitability_mean": 11.681067,
+            "profit_collusion_index_mean": 0.271017,
+            "profit_total_mean": 272.95445,
+            "welfare_mean": 840.120813
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/independent_dqn_v0_multiseed_fixed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "random_audit",
+          "metrics": {
+            "exploitability_mean": 28.21945,
+            "profit_collusion_index_mean": 0.264744,
+            "profit_total_mean": 270.107889,
+            "welfare_mean": 827.94627
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/independent_dqn_v0_multiseed_fixed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "tax_high_price",
+          "metrics": {
+            "exploitability_mean": 29.063133,
+            "profit_collusion_index_mean": 0.264594,
+            "profit_total_mean": 270.040042,
+            "welfare_mean": 827.958025
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/independent_dqn_v0_multiseed_fixed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "anti_collusion",
+          "metrics": {
+            "exploitability_mean": 148.041833,
+            "profit_collusion_index_mean": 0.30585,
+            "profit_total_mean": 288.760036,
+            "welfare_mean": 792.185278
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/centralized_critic_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "demand_shock",
+          "metrics": {
+            "exploitability_mean": 150.164819,
+            "profit_collusion_index_mean": 0.285175,
+            "profit_total_mean": 279.378777,
+            "welfare_mean": 779.601385
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/centralized_critic_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "exploitability_mean": 147.50519,
+            "profit_collusion_index_mean": 0.305559,
+            "profit_total_mean": 288.627877,
+            "welfare_mean": 791.632022
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/centralized_critic_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "price_cap",
+          "metrics": {
+            "exploitability_mean": 49.230821,
+            "profit_collusion_index_mean": 0.328361,
+            "profit_total_mean": 298.974398,
+            "welfare_mean": 820.300089
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/centralized_critic_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "random_audit",
+          "metrics": {
+            "exploitability_mean": 125.843747,
+            "profit_collusion_index_mean": 0.41379,
+            "profit_total_mean": 337.73798,
+            "welfare_mean": 786.480017
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/centralized_critic_v0_multiseed",
+          "world": "pricing_arena"
+        },
+        {
+          "institution": "tax_high_price",
+          "metrics": {
+            "exploitability_mean": 146.316846,
+            "profit_collusion_index_mean": 0.314752,
+            "profit_total_mean": 292.799613,
+            "welfare_mean": 777.736403
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/centralized_critic_v0_multiseed",
+          "world": "pricing_arena"
+        }
+      ],
+      "sourcePath": "outputs/pricing_arena_phase3_full/mind_comparison.csv",
+      "summary": "Repeated oligopoly pricing with regulatory mechanisms and exploitability audits.",
+      "title": "Pricing Arena"
+    },
+    {
+      "baselineInstitution": "none",
+      "id": "resource_island_v1",
+      "institutionLabel": "institution",
+      "institutions": [
+        "none",
+        "property_rights",
+        "trade_price_controls",
+        "reputation_system"
+      ],
+      "interpretation": "The v1 ladder reverses the earlier v0 non-trade artifact. PPO and centralized-critic activate the trade/reputation channel strongly; DQN and independent-DQN trade less but remain distinct.",
+      "metrics": [
+        {
+          "better": "higher",
+          "key": "welfare_mean",
+          "label": "welfare"
+        },
+        {
+          "better": "higher",
+          "key": "survival_rate_mean",
+          "label": "survival"
+        },
+        {
+          "better": "context",
+          "key": "trade_count_mean",
+          "label": "successful trades"
+        },
+        {
+          "better": "context",
+          "key": "trade_institution_blocked_count_mean",
+          "label": "institution blocks"
+        }
+      ],
+      "minds": [
+        "q_learning",
+        "dqn",
+        "ppo",
+        "independent_dqn",
+        "centralized_critic"
+      ],
+      "rows": [
+        {
+          "institution": "none",
+          "metrics": {
+            "survival_rate_mean": 0.943937,
+            "trade_count_mean": 5.32515,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.10645
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "property_rights",
+          "metrics": {
+            "survival_rate_mean": 0.951617,
+            "trade_count_mean": 5.81125,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.153857
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "reputation_system",
+          "metrics": {
+            "survival_rate_mean": 0.930089,
+            "trade_count_mean": 6.6665,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.347654
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "trade_price_controls",
+          "metrics": {
+            "survival_rate_mean": 0.919014,
+            "trade_count_mean": 0.0,
+            "trade_institution_blocked_count_mean": 4.7862,
+            "welfare_mean": 0.95064
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "survival_rate_mean": 0.910186,
+            "trade_count_mean": 0.63985,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.061424
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_dqn_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "property_rights",
+          "metrics": {
+            "survival_rate_mean": 0.907978,
+            "trade_count_mean": 0.57585,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.061459
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_dqn_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "reputation_system",
+          "metrics": {
+            "survival_rate_mean": 0.903313,
+            "trade_count_mean": 2.42115,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.168611
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_dqn_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "trade_price_controls",
+          "metrics": {
+            "survival_rate_mean": 0.868262,
+            "trade_count_mean": 0.0,
+            "trade_institution_blocked_count_mean": 0.90855,
+            "welfare_mean": 0.985179
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_dqn_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "survival_rate_mean": 0.914954,
+            "trade_count_mean": 8.89195,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.253745
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_ppo_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "property_rights",
+          "metrics": {
+            "survival_rate_mean": 0.905772,
+            "trade_count_mean": 11.50395,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.266873
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_ppo_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "reputation_system",
+          "metrics": {
+            "survival_rate_mean": 0.894496,
+            "trade_count_mean": 13.987,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.824442
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_ppo_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "trade_price_controls",
+          "metrics": {
+            "survival_rate_mean": 0.861292,
+            "trade_count_mean": 0.0,
+            "trade_institution_blocked_count_mean": 0.0406,
+            "welfare_mean": 1.015516
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_ppo_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "survival_rate_mean": 0.906394,
+            "trade_count_mean": 1.73005,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.062979
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_independent_dqn_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "property_rights",
+          "metrics": {
+            "survival_rate_mean": 0.905391,
+            "trade_count_mean": 1.6431,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.065512
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_independent_dqn_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "reputation_system",
+          "metrics": {
+            "survival_rate_mean": 0.907895,
+            "trade_count_mean": 2.2882,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.154056
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_independent_dqn_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "trade_price_controls",
+          "metrics": {
+            "survival_rate_mean": 0.843307,
+            "trade_count_mean": 0.0,
+            "trade_institution_blocked_count_mean": 3.0438,
+            "welfare_mean": 0.949507
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_independent_dqn_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "survival_rate_mean": 0.91497,
+            "trade_count_mean": 8.6973,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.248429
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_centralized_critic_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "property_rights",
+          "metrics": {
+            "survival_rate_mean": 0.914974,
+            "trade_count_mean": 7.76335,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.223826
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_centralized_critic_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "reputation_system",
+          "metrics": {
+            "survival_rate_mean": 0.895242,
+            "trade_count_mean": 7.7649,
+            "trade_institution_blocked_count_mean": 0.0,
+            "welfare_mean": 1.485779
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_centralized_critic_full",
+          "world": "resource_island_v1"
+        },
+        {
+          "institution": "trade_price_controls",
+          "metrics": {
+            "survival_rate_mean": 0.863843,
+            "trade_count_mean": 0.0,
+            "trade_institution_blocked_count_mean": 0.4514,
+            "welfare_mean": 1.000857
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/resource_island_v1_centralized_critic_full",
+          "world": "resource_island_v1"
+        }
+      ],
+      "sourcePath": "outputs/resource_island_v1_phase3_full/mind_comparison.csv",
+      "summary": "Spatial inventory economy with contested resources, specialization pressure, and unequal trades.",
+      "title": "Resource Island v1"
+    },
+    {
+      "baselineInstitution": "second_price",
+      "id": "auction_house",
+      "institutionLabel": "auction",
+      "institutions": [
+        "second_price",
+        "first_price",
+        "second_price_reserve",
+        "clock",
+        "second_price_public_signal",
+        "second_price_noisy_signal"
+      ],
+      "interpretation": "The ladder is explicitly not monotone. PPO has low regret in second-price/reserve cases, while centralized-critic is unstable in no-reserve second-price and first-price settings.",
+      "metrics": [
+        {
+          "better": "context",
+          "key": "revenue_mean",
+          "label": "seller revenue"
+        },
+        {
+          "better": "higher",
+          "key": "welfare_mean",
+          "label": "welfare"
+        },
+        {
+          "better": "higher",
+          "key": "allocative_efficiency_mean",
+          "label": "efficiency"
+        },
+        {
+          "better": "lower",
+          "key": "ex_post_regret_mean_mean",
+          "label": "ex-post regret"
+        }
+      ],
+      "minds": [
+        "q_learning",
+        "dqn",
+        "ppo",
+        "independent_dqn",
+        "centralized_critic"
+      ],
+      "rows": [
+        {
+          "institution": "first_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.76945,
+            "ex_post_regret_mean_mean": 1.361085,
+            "revenue_mean": 3.45287,
+            "welfare_mean": 6.31827
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_full",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.73356,
+            "ex_post_regret_mean_mean": 0.27028,
+            "revenue_mean": 3.10009,
+            "welfare_mean": 6.24134
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_full",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_reserve",
+          "metrics": {
+            "allocative_efficiency_mean": 0.79609,
+            "ex_post_regret_mean_mean": 0.15033,
+            "revenue_mean": 3.93839,
+            "welfare_mean": 6.06033
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_full",
+          "world": "auction_house"
+        },
+        {
+          "institution": "clock",
+          "metrics": {
+            "allocative_efficiency_mean": 0.70401,
+            "ex_post_regret_mean_mean": 0.254645,
+            "revenue_mean": 3.57957,
+            "welfare_mean": 6.15734
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "first_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.79137,
+            "ex_post_regret_mean_mean": 1.00822,
+            "revenue_mean": 3.69588,
+            "welfare_mean": 6.40909
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.70473,
+            "ex_post_regret_mean_mean": 0.26039,
+            "revenue_mean": 3.59266,
+            "welfare_mean": 6.11473
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_noisy_signal",
+          "metrics": {
+            "allocative_efficiency_mean": 0.70264,
+            "ex_post_regret_mean_mean": 0.270005,
+            "revenue_mean": 3.53532,
+            "welfare_mean": 6.11161
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_public_signal",
+          "metrics": {
+            "allocative_efficiency_mean": 0.61372,
+            "ex_post_regret_mean_mean": 0.33345,
+            "revenue_mean": 3.09224,
+            "welfare_mean": 5.69153
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_reserve",
+          "metrics": {
+            "allocative_efficiency_mean": 0.75538,
+            "ex_post_regret_mean_mean": 0.22565,
+            "revenue_mean": 4.38448,
+            "welfare_mean": 6.17244
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "clock",
+          "metrics": {
+            "allocative_efficiency_mean": 0.76866,
+            "ex_post_regret_mean_mean": 0.185905,
+            "revenue_mean": 3.21939,
+            "welfare_mean": 6.40201
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/ppo",
+          "world": "auction_house"
+        },
+        {
+          "institution": "first_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.77118,
+            "ex_post_regret_mean_mean": 0.93716,
+            "revenue_mean": 3.40779,
+            "welfare_mean": 6.36535
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/ppo",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.76208,
+            "ex_post_regret_mean_mean": 0.18716,
+            "revenue_mean": 3.2326,
+            "welfare_mean": 6.38903
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/ppo",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_noisy_signal",
+          "metrics": {
+            "allocative_efficiency_mean": 0.75992,
+            "ex_post_regret_mean_mean": 0.184165,
+            "revenue_mean": 3.25251,
+            "welfare_mean": 6.37424
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/ppo",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_public_signal",
+          "metrics": {
+            "allocative_efficiency_mean": 0.71398,
+            "ex_post_regret_mean_mean": 0.249545,
+            "revenue_mean": 3.56496,
+            "welfare_mean": 6.20127
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/ppo",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_reserve",
+          "metrics": {
+            "allocative_efficiency_mean": 0.77993,
+            "ex_post_regret_mean_mean": 0.107075,
+            "revenue_mean": 3.80419,
+            "welfare_mean": 5.96137
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/ppo",
+          "world": "auction_house"
+        },
+        {
+          "institution": "clock",
+          "metrics": {
+            "allocative_efficiency_mean": 0.68882,
+            "ex_post_regret_mean_mean": 0.2751,
+            "revenue_mean": 3.25264,
+            "welfare_mean": 6.03638
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/independent_dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "first_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.79821,
+            "ex_post_regret_mean_mean": 1.047855,
+            "revenue_mean": 3.41207,
+            "welfare_mean": 6.42481
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/independent_dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.7074,
+            "ex_post_regret_mean_mean": 0.280155,
+            "revenue_mean": 3.62956,
+            "welfare_mean": 6.12366
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/independent_dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_noisy_signal",
+          "metrics": {
+            "allocative_efficiency_mean": 0.70455,
+            "ex_post_regret_mean_mean": 0.294885,
+            "revenue_mean": 3.48696,
+            "welfare_mean": 6.11645
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/independent_dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_public_signal",
+          "metrics": {
+            "allocative_efficiency_mean": 0.6361,
+            "ex_post_regret_mean_mean": 0.37457,
+            "revenue_mean": 3.33613,
+            "welfare_mean": 5.79835
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/independent_dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_reserve",
+          "metrics": {
+            "allocative_efficiency_mean": 0.71753,
+            "ex_post_regret_mean_mean": 0.276055,
+            "revenue_mean": 4.41899,
+            "welfare_mean": 6.16772
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/independent_dqn",
+          "world": "auction_house"
+        },
+        {
+          "institution": "clock",
+          "metrics": {
+            "allocative_efficiency_mean": 0.51619,
+            "ex_post_regret_mean_mean": 1.206575,
+            "revenue_mean": 0.06048,
+            "welfare_mean": 4.99178
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/centralized_critic",
+          "world": "auction_house"
+        },
+        {
+          "institution": "first_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.51533,
+            "ex_post_regret_mean_mean": 1.974285,
+            "revenue_mean": 1.27985,
+            "welfare_mean": 5.01609
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/centralized_critic",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price",
+          "metrics": {
+            "allocative_efficiency_mean": 0.52177,
+            "ex_post_regret_mean_mean": 1.436295,
+            "revenue_mean": 0.06261,
+            "welfare_mean": 5.06058
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/centralized_critic",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_noisy_signal",
+          "metrics": {
+            "allocative_efficiency_mean": 0.52541,
+            "ex_post_regret_mean_mean": 1.511595,
+            "revenue_mean": 0.05663,
+            "welfare_mean": 5.05724
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/centralized_critic",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_public_signal",
+          "metrics": {
+            "allocative_efficiency_mean": 0.50376,
+            "ex_post_regret_mean_mean": 1.48713,
+            "revenue_mean": 0.01368,
+            "welfare_mean": 4.99767
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/centralized_critic",
+          "world": "auction_house"
+        },
+        {
+          "institution": "second_price_reserve",
+          "metrics": {
+            "allocative_efficiency_mean": 0.68176,
+            "ex_post_regret_mean_mean": 0.298415,
+            "revenue_mean": 4.31636,
+            "welfare_mean": 6.34235
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/auction_house_phase3_full/centralized_critic",
+          "world": "auction_house"
+        }
+      ],
+      "sourcePath": "outputs/auction_house_phase3_full/mind_comparison.csv",
+      "summary": "Private-value auctions with first-price, second-price, reserve, clock, and information variants.",
+      "title": "Auction House"
+    },
+    {
+      "baselineInstitution": "none",
+      "id": "public_goods",
+      "institutionLabel": "institution",
+      "institutions": [
+        "none",
+        "public_goods_penalty",
+        "contribution_matching",
+        "public_goods_reputation",
+        "information_restriction",
+        "tax_schedule"
+      ],
+      "interpretation": "PPO and centralized-critic nearly stop contributing under baseline and collapse often. DQN-family learners contribute more, and contribution matching creates the clearest discoverable incentive.",
+      "metrics": [
+        {
+          "better": "higher",
+          "key": "sustainability_mean",
+          "label": "sustainability"
+        },
+        {
+          "better": "higher",
+          "key": "contribution_total_mean",
+          "label": "contribution"
+        },
+        {
+          "better": "higher",
+          "key": "welfare_mean",
+          "label": "welfare"
+        },
+        {
+          "better": "lower",
+          "key": "collapse_rate_mean",
+          "label": "collapse rate"
+        }
+      ],
+      "minds": [
+        "q_learning",
+        "dqn",
+        "ppo",
+        "independent_dqn",
+        "centralized_critic"
+      ],
+      "rows": [
+        {
+          "institution": "contribution_matching",
+          "metrics": {
+            "collapse_rate_mean": 0.8391,
+            "contribution_total_mean": 0.27946,
+            "sustainability_mean": 0.104803,
+            "welfare_mean": 2.080752
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_full",
+          "world": "public_goods"
+        },
+        {
+          "institution": "information_restriction",
+          "metrics": {
+            "collapse_rate_mean": 0.9204,
+            "contribution_total_mean": 0.12454,
+            "sustainability_mean": 0.088027,
+            "welfare_mean": 1.798607
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_full",
+          "world": "public_goods"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "collapse_rate_mean": 0.91174,
+            "contribution_total_mean": 0.14177,
+            "sustainability_mean": 0.089174,
+            "welfare_mean": 1.814989
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_full",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_penalty",
+          "metrics": {
+            "collapse_rate_mean": 0.91907,
+            "contribution_total_mean": 0.12571,
+            "sustainability_mean": 0.088191,
+            "welfare_mean": 1.78548
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_full",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_reputation",
+          "metrics": {
+            "collapse_rate_mean": 0.87285,
+            "contribution_total_mean": 0.22191,
+            "sustainability_mean": 0.094478,
+            "welfare_mean": 9.574997
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_full",
+          "world": "public_goods"
+        },
+        {
+          "institution": "tax_schedule",
+          "metrics": {
+            "collapse_rate_mean": 0.91553,
+            "contribution_total_mean": 0.13404,
+            "sustainability_mean": 0.08867,
+            "welfare_mean": 1.807632
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_full",
+          "world": "public_goods"
+        },
+        {
+          "institution": "contribution_matching",
+          "metrics": {
+            "collapse_rate_mean": 0.90426,
+            "contribution_total_mean": 0.16979,
+            "sustainability_mean": 0.095519,
+            "welfare_mean": 1.923139
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "information_restriction",
+          "metrics": {
+            "collapse_rate_mean": 0.95361,
+            "contribution_total_mean": 0.07136,
+            "sustainability_mean": 0.084596,
+            "welfare_mean": 1.747963
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "collapse_rate_mean": 0.95361,
+            "contribution_total_mean": 0.07136,
+            "sustainability_mean": 0.084596,
+            "welfare_mean": 1.747963
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_penalty",
+          "metrics": {
+            "collapse_rate_mean": 0.95361,
+            "contribution_total_mean": 0.07136,
+            "sustainability_mean": 0.084596,
+            "welfare_mean": 1.744279
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_reputation",
+          "metrics": {
+            "collapse_rate_mean": 0.95335,
+            "contribution_total_mean": 0.07184,
+            "sustainability_mean": 0.084639,
+            "welfare_mean": 12.444098
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "tax_schedule",
+          "metrics": {
+            "collapse_rate_mean": 0.95361,
+            "contribution_total_mean": 0.07136,
+            "sustainability_mean": 0.084596,
+            "welfare_mean": 1.747963
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "contribution_matching",
+          "metrics": {
+            "collapse_rate_mean": 0.99989,
+            "contribution_total_mean": 0.00017,
+            "sustainability_mean": 0.080015,
+            "welfare_mean": 1.680244
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/ppo",
+          "world": "public_goods"
+        },
+        {
+          "institution": "information_restriction",
+          "metrics": {
+            "collapse_rate_mean": 0.9999,
+            "contribution_total_mean": 0.00015,
+            "sustainability_mean": 0.08001,
+            "welfare_mean": 1.680143
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/ppo",
+          "world": "public_goods"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "collapse_rate_mean": 0.99991,
+            "contribution_total_mean": 0.00013,
+            "sustainability_mean": 0.080008,
+            "welfare_mean": 1.680124
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/ppo",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_penalty",
+          "metrics": {
+            "collapse_rate_mean": 0.9999,
+            "contribution_total_mean": 0.00014,
+            "sustainability_mean": 0.080009,
+            "welfare_mean": 1.68013
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/ppo",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_reputation",
+          "metrics": {
+            "collapse_rate_mean": 0.99991,
+            "contribution_total_mean": 0.00012,
+            "sustainability_mean": 0.080008,
+            "welfare_mean": 5.183129
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/ppo",
+          "world": "public_goods"
+        },
+        {
+          "institution": "tax_schedule",
+          "metrics": {
+            "collapse_rate_mean": 0.99992,
+            "contribution_total_mean": 0.00011,
+            "sustainability_mean": 0.080007,
+            "welfare_mean": 1.680105
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/ppo",
+          "world": "public_goods"
+        },
+        {
+          "institution": "contribution_matching",
+          "metrics": {
+            "collapse_rate_mean": 0.80459,
+            "contribution_total_mean": 0.41282,
+            "sustainability_mean": 0.120983,
+            "welfare_mean": 2.268887
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/independent_dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "information_restriction",
+          "metrics": {
+            "collapse_rate_mean": 0.95233,
+            "contribution_total_mean": 0.07238,
+            "sustainability_mean": 0.084663,
+            "welfare_mean": 1.748908
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/independent_dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "collapse_rate_mean": 0.95233,
+            "contribution_total_mean": 0.07238,
+            "sustainability_mean": 0.084663,
+            "welfare_mean": 1.748908
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/independent_dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_penalty",
+          "metrics": {
+            "collapse_rate_mean": 0.95233,
+            "contribution_total_mean": 0.07238,
+            "sustainability_mean": 0.084663,
+            "welfare_mean": 1.745258
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/independent_dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_reputation",
+          "metrics": {
+            "collapse_rate_mean": 0.95217,
+            "contribution_total_mean": 0.07255,
+            "sustainability_mean": 0.084674,
+            "welfare_mean": 10.972855
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/independent_dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "tax_schedule",
+          "metrics": {
+            "collapse_rate_mean": 0.95233,
+            "contribution_total_mean": 0.07238,
+            "sustainability_mean": 0.084663,
+            "welfare_mean": 1.748908
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/independent_dqn",
+          "world": "public_goods"
+        },
+        {
+          "institution": "contribution_matching",
+          "metrics": {
+            "collapse_rate_mean": 0.99515,
+            "contribution_total_mean": 0.00701,
+            "sustainability_mean": 0.080623,
+            "welfare_mean": 1.690054
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/centralized_critic",
+          "world": "public_goods"
+        },
+        {
+          "institution": "information_restriction",
+          "metrics": {
+            "collapse_rate_mean": 0.99592,
+            "contribution_total_mean": 0.0066,
+            "sustainability_mean": 0.080427,
+            "welfare_mean": 1.686285
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/centralized_critic",
+          "world": "public_goods"
+        },
+        {
+          "institution": "none",
+          "metrics": {
+            "collapse_rate_mean": 0.99696,
+            "contribution_total_mean": 0.00443,
+            "sustainability_mean": 0.080286,
+            "welfare_mean": 1.684219
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/centralized_critic",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_penalty",
+          "metrics": {
+            "collapse_rate_mean": 0.99616,
+            "contribution_total_mean": 0.00589,
+            "sustainability_mean": 0.080381,
+            "welfare_mean": 1.684964
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/centralized_critic",
+          "world": "public_goods"
+        },
+        {
+          "institution": "public_goods_reputation",
+          "metrics": {
+            "collapse_rate_mean": 0.9959,
+            "contribution_total_mean": 0.00615,
+            "sustainability_mean": 0.080397,
+            "welfare_mean": 3.97559
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/centralized_critic",
+          "world": "public_goods"
+        },
+        {
+          "institution": "tax_schedule",
+          "metrics": {
+            "collapse_rate_mean": 0.99626,
+            "contribution_total_mean": 0.00582,
+            "sustainability_mean": 0.080376,
+            "welfare_mean": 1.685542
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/public_goods_phase3_full/centralized_critic",
+          "world": "public_goods"
+        }
+      ],
+      "sourcePath": "outputs/public_goods_phase3_full/mind_comparison.csv",
+      "summary": "Commons economy with contribution, extraction, regeneration, collapse, and reward institutions.",
+      "title": "Public Goods"
+    },
+    {
+      "baselineInstitution": "deferred_acceptance",
+      "id": "labor_market",
+      "institutionLabel": "mechanism",
+      "institutions": [
+        "deferred_acceptance"
+      ],
+      "interpretation": "This is the strongest MARL warning. Centralized-critic has the highest welfare but much weaker stability and truthfulness, so the headline is a metric tradeoff, not simple improvement.",
+      "metrics": [
+        {
+          "better": "higher",
+          "key": "total_welfare_mean",
+          "label": "welfare"
+        },
+        {
+          "better": "higher",
+          "key": "stability_mean",
+          "label": "stability"
+        },
+        {
+          "better": "higher",
+          "key": "truthful_report_rate_mean",
+          "label": "truthfulness"
+        },
+        {
+          "better": "lower",
+          "key": "manipulation_gain_mean_mean",
+          "label": "manipulation gain"
+        }
+      ],
+      "minds": [
+        "q_learning",
+        "dqn",
+        "ppo",
+        "independent_dqn",
+        "centralized_critic"
+      ],
+      "rows": [
+        {
+          "institution": "deferred_acceptance",
+          "metrics": {
+            "manipulation_gain_mean_mean": 0.002543,
+            "stability_mean": 0.95076,
+            "total_welfare_mean": 3.639301,
+            "truthful_report_rate_mean": 0.78585
+          },
+          "mind": "q_learning",
+          "mindLabel": "Q-learning",
+          "nSeeds": 20,
+          "sourceDir": "outputs/labor_market_full",
+          "world": "labor_market"
+        },
+        {
+          "institution": "deferred_acceptance",
+          "metrics": {
+            "manipulation_gain_mean_mean": 0.005684,
+            "stability_mean": 0.97498,
+            "total_welfare_mean": 3.642764,
+            "truthful_report_rate_mean": 0.703857
+          },
+          "mind": "dqn",
+          "mindLabel": "DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/labor_market_phase3_full/dqn",
+          "world": "labor_market"
+        },
+        {
+          "institution": "deferred_acceptance",
+          "metrics": {
+            "manipulation_gain_mean_mean": -0.012034,
+            "stability_mean": 0.9497,
+            "total_welfare_mean": 3.643217,
+            "truthful_report_rate_mean": 0.575093
+          },
+          "mind": "ppo",
+          "mindLabel": "PPO",
+          "nSeeds": 20,
+          "sourceDir": "outputs/labor_market_phase3_full/ppo",
+          "world": "labor_market"
+        },
+        {
+          "institution": "deferred_acceptance",
+          "metrics": {
+            "manipulation_gain_mean_mean": 0.00303,
+            "stability_mean": 0.95468,
+            "total_welfare_mean": 3.658382,
+            "truthful_report_rate_mean": 0.67244
+          },
+          "mind": "independent_dqn",
+          "mindLabel": "Independent DQN",
+          "nSeeds": 20,
+          "sourceDir": "outputs/labor_market_phase3_full/independent_dqn",
+          "world": "labor_market"
+        },
+        {
+          "institution": "deferred_acceptance",
+          "metrics": {
+            "manipulation_gain_mean_mean": -0.009489,
+            "stability_mean": 0.74923,
+            "total_welfare_mean": 3.820602,
+            "truthful_report_rate_mean": 0.433143
+          },
+          "mind": "centralized_critic",
+          "mindLabel": "Centralized critic",
+          "nSeeds": 20,
+          "sourceDir": "outputs/labor_market_phase3_full/centralized_critic",
+          "world": "labor_market"
+        }
+      ],
+      "sourcePath": "outputs/labor_market_phase3_full/mind_comparison.csv",
+      "summary": "Worker-report matching market with deferred acceptance, stability, truthfulness, and welfare diagnostics.",
+      "title": "Labor Market"
+    }
+  ]
+}

@@ -37,13 +37,15 @@ def encode_observation(
 ) -> np.ndarray:
     """Convert structured observations into a stable float vector.
 
-    Pricing Arena states are two previous discrete actions; when `action_dim`
-    is supplied those are encoded as two one-hot vectors. Other structured
+    Pricing Arena states are previous discrete actions; when `action_dim`
+    is supplied those are encoded as one one-hot vector per action. Other structured
     observations are recursively flattened, then padded/truncated if `obs_dim`
     is fixed by the caller.
     """
-    if action_dim is not None and isinstance(obs, tuple) and len(obs) == 2:
-        vector = np.zeros(2 * action_dim, dtype=float)
+    if action_dim is not None and isinstance(obs, tuple) and all(
+        isinstance(item, (int, np.integer)) for item in obs
+    ):
+        vector = np.zeros(len(obs) * action_dim, dtype=float)
         for offset, item in enumerate(obs):
             index = int(item)
             if 0 <= index < action_dim:

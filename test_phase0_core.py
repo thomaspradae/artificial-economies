@@ -163,6 +163,22 @@ class PricingArenaWrapperTests(unittest.TestCase):
         _, _, _, info = world.step([18, 18])
         self.assertEqual(info["p1"], 5.5)
 
+    def test_pricing_arena_world_supports_more_than_two_firms(self):
+        cfg = MarketConfig(mechanism="price_cap", quality=np.array([8.0, 8.0, 8.0]))
+        world = PricingArenaWorld(config=cfg, institution=PriceCap(price_cap=5.5), seed=9)
+
+        next_state, rewards, done, info = world.step([18, 17, 16])
+
+        self.assertEqual(next_state, (18, 17, 16))
+        self.assertEqual(len(rewards), 3)
+        self.assertFalse(done)
+        self.assertEqual(info["n_firms"], 3.0)
+        self.assertEqual(info["p1"], 5.5)
+        self.assertEqual(info["p2"], 5.5)
+        self.assertEqual(info["p3"], 5.5)
+        self.assertIn("profit_total", info)
+        self.assertAlmostEqual(info["profit_total"], float(info["profit1"] + info["profit2"] + info["profit3"]))
+
 
 class CoreLoggerTests(unittest.TestCase):
     def test_logger_writes_manifest_steps_and_summary(self):

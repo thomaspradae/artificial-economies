@@ -12,3 +12,7 @@ outputs/
 literature/secrets.env
 literature/pdfs/
 literature/text/
+.ollama-local/
+.ollama-models/
+explorer/node_modules/
+explorer/dist/
