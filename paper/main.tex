@@ -58,12 +58,16 @@ or short-horizon artifacts.
 Economic mechanisms are usually evaluated against a model of strategic behavior:
 equilibrium prices, truthful bidding, efficient allocation, or some other
 theoretical benchmark. That evaluation is only as good as the behavioral model
-behind it. This paper sets out to find out what happens when institutions designed around classical economic assumptions are placed in front of learning agents; which guarantees survive, which break, and does the break depend on the
+behind it. This paper asks what happens when institutions designed around
+classical economic assumptions are placed in front of learning agents: which
+guarantees survive, which break, and does the break depend on the
 learning architecture?
 
-We answer this with five small, controlled economic worlds, a pricing duopoly (Pricing Arena), a
-scarce-resource trade economy (Resource Island), a sealed-bid auction (Auction House), a common-pool resource
-game (Public Goods), and a two-sided labor match (Labor Market), each paired with a classical benchmark and a
+We answer this with five small, controlled economic worlds, presented below in
+order of benchmark strength: a sealed-bid auction (Auction House), a two-sided
+labor match (Labor Market), a pricing duopoly (Pricing Arena), a common-pool
+resource game (Public Goods), and a scarce-resource trade economy (Resource
+Island). Each is paired with a classical benchmark and a
 shared ladder of learning architectures: random behavior, tabular Q-learning,
 deep Q-networks, proximal policy optimization, independent multi-agent
 Q-learning, and centralized-critic training. These architectures are not a scale
@@ -161,28 +165,18 @@ feasible welfare, allocative efficiency, ex-post regret, overbidding,
 underbidding, truthful-bid distance, first-price shading distance, and no-sale
 rate.
 
-\subsection{Classical Benchmark and Known-Answer Validation}
+\subsection{Known-Answer Validation}
 
-Auction House carries the most direct classical benchmarks in this project. In a
-private-values second-price auction, bidding one's true value is weakly dominant
-regardless of what other bidders do \citep{vickrey1961}. In a symmetric
-first-price auction with risk-neutral bidders and independent private values,
-equilibrium bids are shaded below value \citep{milgrom2004}. A reserve price
-introduces a known revenue-efficiency tradeoff: it can raise seller revenue by
-withholding sales to low-value bidders, at the cost of realized welfare on the
-sales it prevents \citep{myerson1981}. The clock abstraction implemented here
-shares the second-price reference point: dropping out at true value is the
-truthful benchmark, just as bidding true value is in the sealed-bid version.
-
-These predictions are checked directly before any learned result is interpreted.
-The known-answer runner confirms that truthful bidding has zero grid regret in
-second-price auctions for both two and three bidders, and that the first-price
-shading benchmark bids strictly below value at the same bidder counts.
-Separately, unit tests cover allocation, first-price and second-price payment,
-reserve and no-sale behavior, clock clearing, deterministic tie-breaking, and
-the information-policy observation transforms. The obligation this creates is
-direct: a learned bidder is judged by its distance from a known correct bid, not
-by whether it earns a positive payoff.
+The benchmark obligations for Auction House are stated in Section 3: truthful
+second-price bidding, first-price bid shading, and the reserve-price
+revenue-efficiency tradeoff. The validation layer checks those obligations
+before learned bidders are interpreted. The known-answer runner confirms that
+truthful bidding has zero grid regret in second-price auctions for both two and
+three bidders, and that the first-price shading benchmark bids strictly below
+value at the same bidder counts. Separately, unit tests cover allocation,
+first-price and second-price payment, reserve and no-sale behavior, clock
+clearing, deterministic tie-breaking, and the information-policy observation
+transforms.
 
 Table~\ref{tab:auction-status} lists all six implemented scenarios with their
 validation status. The three sealed-bid formats carry the most direct benchmarks
@@ -376,28 +370,19 @@ The world records match rate, worker welfare, employer welfare, total welfare,
 blocking-pair counts, a stability measure, truthful-report rate,
 manipulation-gain diagnostics, and fixed hand-checkable benchmark cases.
 
-\subsection{Classical Benchmark and Known-Answer Validation}
+\subsection{Known-Answer Validation}
 
-Worker-proposing deferred acceptance has two exact properties under canonical
-assumptions: the resulting matching is stable, meaning no unmatched
-worker-employer pair would both prefer to match with each other, and truthful
-reporting is a dominant strategy for the proposing side
-\citep{galeshapley1962,rothsotomayor1990,roth1984}. Neither property is a scalar
-target in the way a Nash price is. Both are checkable conditions on the
-resulting matching, which makes this world's benchmark exact even though it
-does not define a single payoff number to converge toward.
-
-Four fixed benchmark cases validate the mechanism layer before any learned
-result is interpreted: a stable, fully truthful matching case, which must pass
-with zero blocking pairs; a deliberately forced unstable case, which must be
-identified by the blocking-pair check; a welfare-accounting case, which must
-sum payoffs correctly; and a direct check that no worker has a profitable
-deviation from truthful reporting under standard worker-proposing deferred
-acceptance. All four pass. This last case matters for interpretation: any
-later decline in truthful-report rate is not evidence that the implemented
-mechanism fails to be strategy-proof. The mechanism-level check confirms the
-strategy-proof property; different learned reports are behavioral outcomes of
-the learners.
+The benchmark obligations for Labor Market are stability and proposing-side
+strategy-proofness under worker-proposing deferred acceptance. Four fixed cases
+validate that mechanism layer before learned results are interpreted: a stable,
+fully truthful matching case, which must pass with zero blocking pairs; a
+deliberately forced unstable case, which must be identified by the blocking-pair
+check; a welfare-accounting case, which must sum payoffs correctly; and a direct
+check that no worker has a profitable deviation from truthful reporting under
+standard worker-proposing deferred acceptance. All four pass. This last case
+matters for interpretation: a later decline in truthful-report rate is not
+evidence that the implemented mechanism fails to be strategy-proof. It is a
+behavioral outcome of the learner.
 
 \subsection{Baseline Result}
 
@@ -467,7 +452,7 @@ misreport. The appropriate interpretation is behavioral: learners can converge
 on non-truthful reports that do not pay off in the benchmark sense, while still
 changing realized stability and welfare through the policies they learn.
 
-\subsection{Metric Conflict}
+\subsection{Relation to the Main Question}
 
 The centralized-critic row in Table~\ref{tab:labor-crossmind} is this world's
 clearest metric conflict. Centralized critic produces the highest total welfare
@@ -756,16 +741,17 @@ Demand shock & Passes all checks & Robustness check, not a policy result \\
 \label{tab:pricing-mechanism-status}
 \end{table}
 
-Pricing Arena's most interpretable result is a guardrail that succeeds on its
-direct target while failing to provide an invariant guarantee over adjacent
-economic outcomes: price caps lower exploitability for every learner tested,
-but their effect on profit and collusion is learner-dependent, with the DQN
-effect emerging only after sufficient training. The remaining four mechanisms
-are correctly implemented, but at current parameters their effects are too
-small or inconsistent to support a general claim beyond the reported values.
-Whether the price-cap result and the secondary-mechanism patterns persist as
-the number of firms increases beyond two is addressed in the cross-world
-synthesis section.
+\subsection{Relation to the Main Question}
+
+Pricing Arena answers the main question through metric disagreement and
+training-horizon dependence. Price caps lower exploitability for every learner
+tested, but their effect on profit and collusion is learner-dependent, with the
+DQN effect emerging only after sufficient training. The remaining four
+mechanisms are correctly implemented, but at current parameters their effects
+are too small or inconsistent to support a general claim beyond the reported
+values. Whether the price-cap result and the secondary-mechanism patterns
+persist as the number of firms increases beyond two is addressed in the
+cross-world synthesis section.
 
 
 \section{Public Goods}
@@ -789,29 +775,18 @@ stock, sustainability, total contribution, total extraction, contribution and
 extraction rates, collapse-rate diagnostics, welfare, inequality, penalty
 totals, matched contribution, reputation bonuses, and tax revenue.
 
-\subsection{Classical Benchmark and Known-Answer Validation}
+\subsection{Known-Answer Validation}
 
-Classical theory gives a directional benchmark rather than a point prediction:
-public goods are underprovided because each contributor captures only part of
-the social benefit of contributing, and common-pool resources are overused
-because each extractor imposes a depletion cost on others that it does not fully
-internalize \citep{samuelson1954,hardin1968}. Larger groups can intensify this
-problem because each individual's contribution becomes less pivotal to the
-aggregate outcome. These claims do not specify a scalar value a learned
-population should reach. They specify two reference regimes, free-riding at one
-end and cooperative or social provision at the other. An institution is
-therefore judged by whether it moves learned behavior from the first regime
-toward the second, not by whether it reaches an exact target.
-
-The known-answer runner checks that the implementation can distinguish these
-regimes independently of any learned policy, at group sizes of two, four, and
-eight agents. All three checks pass. This does not validate that a learned
-population converges near the social optimum. It validates that, if a learned
-population did move toward that regime, the code would register the difference
-from free-riding correctly. That is a narrower claim than the exact benchmarks
-in Auction House or Labor Market, and the rest of this section treats welfare
-movement as evidence only when it is accompanied by the relevant state
-variables.
+The benchmark obligations for Public Goods are bracketed rather than pointed:
+the implementation must distinguish free-riding from cooperative provision and
+must report welfare separately from the underlying resource state. The
+known-answer runner checks those regimes independently of any learned policy, at
+group sizes of two, four, and eight agents. All three checks pass. This does not
+validate that a learned population converges near the social optimum. It
+validates that, if a learned population moved toward that regime, the code would
+register the difference from free-riding correctly. The rest of this section
+therefore treats welfare movement as evidence only when it is accompanied by the
+relevant state variables.
 
 \subsection{Q-Learning Full Results}
 
@@ -1203,7 +1178,7 @@ for Q-learning to 0.04 for PPO. The practical force of an identical rule
 therefore depends on how much a given learner attempts to trade in the first
 place.
 
-\subsection{What Remains Open}
+\subsection{Relation to the Main Question}
 
 The DQN and independent-DQN trade result above is reported at a single training
 budget. Pricing Arena's price-cap result showed that a single-budget reading of
