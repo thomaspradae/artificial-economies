@@ -986,56 +986,37 @@ sweep is meant to answer.
 
 \section{Resource Island}
 
-\subsection{World}
+\subsection{World and Benchmark}
 
 Resource Island is a bounded-grid gather-and-trade economy. Agents move across
-the grid, gather food and wood, maintain an energy stock that is drawn down
-each round, hold separate food and wood inventories, and can starve if energy
-runs out. Available actions are staying in place, moving in one of four
-directions, gathering from the current cell, and offering food for wood or wood
-for food in trade. The world implements property rights, redistribution, trade
-price controls, and a reputation system as swappable institutions on top of
-this base economy. It was built specifically to test whether the platform's
-shared \code{World}/\code{Agent}/\code{Institution} interface holds up outside a
-two-firm pricing game, in a setting with spatial structure, inventory, and
-multilateral exchange rather than a single simultaneous-move market.
+the grid, gather food and wood, maintain an energy stock that is drawn down each
+round, hold separate food and wood inventories, and can starve if energy runs
+out. Available actions are staying in place, moving in one of four directions,
+gathering from the current cell, and offering food for wood or wood for food in
+trade. The world implements property rights, redistribution, trade price
+controls, and a reputation system as swappable institutions on top of this base
+economy. It tests the shared \code{World}/\code{Agent}/\code{Institution}
+interface outside a two-firm pricing game, in a setting with spatial structure,
+inventory, and multilateral exchange rather than a single simultaneous-move
+market.
 
-The world records survival rate, welfare, specialization, inequality over
-time, resource sustainability, trade attempts, successful trades,
-inventory-blocked trades, institution-blocked trades, property claims, property
-violations, and property opportunities. This last group exists because Resource
-Island, unlike Pricing Arena or Auction House, has no external closed-form
-benchmark to check learned behavior against; its central obligation is instead
-to demonstrate that each institution was placed under economic pressure before
-any welfare or trade number from it is interpreted.
+Unlike Pricing Arena or Auction House, Resource Island has no closed-form
+external benchmark. Classical theory supplies qualitative expectations:
+property rights should matter when resources are contested, trade should raise
+welfare when agents have heterogeneous needs or access, reputation should support
+repeated exchange, and price controls can prevent unequal exchange while also
+blocking mutually beneficial trades. The benchmark obligation is therefore
+activation. An institution is interpreted only if the run creates the behavior
+the institution is meant to govern: contested resource access for property
+rights, unequal offers for trade controls, and repeated exchange for reputation.
 
-\subsection{Activation as the Governing Question}
-
-Classical theory gives qualitative predictions here rather than a single target
-value: property rights should reduce conflict over contested resources, trade
-should raise welfare when agents have heterogeneous needs or access, reputation
-should support repeated exchange, and price controls can protect against
-exploitative trades while also blocking mutually beneficial ones. None of these
-predictions specifies a number a learned agent should reach. What they do
-specify is a precondition: an institution cannot be evaluated unless the world
-creates the situation the institution is meant to govern. A property-rights rule
-is not evaluated if no non-owner ever has reason to access a claimed cell, and a
-trade price control is not evaluated if every trade already happens to be
-one-for-one. This section therefore reports Resource Island results only under
-a configuration with contested resources, heterogeneous resource pressure,
-unequal trade offers, and direct activation diagnostics.
-
-\subsection{Activation Check}
-
-Resource Island uses activation diagnostics as a prerequisite for interpreting
-institution effects. The reported configuration contains contested resource
-layouts, so multiple agents have reason to access the same cells; unequal trade
-offers, so trade price controls can bind; specialization pressure, through
-heterogeneous resource preferences and starting inventories; and direct counters
-for trade attempts, blocked trades, property opportunities, property violations,
-and institution blocks. These diagnostics confirm that the reported runs place
-the relevant institutions under economic pressure before welfare or trade
-differences are interpreted.
+The reported configuration is built around that obligation. It uses contested
+resource layouts, heterogeneous resource pressure, unequal trade offers, and
+direct counters for trade attempts, successful trades, inventory-blocked trades,
+institution-blocked trades, property claims, property violations, and property
+opportunities. These diagnostics make the Resource Island evidence
+activation-conditioned: welfare and survival are interpreted only together with
+the counters showing whether the relevant institutional channel was exercised.
 
 \subsection{Baseline}
 
@@ -1177,11 +1158,15 @@ Centralized critic & 0.9150 & 1.2484 & 8.6973 & 10.8525 & 0.4073 & 0.8920 \\
 \label{tab:resource-crossmind}
 \end{table}
 
-This is a different architecture effect from the one observed in Pricing Arena.
-In Pricing Arena, DQN eventually learns a profit-preserving response to a price
-constraint. In Resource Island, DQN and independent-DQN underuse a productive
-channel that is demonstrably available, since three other learners in the same
-environment use it extensively. The failure mode here is non-discovery of a
+The same environment supports high trade volume for three of the five learners,
+which is why the low DQN and independent-DQN trade counts are not interpreted as
+evidence that the world lacks trade opportunities. They are evidence that, at
+the tested budget, those learners use the exchange channel much less than
+Q-learning, PPO, or the centralized critic. This is a different architecture
+effect from the one observed in Pricing Arena. In Pricing Arena, DQN eventually
+learns a profit-preserving response to a price constraint. In Resource Island,
+DQN and independent-DQN underuse a productive channel that the other learners
+demonstrably use. The failure mode is non-discovery or weak reinforcement of a
 productive market opportunity rather than exploitation of a regulatory
 guardrail.
 
@@ -1208,36 +1193,38 @@ Centralized critic & 24.9577 & 7.7649 & 1.4858 \\
 \label{tab:resource-activation-by-mind}
 \end{table}
 
-Reputation therefore amplifies an exchange channel that already has to exist
-for the reputation bonus to have behavioral content. For DQN and
-independent-DQN, the baseline trade channel is limited, so the reputation effect
-is also limited. Trade price controls show the reverse pattern: successful
-trade falls to zero for every learner under this institution, so the formal
-rule binds universally, but the amount of blocked-trade pressure differs by
-learner, from 4.79 for Q-learning to 0.04 for PPO. The practical economic effect
-of the same rule therefore depends on how much a given learner attempts to
-trade in the first place.
+Reputation amplifies an exchange channel that already has to exist for the
+reputation bonus to have behavioral content. For DQN and independent-DQN, the
+baseline trade channel is limited, so the amplification is limited as well.
+Trade price controls show the opposite pattern: successful trade falls to zero
+for every learner under this institution, so the formal rule binds universally,
+but the amount of blocked-trade pressure differs sharply by learner, from 4.79
+for Q-learning to 0.04 for PPO. The practical force of an identical rule
+therefore depends on how much a given learner attempts to trade in the first
+place.
 
 \subsection{What Remains Open}
 
 The DQN and independent-DQN trade result above is reported at a single training
-budget, and Pricing Arena's price-cap result showed why single-budget
-interpretations require caution. It is possible that DQN discovers the trade
-channel more slowly than PPO or the centralized critic rather than failing to
-discover it altogether. Until a budget ladder analogous to
-Table~\ref{tab:pricing-budget-ladder} is run for this world, the claim is
-limited to the training budget actually tested.
+budget. Pricing Arena's price-cap result showed that a single-budget reading of
+a learning-architecture effect can be misleading: a result that looked negative
+at 1,000 steps became positive and statistically significant at the full
+40,000-step budget. The same caution applies here. Learning to trade in Resource
+Island requires a sequence of actions: moving to resources, gathering,
+constructing an offer, and finding a compatible counterparty. DQN's off-policy,
+replay-buffer exploration could plausibly discover and reinforce that sequence
+more slowly than PPO's on-policy exploration, without that implying that DQN
+cannot learn it at all.
 
-Resource Island's contribution is different in kind from Pricing Arena's. The
-central requirement is activation: the world must place property rights, trade
-controls, and reputation under measurable economic pressure before their effects
-can be interpreted. Under that requirement, trade price controls bind and
-eliminate exchange, reputation amplifies trade where a learner already engages
-in it, and property rights become measurable rather than purely nominal. The
-learner-architecture split is consistent across the baseline and the
-institutions tested: Q-learning, PPO, and the centralized critic sustain
-meaningful trade economies, while DQN and independent-DQN do not at the training
-budget tested here.
+Until a budget ladder analogous to Table~\ref{tab:pricing-budget-ladder} is run
+for this world, the claim is limited to the training budget actually tested. At
+that budget, trade price controls bind and eliminate exchange, reputation
+amplifies trade where a learner already engages in it, and property rights are
+measurable through opportunity counters. The learner split is also
+activation-conditioned: Q-learning, PPO, and the centralized critic sustain
+meaningful trade economies, while DQN and independent-DQN show low trade
+activation relative to those learners. Whether that gap narrows, holds, or
+reverses with more training remains open.
 
 \section{Cross-World Synthesis}
 
