@@ -232,70 +232,65 @@ function WorldBentoDashboard({
   const laggard = ordered[ordered.length - 1];
 
   return (
-    <section className={`world-dashboard ${presentation.accentClass}`} aria-label={`${displayWorldTitle(world)} dashboard`}>
-      <article className="dashboard-tile hero-tile">
-        <span>{presentation.type}</span>
-        <h2>{presentation.question}</h2>
-        <p>{presentation.finding}</p>
-      </article>
-
-      <article className="dashboard-tile benchmark-tile">
-        <span>Benchmark</span>
-        <strong>{presentation.benchmark}</strong>
-      </article>
-
-      <article className="dashboard-tile metric-tile">
-        <span>Selected Metric</span>
-        <strong>{metric.label}</strong>
-        <p>{metric.better === "context" ? "Read with mechanism context" : `${metric.better} is better`}</p>
-      </article>
-
-      <article className="dashboard-tile institution-tile">
-        <span>{world.institutionLabel}</span>
-        <strong>{shortLabel(institution)}</strong>
-      </article>
-
-      <article className="dashboard-tile channel-tile">
-        <span>Architecture-Sensitive Channel</span>
-        <strong>{presentation.channel}</strong>
-      </article>
-
-      <article className="dashboard-tile leader-tile">
-        <span>Best On Metric</span>
-        <strong>{leader ? learnerLabels[leader.mind] : "n/a"}</strong>
-        <p>{leader ? formatMetric(leader.metrics[metric.key]) : "n/a"}</p>
-      </article>
-
-      <article className="dashboard-tile spread-tile">
-        <span>Across-Mind Spread</span>
-        <strong>{formatMetric(spread)}</strong>
-        <p>
-          {leader && laggard
-            ? `${learnerLabels[leader.mind]} to ${learnerLabels[laggard.mind]}`
-            : "n/a"}
-        </p>
-      </article>
-
-      <article className="dashboard-tile learner-strip-tile">
-        <div className="section-title dark-title">
-          <span>Learner Suite</span>
-          <strong>{displayWorldTitle(world)}</strong>
+    <section className={`world-dashboard-minimal ${presentation.accentClass}`} aria-label={`${displayWorldTitle(world)} dashboard`}>
+      <article className="world-thesis-panel">
+        <div className="world-thesis-heading">
+          <span>{presentation.type}</span>
+          <h2>{presentation.question}</h2>
+          <p>{presentation.finding}</p>
         </div>
-        <div className="learner-dashboard-list">
-          {rows.map((row) => (
-            <div className="learner-dashboard-row" key={`${row.mind}-${row.institution}`}>
-              <span>{learnerLabels[row.mind]}</span>
-              <MetricPill value={row.metrics[metric.key]} min={min} max={max} />
-            </div>
-          ))}
+
+        <div className="world-obligation-list">
+          <InterpretiveRow label="Classical anchor" text={presentation.benchmark} />
+          <InterpretiveRow label="Architecture signal" text={presentation.channel} />
+          <InterpretiveRow label="Claim boundary" text={presentation.limitation} />
         </div>
       </article>
 
-      <article className="dashboard-tile caveat-tile">
-        <span>Claim Boundary</span>
-        <strong>{presentation.limitation}</strong>
-      </article>
+      <aside className="selected-view-panel">
+        <div>
+          <span>Selected view</span>
+          <strong>{shortLabel(institution)}</strong>
+          <p>
+            Reading <em>{metric.label}</em>; {metric.better === "context" ? "interpret direction with the mechanism" : `${metric.better} is better`}.
+          </p>
+        </div>
+        <div className="selected-view-stats">
+          <div>
+            <span>Best on metric</span>
+            <strong>{leader ? learnerLabels[leader.mind] : "n/a"}</strong>
+            <p>{leader ? formatMetric(leader.metrics[metric.key]) : "n/a"}</p>
+          </div>
+          <div>
+            <span>Across-mind spread</span>
+            <strong>{formatMetric(spread)}</strong>
+            <p>
+              {leader && laggard
+                ? `${learnerLabels[leader.mind]} to ${learnerLabels[laggard.mind]}`
+                : "n/a"}
+            </p>
+          </div>
+        </div>
+      </aside>
+
+      <div className="learner-dashboard-list minimal-bars">
+        {rows.map((row) => (
+          <div className="learner-dashboard-row" key={`${row.mind}-${row.institution}`}>
+            <span>{learnerLabels[row.mind]}</span>
+            <MetricPill value={row.metrics[metric.key]} min={min} max={max} />
+          </div>
+        ))}
+      </div>
     </section>
+  );
+}
+
+function InterpretiveRow({ label, text }: { label: string; text: string }) {
+  return (
+    <div className="interpretive-row">
+      <span>{label}</span>
+      <p>{text}</p>
+    </div>
   );
 }
 
