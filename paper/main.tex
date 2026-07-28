@@ -247,7 +247,7 @@ rises, welfare falls, and a positive share of auctions produce no sale.
 \subsection{Cross-Mind Sealed-Bid Results}
 
 Table~\ref{tab:auction-crossmind-second} reports second-price results across
-the full learner suite, where the benchmark is sharpest. PPO is closest to the
+the full learner suite, where the benchmark is most direct. PPO is closest to the
 intended outcome of every learner tested: lowest ex-post regret at \(0.187\),
 highest welfare at \(6.389\), and highest allocative efficiency at \(0.762\).
 DQN and independent-DQN raise seller revenue above the Q-learning baseline, but
@@ -767,56 +767,222 @@ Whether the price-cap result and the secondary-mechanism patterns persist as
 the number of firms increases beyond two is addressed in the cross-world
 synthesis section.
 
+
 \section{Public Goods}
 
 \subsection{World}
 
-Public Goods is a repeated common-pool resource environment, following the
-standard tension between private extraction and shared surplus
-\citep{samuelson1954,hardin1968}. Agents choose
-between contributing to the pool, extracting from it, or remaining inactive.
-Extraction pays private reward but depletes the shared stock; contribution costs
-the contributor but helps sustain the pool. When requested extraction exceeds
-available stock, extraction is rationed proportionally. Deterministic
-regeneration makes the sustainability channel easy to audit.
+Public Goods is a repeated common-pool resource and public-goods environment. In
+each round, agents choose between contributing to a shared pool, extracting from
+it, or remaining inactive. Contribution is individually costly but supports the
+shared state; extraction pays a private reward while depleting the pool. When
+requested extraction exceeds the available stock, extraction is rationed
+proportionally rather than allowed to run negative, and the pool regenerates
+deterministically each round. This makes the resource-state channel directly
+auditable.
 
-The implemented institutions are no intervention, a penalty schedule,
-contribution matching, reputation rewards, information restriction, and a
-generic tax-and-redistribution schedule. The main metrics are welfare,
-sustainability, total contribution, extraction relative to regeneration,
-inequality, collapse diagnostics, and tax revenue where applicable.
+The implemented institutions are no intervention, a penalty schedule aimed at
+extraction, contribution matching, reputation-based reward bonuses, an
+information-restriction variant that coarsens what agents observe about the
+pool, and a generic tax-and-redistribution schedule. The world records pool
+stock, sustainability, total contribution, total extraction, contribution and
+extraction rates, collapse-rate diagnostics, welfare, inequality, penalty
+totals, matched contribution, reputation bonuses, and tax revenue.
 
-\subsection{Q-Learning Full Run}
+\subsection{Classical Benchmark and Known-Answer Validation}
 
-The n=20 tabular Q-learning full run confirms the intended commons pressure. In
-the baseline, agents mostly extract and contribute little: sustainability is
-0.0892 and total contribution is 0.1418. Contribution matching improves both
-welfare and sustainability in this setting, reaching welfare 2.0808 and
-sustainability 0.1048. Reputation is a strong reward-shaping intervention, with
-welfare 9.5750, while the tax schedule mainly changes redistribution/accounting
-at the tested rates.
+Classical theory gives a directional benchmark rather than a point prediction:
+public goods are underprovided because each contributor captures only part of
+the social benefit of contributing, and common-pool resources are overused
+because each extractor imposes a depletion cost on others that it does not fully
+internalize \citep{samuelson1954,hardin1968}. Larger groups can intensify this
+problem because each individual's contribution becomes less pivotal to the
+aggregate outcome. These claims do not specify a scalar value a learned
+population should reach. They specify two reference regimes, free-riding at one
+end and cooperative or social provision at the other. An institution is
+therefore judged by whether it moves learned behavior from the first regime
+toward the second, not by whether it reaches an exact target.
 
-The effect validator classifies the tax schedule as mostly reward/accounting
-under this configuration, while penalty, contribution matching, reputation, and
-information restriction change state metrics relative to baseline. This is a
-diagnostic classification, not yet a final welfare ranking.
+The known-answer runner checks that the implementation can distinguish these
+regimes independently of any learned policy, at group sizes of two, four, and
+eight agents. All three checks pass. This does not validate that a learned
+population converges near the social optimum. It validates that, if a learned
+population did move toward that regime, the code would register the difference
+from free-riding correctly. That is a narrower claim than the exact benchmarks
+in Auction House or Labor Market, and the rest of this section treats welfare
+movement as evidence only when it is accompanied by the relevant state
+variables.
 
-\subsection{Cross-Mind Status}
+\subsection{Q-Learning Full Results}
 
-The full Public Goods learner suite shows that stronger function approximation
-or centralized training does not automatically solve the commons problem. Under
-no institution, Q-learning reaches welfare \(1.815\),
-sustainability \(0.089\), and contribution \(0.142\). DQN and fixed
-independent-DQN are close but contribute less; PPO and centralized-critic
-contribute almost nothing and sit near the lower sustainability regime.
+Table~\ref{tab:public-goods-qlearning} shows the full \(n=20\) Q-learning run
+across all six institutions. The baseline confirms the intended commons
+pressure directly: contribution is low, extraction is high relative to it, and
+the collapse-rate diagnostic is above \(0.9\). Contribution matching moves
+furthest from that baseline on the state variables, raising sustainability,
+contribution, and welfare together while lowering collapse. Reputation raises
+welfare far more sharply than any other institution, but its effect on
+sustainability and contribution is much smaller than its effect on reward. The
+tax schedule produces little movement in the state variables while generating
+positive tax revenue, which is precisely the pattern this world's reporting
+discipline is intended to detect.
 
-Contribution matching is the clearest state-changing intervention in the full
-learner-suite run. It improves Q-learning sustainability from \(0.089\) to \(0.105\) and
-fixed independent-DQN sustainability from \(0.085\) to \(0.121\), with a larger
-increase in contribution for independent-DQN. It does not rescue PPO in this
-configuration. The economic reading is therefore conditional: the institution
-can improve the state variables when the learner explores contribution, but a
-more capable policy class can still converge to low-contribution behavior.
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrrr}
+\toprule
+Institution & Sustainability & Contribution & Extraction & Welfare & Collapse \\
+\midrule
+None & 0.089 & 0.142 & 1.783 & 1.815 & 0.912 \\
+Penalty & 0.088 & 0.126 & 1.762 & 1.785 & 0.919 \\
+Contribution matching & 0.105 & 0.279 & 2.088 & 2.081 & 0.839 \\
+Reputation & 0.094 & 0.222 & 1.885 & 9.575 & 0.873 \\
+Information restriction & 0.088 & 0.125 & 1.760 & 1.799 & 0.920 \\
+Tax schedule & 0.089 & 0.134 & 1.773 & 1.808 & 0.916 \\
+\bottomrule
+\end{tabular}
+\caption{Public Goods, Q-learning full run across all institutions.}
+\label{tab:public-goods-qlearning}
+\end{table}
+
+Two institutions are particularly important for interpretation. The penalty
+schedule, although aimed directly at extraction, produces a slightly weaker
+outcome than no intervention at the tested parameters: welfare falls by
+\(0.030\) and collapse rises by \(0.007\) relative to baseline. This is not an
+implementation defect; the penalty is confirmed to bind, but it does not improve
+the commons under this configuration. Information restriction is close to
+baseline in every column and marginally weaker in most of them, so it does not
+support a positive institutional claim in the current run.
+
+Reputation illustrates why this world reports welfare separately from the
+resource state. Its welfare value, \(9.575\), is more than five times the
+baseline welfare, but sustainability moves only from \(0.089\) to \(0.094\), and
+contribution moves from \(0.142\) to \(0.222\). The reputation bonus mean,
+\(7.684\), accounts for most of the welfare increase as an institutional reward,
+not as a consequence of substantially lower extraction or higher contribution.
+Tax schedule is a stricter version of the same diagnostic: tax revenue rises by
+\(0.182\), while sustainability, contribution, and welfare are approximately
+unchanged. Welfare, tax revenue, contribution, extraction, and sustainability
+therefore have to be interpreted as separate quantities.
+
+\subsection{Cross-Mind Results}
+
+Table~\ref{tab:public-goods-baseline-crossmind} shows the no-institution
+baseline across the full learner suite. The main split is between learners that
+retain some contribution and learners that nearly eliminate it. PPO contributes
+\(0.000\), and centralized critic contributes \(0.004\), with collapse at or near
+\(1.0\) for both. DQN and independent-DQN sit between Q-learning and the two
+near-zero contributors, closer to Q-learning's level but still below it. In this
+world, additional function approximation or centralized training does not imply
+more contribution.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrrr}
+\toprule
+Mind & Sustainability & Contribution & Extraction & Welfare & Collapse \\
+\midrule
+Q-learning & 0.089 & 0.142 & 1.783 & 1.815 & 0.912 \\
+DQN & 0.085 & 0.071 & 1.692 & 1.748 & 0.954 \\
+PPO & 0.080 & 0.000 & 1.600 & 1.680 & 1.000 \\
+Independent-DQN & 0.085 & 0.072 & 1.693 & 1.749 & 0.952 \\
+Centralized critic & 0.080 & 0.004 & 1.606 & 1.684 & 0.997 \\
+\bottomrule
+\end{tabular}
+\caption{Public Goods, no-institution baseline, full learner suite.}
+\label{tab:public-goods-baseline-crossmind}
+\end{table}
+
+Table~\ref{tab:public-goods-matching-crossmind} shows contribution matching for
+the same five learners. The institution changes behavior for Q-learning, DQN,
+and especially independent-DQN, whose contribution rises from \(0.072\) in the
+baseline to \(0.413\) under matching. It produces little response for PPO or the
+centralized critic. PPO's contribution remains \(0.000\), and centralized
+critic's contribution rises only to \(0.007\). The same rule, under the same
+environmental configuration, therefore changes the contribution channel for some
+learners and leaves it nearly inactive for others.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Mind & Sustainability & Contribution & Welfare & Collapse \\
+\midrule
+Q-learning & 0.105 & 0.279 & 2.081 & 0.839 \\
+DQN & 0.096 & 0.170 & 1.923 & 0.904 \\
+PPO & 0.080 & 0.000 & 1.680 & 1.000 \\
+Independent-DQN & 0.121 & 0.413 & 2.269 & 0.805 \\
+Centralized critic & 0.081 & 0.007 & 1.690 & 0.995 \\
+\bottomrule
+\end{tabular}
+\caption{Public Goods, contribution matching, full learner suite.}
+\label{tab:public-goods-matching-crossmind}
+\end{table}
+
+Reputation, shown in Table~\ref{tab:public-goods-reputation-crossmind}, makes
+the reward-versus-state distinction sharper when every learner is compared side
+by side. Every learner's welfare rises above its own baseline. For DQN, welfare
+rises from \(1.748\) to \(12.444\), higher than Q-learning's reputation welfare
+of \(9.575\). For PPO, welfare rises from \(1.680\) to \(5.183\) while
+contribution remains \(0.000\). A reputation-driven welfare increase is
+therefore not equivalent to improvement in the underlying commons state.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Mind & Sustainability & Contribution & Welfare & Reputation Bonus \\
+\midrule
+Q-learning & 0.094 & 0.222 & 9.575 & 7.684 \\
+DQN & 0.085 & 0.072 & 12.444 & 10.696 \\
+PPO & 0.080 & 0.000 & 5.183 & 3.503 \\
+Independent-DQN & 0.085 & 0.073 & 10.973 & 9.224 \\
+Centralized critic & 0.080 & 0.006 & 3.976 & 2.290 \\
+\bottomrule
+\end{tabular}
+\caption{Public Goods, reputation system, full learner suite.}
+\label{tab:public-goods-reputation-crossmind}
+\end{table}
+
+PPO's row is the clearest metric-decomposition case in this world: welfare more
+than triples relative to its own baseline through the reputation bonus, while
+contribution remains zero. If welfare were reported alone, PPO under reputation
+would appear successful. The contribution and sustainability columns show that
+this is a reward-accounting effect rather than a resolved commons problem.
+
+\subsection{Group-Size Status}
+
+Whether this pattern is a free-riding mechanism in the group-size sense, or a
+fixed-configuration outcome at the group size tested so far, remains open. A
+sweep over \(n_{agents} \in \{2,4,8,16\}\) was created to test this directly,
+but completed, validated summary outputs for that sweep are not available
+locally at the time of writing. Local split directories exist for each group
+size without validated summary files behind them. The claims in this section
+are therefore limited to the group size actually tested and validated here, and
+claims about how free-riding scales with group size are deferred until that
+sweep produces validated output.
+
+\subsection{Relation to the Main Question}
+
+Public Goods shows a commons failure that welfare alone can misdescribe. The
+baseline confirms the intended free-riding pressure directly, and contribution
+matching is the institution that most clearly moves the underlying resource
+state for three of the five learners tested. Reputation and tax schedule
+illustrate the opposite pattern at different scales: reputation produces a
+large welfare increase on top of a much smaller state change, while tax schedule
+produces almost no state change behind its revenue number.
+
+The architecture split is substantial at the group size currently validated.
+PPO and centralized critic contribute at or near zero in the baseline and remain
+there under most institutions, including contribution matching. Q-learning,
+DQN, and especially independent-DQN respond to the same matching institution
+with increases in contribution and sustainability. Public Goods therefore
+supports the paper's central claim in a different form from Pricing Arena or
+Auction House: the guarantee that an incentive institution changes behavior is
+not architecture-invariant, and welfare cannot be read without the state
+variables the institution is meant to protect. Whether this split persists,
+sharpens, or narrows as group size changes is the open question the pending
+sweep is meant to answer.
 
 \section{Resource Island}
 
