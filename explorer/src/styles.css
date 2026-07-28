@@ -417,6 +417,209 @@ h1 {
   padding-top: 12px;
 }
 
+.compact-comparison {
+  grid-template-columns: minmax(460px, 1fr) minmax(460px, 1fr);
+}
+
+.world-dashboard {
+  display: grid;
+  grid-template-columns: 1.05fr 0.72fr 0.72fr 0.72fr;
+  grid-auto-rows: minmax(112px, auto);
+  gap: 12px;
+  margin-top: 12px;
+  padding: 18px;
+  border-radius: 26px;
+  background: #090909;
+  color: #111111;
+}
+
+.dashboard-tile {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 112px;
+  padding: 18px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 18px;
+  background: #f3f3f3;
+  overflow: hidden;
+}
+
+.dashboard-tile span {
+  display: block;
+  color: rgb(17 17 17 / 0.62);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dashboard-tile strong {
+  color: #111111;
+  font-size: clamp(1rem, 1.4vw, 1.55rem);
+  line-height: 1.05;
+}
+
+.dashboard-tile p {
+  max-width: 740px;
+  margin: 0;
+  color: rgb(17 17 17 / 0.7);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.hero-tile {
+  grid-row: span 2;
+  align-content: end;
+  min-height: 260px;
+  color: #f8f8f8;
+  background: #262626;
+}
+
+.hero-tile span,
+.hero-tile p {
+  color: rgb(255 255 255 / 0.68);
+}
+
+.hero-tile h2 {
+  max-width: 760px;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.8rem, 5vw, 5.8rem);
+  font-weight: 820;
+  line-height: 0.92;
+  letter-spacing: 0;
+}
+
+.benchmark-tile,
+.channel-tile,
+.caveat-tile {
+  grid-column: span 2;
+}
+
+.learner-strip-tile {
+  grid-column: span 2;
+  grid-row: span 2;
+  min-height: 236px;
+  background: #1f1f1f;
+}
+
+.learner-strip-tile .dark-title span,
+.learner-strip-tile .dark-title strong {
+  color: rgb(255 255 255 / 0.76);
+}
+
+.learner-dashboard-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 4px;
+}
+
+.learner-dashboard-row {
+  display: grid;
+  grid-template-columns: 132px minmax(120px, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.learner-dashboard-row > span {
+  color: rgb(255 255 255 / 0.78);
+  font-size: 0.86rem;
+  font-weight: 760;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.metric-pill {
+  display: grid;
+  position: relative;
+  align-items: center;
+  min-height: 30px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.09);
+}
+
+.metric-pill-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: 999px;
+  background: var(--world-accent, #9b8cff);
+  animation: grow-dashboard-bar 620ms cubic-bezier(0.19, 1, 0.22, 1) both;
+}
+
+.metric-pill strong {
+  position: relative;
+  z-index: 1;
+  justify-self: end;
+  padding: 0 12px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.42);
+}
+
+.metric-tile,
+.leader-tile {
+  background: #ffffff;
+}
+
+.institution-tile,
+.spread-tile {
+  background: var(--world-soft, #eeeaff);
+}
+
+.channel-tile {
+  background: var(--world-accent, #9b8cff);
+}
+
+.channel-tile span,
+.channel-tile strong,
+.channel-tile p {
+  color: #111111;
+}
+
+.caveat-tile {
+  background: #dfe3e0;
+}
+
+.accent-violet {
+  --world-accent: #9277ff;
+  --world-soft: #e8e2ff;
+}
+
+.accent-green {
+  --world-accent: #79bd88;
+  --world-soft: #dfefe3;
+}
+
+.accent-orange {
+  --world-accent: #ff744d;
+  --world-soft: #ffe2d7;
+}
+
+.accent-yellow {
+  --world-accent: #eadf58;
+  --world-soft: #f7f1b8;
+}
+
+.accent-blue {
+  --world-accent: #89a7ff;
+  --world-soft: #e2e9ff;
+}
+
+@keyframes grow-dashboard-bar {
+  from {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  to {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
 .home-world-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -801,8 +1004,16 @@ code {
   .experience-grid,
   .evidence-grid,
   .cross-world-grid,
-  .home-world-grid {
+  .home-world-grid,
+  .world-dashboard {
     grid-template-columns: 1fr;
+  }
+
+  .benchmark-tile,
+  .channel-tile,
+  .caveat-tile,
+  .learner-strip-tile {
+    grid-column: auto;
   }
 
   .metric-grid,
@@ -851,6 +1062,10 @@ code {
   }
 
   .mind-bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .learner-dashboard-row {
     grid-template-columns: 1fr;
   }
 
