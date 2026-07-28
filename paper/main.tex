@@ -18,39 +18,32 @@ Testing Whether Institutions Stay Robust Across Learning Architectures}
   Universidad Nacional de Colombia\\
   \texttt{tpradae@unal.edu.co}
 }
-\date{Draft 0.3 -- \today}
+\date{}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This paper introduces a code-first experimental platform for studying whether
-economic mechanisms remain robust when the strategic agents inside them are
-adaptive learners rather than equilibrium solvers. The platform implements a
-shared \code{World}/\code{Agent}/\code{Institution} interface, repeated
-multiseed evaluation, exploitability tests, and interchangeable mind classes
-ranging from random and tabular Q-learning agents to PyTorch DQN, PPO,
-decorrelated independent-DQN, and centralized-critic agents. The first
-validated environment is a repeated two-firm pricing arena with six regulatory
-mechanisms. In this world, price caps robustly reduce exploitability across
-mind classes, but their effect on collusion is metric- and
-architecture-dependent. A new paired-seed audit shows that DQN's positive
-profit-under-cap result is not visible in 1000-step traces; it emerges with
-training budget, becomes mostly positive by 10,000 steps, and is positive in
-the 40,000-step full table. The second environment, Resource Island, extends
-the same interface to a spatial inventory economy and reveals a different
-lesson: institution conclusions are only meaningful when the world actually
-exercises the institutional channel. The reported Resource Island configuration
-therefore uses contested resources, unequal trades, specialization pressure, and
-activation diagnostics before interpreting property rights, trade controls, and
-reputation. Three additional environments extend the suite: Auction House
-provides a benchmarked auction-design testbed, Public Goods exposes common-pool
-extraction and contribution incentives, and Labor Market tests learned
-reporting under deferred acceptance. The current contribution is both empirical
-and methodological: it reports initial evidence that institutional robustness
-changes across learning architectures, and it documents the validation
-discipline needed to distinguish real economic findings from inactive-mechanism
-or short-horizon artifacts.
+\setlength{\parindent}{0pt}
+Across five controlled economies, the same institutional rule can look robust
+under one learner, weak under another, and successful on one metric while
+failing on the channel it was meant to govern. We study this pattern in Auction
+House, Labor Market, Pricing Arena, Public Goods, and Resource Island, each
+implemented under a shared \code{World}/\code{Agent}/\code{Institution}
+interface and evaluated with random behavior, tabular Q-learning, DQN, PPO,
+decorrelated independent-DQN, and centralized-critic learners. The results are
+deliberately heterogeneous. Auction rules preserve their formal benchmark
+structure, but learned bidders remain away from zero-regret benchmark bidding.
+Deferred acceptance keeps high match rates, but welfare, stability, and
+truthful reporting can separate. Price caps reduce exploitability across
+learners, while their profit and collusion effects depend on architecture and
+training horizon. Commons institutions can raise measured welfare without
+repairing the underlying resource state. Resource-allocation rules become
+interpretable only when trade and property channels are actually exercised. The
+paper's contribution is a validation framework for artificial economies:
+claims about institutions under learning agents must be tied not only to the
+formal rule, but also to the learner, the metric, the training budget, and the
+economic channel being governed.
 \end{abstract}
 
 \section{Introduction}
@@ -139,11 +132,12 @@ Resource Island gather bounds. Third, the experiment must be replicated over
 seeds, with per-seed and aggregate CSV outputs. Fourth, the institution must
 actually activate. An institution that never faces the behavior it is meant to
 govern produces no evidence about that institution, only about the world design.
-The Resource Island section gives a concrete case. The second new validation layer is mechanism tracing. The trace runner produces
+Resource Island illustrates this activation requirement. In addition to these
+four checks, the platform uses mechanism tracing. The trace runner produces
 per-step rows and algebraic decomposition rows for all five worlds and all
 thesis-facing minds. These traces do not replace full-run evidence; they show
 the channel behind a claim and can expose contradictions between short traces
-and full-run results. The Pricing Arena section gives a concrete case.
+and full-run results. Pricing Arena illustrates that use case.
 
 
 \section{Auction House}
@@ -238,7 +232,7 @@ allocative efficiency and positive regret rather than as a code or mechanism
 defect. The reserve result follows the textbook tradeoff direction: revenue
 rises, welfare falls, and a positive share of auctions produce no sale.
 
-\subsection{Cross-Mind Sealed-Bid Results}
+\subsection{Learner Comparison in Sealed-Bid Auctions}
 
 Table~\ref{tab:auction-crossmind-second} reports second-price results across
 the full learner suite, where the benchmark is most direct. PPO is closest to the
@@ -254,7 +248,7 @@ allocative efficiency falls to \(0.522\), and regret rises to \(1.436\).
 \centering
 \begin{tabular}{lrrrrr}
 \toprule
-Mind & Revenue & Welfare & Efficiency & Regret & Truthful Dist. \\
+Mind & Revenue & Welfare & Efficiency & Regret & Truthful distance \\
 \midrule
 Q-learning & 3.100 & 6.241 & 0.734 & 0.270 & 1.996 \\
 DQN & 3.593 & 6.115 & 0.705 & 0.260 & 2.392 \\
@@ -322,7 +316,7 @@ as stress tests of the auction interface rather than as settled
 information-design results, since neither has the sealed-bid formats' full
 Q-learning evidence base.
 
-\subsection{Relation to the Main Question}
+\subsection{Auction-Theoretic Interpretation}
 
 Auction House separates two objects that this paper treats as distinct: the
 validity of a mechanism and whether learned behavior recovers what the mechanism
@@ -384,7 +378,7 @@ matters for interpretation: a later decline in truthful-report rate is not
 evidence that the implemented mechanism fails to be strategy-proof. It is a
 behavioral outcome of the learner.
 
-\subsection{Baseline Result}
+\subsection{Baseline}
 
 Table~\ref{tab:labor-baseline} shows the full \(n=20\) Q-learning run. Match
 rate is perfect, stability is high, and truthful reporting remains below the
@@ -413,7 +407,7 @@ Manipulation gain & 0.003 \\
 \label{tab:labor-baseline}
 \end{table}
 
-\subsection{Cross-Mind Results}
+\subsection{Learner Comparison}
 
 Table~\ref{tab:labor-crossmind} reports the same measurements across the full
 learner suite. Match rate is \(1.0\) for every learner, so the relevant
@@ -452,10 +446,10 @@ misreport. The appropriate interpretation is behavioral: learners can converge
 on non-truthful reports that do not pay off in the benchmark sense, while still
 changing realized stability and welfare through the policies they learn.
 
-\subsection{Relation to the Main Question}
+\subsection{Matching Interpretation}
 
 The centralized-critic row in Table~\ref{tab:labor-crossmind} is this world's
-clearest metric conflict. Centralized critic produces the highest total welfare
+sharpest metric conflict. Centralized critic produces the highest total welfare
 of any learner tested, \(3.821\) against Q-learning's \(3.639\). Read in
 isolation, that aggregate suggests improvement. Read against the benchmark
 properties, the same row is weaker: stability falls from \(0.951\) to \(0.749\)
@@ -468,7 +462,7 @@ the matching rather than to a scalar payoff. Match rate and stability survive
 the move to learned worker reports for four of the five learners; truthfulness
 falls for every neural or MARL learner relative to Q-learning, without that
 fall constituting evidence of profitable manipulation under the mechanism's own
-diagnostic. Centralized critic gives the clearest result in this world:
+diagnostic. Centralized critic gives the largest separation in this world:
 it raises welfare furthest above the Q-learning baseline while degrading
 stability and truthfulness furthest below it.
 
@@ -512,7 +506,7 @@ checked directly against the world's own demand and cost parameters, for
 validate anything about learned behavior; it validates that the reference point
 learned behavior is measured against is not arbitrary.
 
-\subsection{Baseline and Main Result}
+\subsection{Baseline and Price-Cap Result}
 
 Table~\ref{tab:pricing-baseline} shows the unregulated baseline for each
 learner. Q-learning and the centralized critic sit at the higher-price,
@@ -537,7 +531,7 @@ Centralized critic & 5.925 & 288.6 & 791.6 & 0.618 & 147.5 \\
 \end{table}
 
 Table~\ref{tab:pricing-cap-full} shows the change under a price cap, relative
-to that baseline, for every learner. The exploitability column is the clearest
+to that baseline, for every learner. The exploitability column is the most stable
 result in this world: it falls for every learner, without exception. The profit
 column is not: it falls for Q-learning and random play, in line with the
 conventional expectation that a cap disciplines pricing behavior, but it rises
@@ -557,7 +551,7 @@ Independent-DQN & \(-0.288\) & \(+3.093\) & \(+12.183\) & \(-14.871\) \\
 Centralized critic & \(-1.337\) & \(+10.347\) & \(+28.668\) & \(-98.274\) \\
 \bottomrule
 \end{tabular}
-\caption{Price cap versus no regulation, change by learner, n=20 full run.}
+\caption{Price cap versus no regulation, change by learner, \(n=20\) full run.}
 \label{tab:pricing-cap-full}
 \end{table}
 
@@ -571,9 +565,9 @@ structure more than offsets the lower price. Q-learning follows the standard
 price-discipline expectation more closely than DQN, independent-DQN, or the
 centralized critic.
 
-\subsection{The Training-Budget Correction}
+\subsection{Training-Budget Audit}
 
-The DQN result above was not visible in the first version of this analysis. A
+The DQN result above was not visible in the short-trace analysis. A
 short, 1000-step mechanism trace, run to check the channel behind the headline
 number, showed DQN profit falling under the cap for every seed tested, the
 opposite of Table~\ref{tab:pricing-cap-full}. This discrepancy was resolved by
@@ -587,10 +581,10 @@ from.
 \toprule
 Source & Steps & Mean Profit \(\Delta\) & Positive Seed Share & Mean Quantity \(\Delta\) \\
 \midrule
-fresh audit & 1{,}000 & \(-11.711\) & 0.10 & 3.220 \\
-fresh audit & 5{,}000 & \(+1.730\) & 0.50 & 4.102 \\
-fresh audit & 10{,}000 & \(+35.448\) & 0.80 & 3.540 \\
-full table & 40{,}000 & \(+55.358\) & 0.85 & 0.226 \\
+Budget audit & 1{,}000 & \(-11.711\) & 0.10 & 3.220 \\
+Budget audit & 5{,}000 & \(+1.730\) & 0.50 & 4.102 \\
+Budget audit & 10{,}000 & \(+35.448\) & 0.80 & 3.540 \\
+Full run & 40{,}000 & \(+55.358\) & 0.85 & 0.226 \\
 \bottomrule
 \end{tabular}
 \caption{DQN price-cap profit delta by training budget. Values are paired seed
@@ -624,7 +618,7 @@ these interventions as it is for the price cap.
 The high-price tax subtracts a quantity-weighted penalty from reward above a
 price threshold. Its effect is small in every direction and every learner:
 Q-learning's exploitability falls modestly, DQN is essentially unaffected, and
-the centralized critic moves in the wrong direction on price and welfare. At
+the centralized critic moves opposite to the intended direction on price and welfare. At
 the tested tax rate, the penalty is too small, or too easy to avoid, to reliably
 change pricing behavior.
 
@@ -718,7 +712,7 @@ Centralized critic & \(-0.050\) & \(-9.2\) & \(-12.0\) & \(+2.7\) \\
 \label{tab:pricing-demandshock}
 \end{table}
 
-These outcomes should be interpreted as economic-activation results rather than
+These outcomes are activation-conditioned results rather than
 implementation defects. All four mechanisms pass the same mechanics and parity
 tests as price cap. At the parameters currently tested, only price cap creates
 pressure strong enough to produce a consistent, cross-learner, interpretable
@@ -734,16 +728,16 @@ Price cap & Passes all checks & Strong, consistent, cross-learner \\
 High-price tax & Passes all checks & Weak at tested rate \\
 Random audit & Passes all checks & Mixed, sign-inconsistent \\
 Anti-collusion penalty & Passes all checks & Limited binding, parameter-sensitive \\
-Demand shock & Passes all checks & Robustness check, not a policy result \\
+Demand shock & Passes all checks & Robustness perturbation \\
 \bottomrule
 \end{tabular}
 \caption{Mechanism status, implementation versus interpretability, Pricing Arena.}
 \label{tab:pricing-mechanism-status}
 \end{table}
 
-\subsection{Relation to the Main Question}
+\subsection{Pricing Interpretation}
 
-Pricing Arena answers the main question through metric disagreement and
+Pricing Arena's central result is a split between metric behavior and
 training-horizon dependence. Price caps lower exploitability for every learner
 tested, but their effect on profit and collusion is learner-dependent, with the
 DQN effect emerging only after sufficient training. The remaining four
@@ -788,7 +782,7 @@ register the difference from free-riding correctly. The rest of this section
 therefore treats welfare movement as evidence only when it is accompanied by the
 relevant state variables.
 
-\subsection{Q-Learning Full Results}
+\subsection{Q-Learning Institution Results}
 
 Table~\ref{tab:public-goods-qlearning} shows the full \(n=20\) Q-learning run
 across all six institutions. The baseline confirms the intended commons
@@ -840,7 +834,14 @@ Tax schedule is a stricter version of the same diagnostic: tax revenue rises by
 unchanged. Welfare, tax revenue, contribution, extraction, and sustainability
 therefore have to be interpreted as separate quantities.
 
-\subsection{Cross-Mind Results}
+The separate tax-schedule sweep extends this accounting check across Public
+Goods and Resource Island at flat tax rates from \(0.0\) to \(0.4\). Tax revenue
+rises mechanically with the rate, while aggregate welfare remains roughly
+stable under the current reward definitions, so the result is interpreted as an
+institution-level redistribution sweep rather than as evidence for a standalone
+central-planner world.
+
+\subsection{Learner Comparison}
 
 Table~\ref{tab:public-goods-baseline-crossmind} shows the no-institution
 baseline across the full learner suite. The main split is between learners that
@@ -919,13 +920,13 @@ Centralized critic & 0.080 & 0.006 & 3.976 & 2.290 \\
 \label{tab:public-goods-reputation-crossmind}
 \end{table}
 
-PPO's row is the clearest metric-decomposition case in this world: welfare more
+PPO's row is the sharpest metric-decomposition case in this world: welfare more
 than triples relative to its own baseline through the reputation bonus, while
 contribution remains zero. If welfare were reported alone, PPO under reputation
 would appear successful. The contribution and sustainability columns show that
 this is a reward-accounting effect rather than a resolved commons problem.
 
-\subsection{Group-Size Status}
+\subsection{Group-Size Boundary}
 
 Whether this pattern is a free-riding mechanism in the group-size sense, or a
 fixed-configuration outcome at the group size tested so far, remains open. A
@@ -937,7 +938,7 @@ are therefore limited to the group size actually tested and validated here, and
 claims about how free-riding scales with group size are deferred until that
 sweep produces validated output.
 
-\subsection{Relation to the Main Question}
+\subsection{Commons Interpretation}
 
 Public Goods shows a commons failure that welfare alone can misdescribe. The
 baseline confirms the intended free-riding pressure directly, and contribution
@@ -951,9 +952,9 @@ The architecture split is substantial at the group size currently validated.
 PPO and centralized critic contribute at or near zero in the baseline and remain
 there under most institutions, including contribution matching. Q-learning,
 DQN, and especially independent-DQN respond to the same matching institution
-with increases in contribution and sustainability. Public Goods therefore
-supports the paper's central claim in a different form from Pricing Arena or
-Auction House: the guarantee that an incentive institution changes behavior is
+with increases in contribution and sustainability. Public Goods therefore gives
+a different architecture-dependent result from Pricing Arena or Auction House:
+the guarantee that an incentive institution changes behavior is
 not architecture-invariant, and welfare cannot be read without the state
 variables the institution is meant to protect. Whether this split persists,
 sharpens, or narrows as group size changes is the open question the pending
@@ -1104,7 +1105,14 @@ thesis-facing Resource Island evidence focuses on property rights, trade price
 controls, and reputation because those are the institutions with directly
 validated activation diagnostics in the reported table.
 
-\subsection{Cross-Mind Results}
+A strict-local trade-radius ablation checks how much this result depends on
+market access. Restricting trade to radius one reduces baseline successful
+trades from \(5.3251\) to \(1.8996\), and reduces reputation-system successful
+trades from \(6.6665\) to \(1.9267\). The institutional channels still exist,
+but the exchange gains are much smaller, so Resource Island's conclusions are
+bounded by the trade-friction assumptions of the reported configuration.
+
+\subsection{Learner Comparison}
 
 Table~\ref{tab:resource-crossmind} shows the no-institution baseline across the
 full learner suite. The split is substantial: Q-learning, PPO, and the
@@ -1119,7 +1127,7 @@ efficient resource governance.
 \small
 \begin{tabular}{lrrrrrr}
 \toprule
-Mind & Survival & Welfare & Trades & Attempts & Specialization & Sustain. \\
+Mind & Survival & Welfare & Trades & Attempts & Specialization & Resource sustain. \\
 \midrule
 Q-learning & 0.9439 & 1.1065 & 5.3251 & 10.5507 & 0.3895 & 0.7638 \\
 DQN & 0.9102 & 1.0614 & 0.6398 & 1.0709 & 0.1790 & 0.9529 \\
@@ -1176,7 +1184,7 @@ for every learner under this institution, so the formal rule binds universally,
 but the amount of blocked-trade pressure differs sharply by learner, from 4.79
 for Q-learning to 0.04 for PPO. The practical force of an identical rule
 therefore depends on how much a given learner attempts to trade in the first
-place. Resource Island therefore answers the main question through activation:
+place. Resource Island's interpretation is activation-conditioned:
 the same institution can be formally present for every learner, but its economic
 effect depends on whether the learner discovers and repeatedly uses the channel
 the rule governs.
@@ -1201,10 +1209,10 @@ remains open.
 
 \section{Cross-World Synthesis}
 
-The emerging thesis is not that one institution always works, or that the
-agent classes form a universal intelligence ranking. The stronger claim is more
-specific: institutional robustness must be evaluated jointly with the learning
-architecture, the training horizon, and activation diagnostics. Tabular value
+The cross-world evidence does not support a universal ranking of institutions
+or learners. It supports a narrower claim: institutional robustness must be
+evaluated jointly with the learning architecture, the training horizon, and
+activation diagnostics. Tabular value
 learning, function approximation, on-policy policy gradients, decorrelated
 independent learners, and centralized critics violate different assumptions of
 the classical benchmark story. The comparisons are therefore best read as a
@@ -1219,7 +1227,7 @@ learner-architecture stress test, not as a scalar capability ranking.
 World & Guarantee tested & What survives & What breaks & Architecture-sensitive channel \\
 \midrule
 Auction House & Truthful or shaded bidding and reserve-price tradeoffs & Fixed auction rules reproduce the benchmark structure & Learned bidders do not fully recover zero-regret benchmark behavior & PPO is closest to benchmark bidding; centralized critic deviates most under private information \\
-Labor Market & Deferred-acceptance stability and proposing-side strategy-proofness & Match rates stay high and most learners preserve stability & Welfare can rise while truthfulness and stability fall & Centralized critic gives the clearest welfare-versus-stability conflict \\
+Labor Market & Deferred-acceptance stability and proposing-side strategy-proofness & Match rates stay high and most learners preserve stability & Welfare can rise while truthfulness and stability fall & Centralized critic gives the largest welfare-versus-stability conflict \\
 Pricing Arena & Pricing guardrails against collusion and exploitability & Price caps reduce exploitability for every learner tested & Profit and collusion effects are not invariant to learner or training budget & DQN's price-cap profit response changes sign with training budget \\
 Public Goods & Incentives against free-riding and commons depletion & Contribution matching moves contribution and sustainability for several learners & Welfare/reward gains can overstate changes in the resource state & PPO and centralized critic remain near-zero contributors at the validated group size \\
 Resource Island & Activation of property, trade-control, and reputation channels & Property pressure, blocked trades, and reputation-mediated exchange are measurable & Trade price controls eliminate exchange; DQN-family learners trade much less at the tested budget & Learners differ in whether they discover the trade/reputation channel \\
@@ -1276,78 +1284,29 @@ under the cap; the 40,000-step table correctly showed a positive DQN
 cap-minus-none profit delta. The result is reportable only because the
 contradiction was resolved through paired seed deltas and a budget ladder.
 
-\section{Reproducibility}
-
-The repository records validation status in \code{ROADMAP\_STATUS.md}. Core
-outputs are stored under \code{outputs/}. Major runners include:
-
-\begin{itemize}
-  \item \code{run\_multiseed.py} for Pricing Arena replicated runs;
-  \item \code{run\_exploitability.py} for frozen-policy adversarial evaluation;
-  \item \code{run\_phase3\_full.py} and \code{validate\_phase3\_full.py} for
-  full Phase 3 Pricing Arena checks;
-  \item \code{run\_known\_answer\_sanity\_checks.py} for theorem/bracketing
-  checks before learned-policy interpretation;
-  \item \code{run\_mechanism\_traces.py} for per-step mechanism traces and
-  decomposition tables across worlds;
-  \item \code{run\_pricing\_quantity\_margin\_audit.py} for the Pricing Arena
-  price-cap budget-ladder contradiction audit;
-  \item \code{run\_claim\_audit\_suite.py} for cross-world paired-effect,
-  benchmark-gap, metric-conflict, activation, and trace-alignment audits;
-  \item \code{run\_resource\_island\_smoke.py} for Resource Island smoke,
-  validation, and full runs;
-  \item \code{run\_auction\_house\_smoke.py} for Auction House runs;
-  \item \code{run\_public\_goods\_smoke.py} for Public Goods runs;
-  \item \code{run\_labor\_market\_smoke.py} for Labor Market runs;
-  \item \code{build\_world\_mind\_comparison.py} and
-  \code{build\_cross\_world\_synthesis.py} for ladder comparisons and
-  cross-world synthesis.
-\end{itemize}
-
-The test suite currently includes unit, integration, and output-validation
-coverage for the core abstractions, Pricing Arena, Resource Island, Auction
-House, Public Goods, Labor Market, and deep-RL/MARL minds.
-
-One implementation issue is recorded explicitly because it changes how earlier
-tables should be read. The original independent-DQN registration produced an
-alias of the DQN condition rather than a decorrelated independent-learner
-baseline. The implementation was corrected, smoke gates now verify divergence,
-and the thesis-facing Pricing Arena and Resource Island tables use the corrected
-independent-DQN reruns.
-
-\subsection{Primary Output Artifacts}
-
-The main numerical claims in the paper are backed by the following generated
-artifacts:
-
-\begin{itemize}
-  \item \path{outputs/known_answer_sanity_checks_current/summary.csv};
-  \item \path{outputs/mechanism_traces_local_full/mechanism_decomposition.csv};
-  \item \path{outputs/phase3_full/mind_comparison.csv};
-  \item \path{outputs/pricing_quantity_margin_audit/dqn_budget_ladder.csv};
-  \item \path{outputs/pricing_quantity_margin_audit/existing_full_seed_deltas.csv};
-  \item \path{outputs/resource_island_v1_full/summary_aggregate.csv};
-  \item \path{outputs/resource_island_v1_strict_radius_full/summary_aggregate.csv};
-  \item \path{outputs/resource_island_v1_phase3_full/mind_comparison.csv};
-  \item \path{outputs/auction_house_phase3_full/mind_comparison.csv};
-  \item \path{outputs/public_goods_phase3_full/mind_comparison.csv};
-  \item \path{outputs/labor_market_phase3_full/mind_comparison.csv};
-  \item \path{outputs/cross_world_synthesis/synthesis_table.csv};
-  \item \path{outputs/claim_audit_suite/claim_audit_report.md}.
-\end{itemize}
-
 \section{Conclusion}
 
-This draft reports a first version of an artificial-economies platform for
-testing institutional robustness under learning agents. The mature Pricing
-Arena result already shows why the question matters: exploitability and
-collusion can move differently under the same institution, and a headline
-effect can depend on training budget rather than appearing in short traces.
-Resource Island, Auction House, Public Goods, and Labor Market extend the
-project beyond pricing games. Their role is not merely to add more checkboxes,
-but to test whether the patterns found in Pricing Arena survive when the
-economic structure changes and when the relevant institutional channel is
-actually activated.
+This paper asked whether institutions designed around classical economic
+assumptions preserve their guarantees when the agents inside them are adaptive
+learners. The answer is not uniform. In Auction House and Labor Market, exact
+mechanism properties remain valid at the rule level, but learned behavior can
+fall short of truthful, stable, or low-regret benchmark behavior. In Pricing
+Arena, a price cap lowers exploitability across learners, yet its effects on
+profit and collusion depend on architecture and training horizon. In Public
+Goods, welfare improvements can reflect reward accounting rather than changes
+in contribution or sustainability. In Resource Island, institutional claims
+depend first on whether the relevant property, trade, or reputation channel is
+actually exercised.
+
+The main contribution is therefore not a ranking of learners or institutions.
+It is a validation framework for asking which theoretical guarantees survive
+which learner assumptions: tabular value learning, function approximation,
+on-policy policy optimization, independent multi-agent learning, and
+centralized-critic training. Across the five worlds, the implication is
+consistent: institutional robustness cannot be inferred from a mechanism's
+formal rule alone. It has to be measured jointly with the learner, the metric,
+the training budget, and the activation of the economic channel the institution
+is meant to govern.
 
 \bibliographystyle{plainnat}
 \bibliography{references}
