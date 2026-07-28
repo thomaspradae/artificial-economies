@@ -206,50 +206,131 @@ payoffs \citep{vickrey1961,milgrom2004,dutting2019}.
 
 \subsection{World}
 
-Labor Market is a two-sided matching environment. Workers are learning agents;
-employers have fixed preferences. Each worker reports a top choice, the world
-constructs reported preferences, and matching is resolved using deferred
-acceptance \citep{galeshapley1962,rothsotomayor1990}. The world reports match rate, total welfare, truthful-report rate,
-stability, blocking-pair diagnostics, and manipulation-gain diagnostics.
+Labor Market is a two-sided matching world. Workers are learning agents;
+employers hold fixed, non-learning preferences over workers. In each round, a
+worker reports a top choice among available employers, and the world constructs
+a reported preference profile from those actions. A deferred-acceptance
+procedure then resolves the reported profile into a matching, and each worker's
+reward is the utility of its matched outcome \citep{galeshapley1962,rothsotomayor1990}.
+Unlike the other four worlds, not every economic actor in Labor Market learns:
+only the workers do, while employers remain fixed preference holders throughout.
+That asymmetry is part of the test. It checks whether the shared learner suite
+behaves consistently when applied to only one side of a two-sided mechanism.
 
-This world is intentionally asymmetric. Unlike Pricing Arena, Resource Island,
-Public Goods, and Auction House, not every economic actor is a learning agent.
-That asymmetry is the main interface test for the learning-architecture suite:
-DQN, PPO, independent-DQN, and centralized-critic operate only over the worker
-side while employers remain fixed preference holders.
+The world records match rate, worker welfare, employer welfare, total welfare,
+blocking-pair counts, a stability measure, truthful-report rate,
+manipulation-gain diagnostics, and fixed hand-checkable benchmark cases.
 
-\subsection{Q-Learning Full Run}
+\subsection{Classical Benchmark and Known-Answer Validation}
 
-The n=20 tabular Q-learning full run is substantially more stable than the
-short smoke run. Match rate remains \code{1.0}, while
-\code{stability\_mean=0.9508}, \code{truthful\_report\_rate\_mean=0.7859}, and
-\code{total\_welfare\_mean=3.6393}. The report-top action space creates
-truthfulness variation, but worker-proposing deferred acceptance still produces
-mostly stable matchings under the current random-preference setup.
+Worker-proposing deferred acceptance has two exact properties under canonical
+assumptions: the resulting matching is stable, meaning no unmatched
+worker-employer pair would both prefer to match with each other, and truthful
+reporting is a dominant strategy for the proposing side
+\citep{galeshapley1962,rothsotomayor1990,roth1984}. Neither property is a scalar
+target in the way a Nash price is. Both are checkable conditions on the
+resulting matching, which makes this world's benchmark exact even though it
+does not define a single payoff number to converge toward.
 
-Fixed benchmark cases clarify the interpretation. Under worker-proposing
-deferred acceptance, workers should not have profitable report deviations in
-the canonical strategy-proof setting \citep{galeshapley1962,rothsotomayor1990,roth1984}. Future manipulation tests therefore need
-to target the non-proposing side, change the mechanism, or add information and
-commitment frictions rather than treating worker misreports under standard
-deferred acceptance as the main expected failure mode.
+Four fixed benchmark cases validate the mechanism layer before any learned
+result is interpreted: a stable, fully truthful matching case, which must pass
+with zero blocking pairs; a deliberately forced unstable case, which must be
+identified by the blocking-pair check; a welfare-accounting case, which must
+sum payoffs correctly; and a direct check that no worker has a profitable
+deviation from truthful reporting under standard worker-proposing deferred
+acceptance. All four pass. This last case matters for interpretation: any
+later decline in truthful-report rate is not evidence that the implemented
+mechanism fails to be strategy-proof. The mechanism-level check confirms the
+strategy-proof property; different learned reports are behavioral outcomes of
+the learners.
 
-\subsection{Cross-Mind Status}
+\subsection{Baseline Result}
 
-The full Labor Market learner-suite run keeps match rate at \(1.0\) for every mind, so the
-relevant margins are stability and truthful-report behavior. DQN slightly
-improves stability relative to Q-learning (\(0.975\) versus \(0.951\)) while
-reporting truthfully less often. PPO and fixed independent-DQN preserve high
-stability but also lower truthfulness. The centralized-critic scaffold has the
-weakest matching behavior in this asymmetric setup, with stability \(0.749\)
-and truthful-report rate \(0.433\).
+Table~\ref{tab:labor-baseline} shows the full \(n=20\) Q-learning run. Match
+rate is perfect, stability is high, and truthful reporting remains below the
+exact optimum confirmed by the benchmark case, at \(0.786\) rather than
+\(1.0\). Total welfare also falls below the truthful benchmark welfare of
+\(4.807\). The manipulation-gain diagnostic is close to zero, at \(0.003\),
+which indicates that lower truthfulness is not the same thing as profitable
+strategic misreporting in this setup.
 
-Economically, this is consistent with the benchmark warning: worker-proposing
-deferred acceptance is strategy-proof for workers in the canonical setting, so
-lower truthful-report rates are not automatically evidence of profitable
-manipulation \citep{galeshapley1962,rothsotomayor1990,roth1984}. The result is better framed as a learned-reporting diagnostic:
-the mechanism keeps matches mostly stable for most learners, while the
-centralized-critic architecture is sensitive to this asymmetric environment.
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+Metric & Value \\
+\midrule
+Match rate & 1.000 \\
+Stability & 0.951 \\
+Truthful-report rate & 0.786 \\
+Total welfare & 3.639 \\
+Benchmark truthful welfare & 4.807 \\
+Blocking pairs & 0.057 \\
+Manipulation gain & 0.003 \\
+\bottomrule
+\end{tabular}
+\caption{Labor Market, Q-learning full run.}
+\label{tab:labor-baseline}
+\end{table}
+
+\subsection{Cross-Mind Results}
+
+Table~\ref{tab:labor-crossmind} reports the same measurements across the full
+learner suite. Match rate is \(1.0\) for every learner, so the relevant
+cross-mind variation is in stability and truthfulness. DQN is the most stable
+learner in the table, at \(0.975\), while also reporting truthfully less often
+than Q-learning. PPO holds stability close to Q-learning's level but reduces
+truthful reporting to \(0.575\). Independent-DQN raises welfare slightly above
+Q-learning while giving up a moderate amount of truthfulness. The centralized
+critic is the main exception: it produces the highest welfare in the table,
+\(3.821\), while stability falls to \(0.749\) and truthful-report rate falls to
+\(0.433\), both below every other learner.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Mind & Match Rate & Stability & Truthful Report & Welfare \\
+\midrule
+Q-learning & 1.000 & 0.951 & 0.786 & 3.639 \\
+DQN & 1.000 & 0.975 & 0.704 & 3.643 \\
+PPO & 1.000 & 0.950 & 0.575 & 3.643 \\
+Independent-DQN & 1.000 & 0.955 & 0.672 & 3.658 \\
+Centralized critic & 1.000 & 0.749 & 0.433 & 3.821 \\
+\bottomrule
+\end{tabular}
+\caption{Labor Market, full learner suite under deferred acceptance.}
+\label{tab:labor-crossmind}
+\end{table}
+
+These results do not support the claim that worker-proposing deferred
+acceptance loses strategy-proofness when the reporting side is learned. The
+manipulation-gain diagnostic remains near zero or negative for every learner in
+the table, including the centralized critic. A lower truthful-report rate is
+therefore not evidence that a learner found and exploited a profitable
+misreport. The appropriate interpretation is behavioral: learners can converge
+on non-truthful reports that do not pay off in the benchmark sense, while still
+changing realized stability and welfare through the policies they learn.
+
+\subsection{Metric Conflict}
+
+The centralized-critic row in Table~\ref{tab:labor-crossmind} is this world's
+clearest metric conflict. Centralized critic produces the highest total welfare
+of any learner tested, \(3.821\) against Q-learning's \(3.639\). Read in
+isolation, that aggregate suggests improvement. Read against the benchmark
+properties, the same row is weaker: stability falls from \(0.951\) to \(0.749\)
+and truthful reporting falls from \(0.786\) to \(0.433\). The result therefore
+separates payoff improvement from preservation of the mechanism's intended
+properties.
+
+Labor Market's benchmark is exact, but the exactness attaches to properties of
+the matching rather than to a scalar payoff. Match rate and stability survive
+the move to learned worker reports for four of the five learners; truthfulness
+falls for every neural or MARL learner relative to Q-learning, without that
+fall constituting evidence of profitable manipulation under the mechanism's own
+diagnostic. Centralized critic gives the clearest result in this world:
+it raises welfare furthest above the Q-learning baseline while degrading
+stability and truthfulness furthest below it.
 
 \section{Pricing Arena}
 
