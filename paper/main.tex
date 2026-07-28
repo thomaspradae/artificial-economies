@@ -150,51 +150,75 @@ Auction House is a single-item auction environment with independent private
 values, discrete bid actions, deterministic tie-breaking, and configurable
 payment rules. Each bidder observes its own valuation bin and chooses a bid from
 a fixed grid. The implemented auction formats are second-price, first-price,
-and a simple ascending-clock abstraction; the second-price format also supports
-a reserve-price variant. Information variants modify bidder observations through
-a public signal or bounded value-bin noise, but they do not change the allocation
-or payment rule.
+and a simplified ascending-clock abstraction; the second-price format also
+supports a reserve-price variant. Two information variants modify what a bidder
+observes without changing the allocation or payment rule: a public-signal
+version mixes a bidder's own value with rival-value information, and a
+noisy-signal version perturbs the observed value bin directly.
 
-This world asks whether learned bidders recover the benchmark behavior that
-auction theory predicts in clean mechanisms. The main economic quantities are
-seller revenue, bidder surplus, realized welfare, allocative efficiency,
-ex-post regret, overbidding, underbidding, truthful-bid distance, and distance
-from the first-price shading benchmark.
+The world records seller revenue, bidder surplus, realized welfare, maximum
+feasible welfare, allocative efficiency, ex-post regret, overbidding,
+underbidding, truthful-bid distance, first-price shading distance, and no-sale
+rate.
 
 \subsection{Classical Benchmark and Known-Answer Validation}
 
-Auction House is a first-tier benchmark world because the relevant classical
-predictions are exact. In a private-values second-price auction, truthful
-bidding is weakly dominant \citep{vickrey1961}. In a symmetric first-price
-auction with risk-neutral bidders and independent private values, equilibrium
-bids are shaded below value \citep{milgrom2004}. A reserve price changes the
-revenue-efficiency tradeoff: it can raise seller revenue by withholding low bids,
-but it can also lower realized welfare by preventing efficient sales
-\citep{myerson1981}. The clock abstraction shares the second-price reference in
-this implementation: dropout at value is the truthful benchmark.
+Auction House carries the most direct classical benchmarks in this project. In a
+private-values second-price auction, bidding one's true value is weakly dominant
+regardless of what other bidders do \citep{vickrey1961}. In a symmetric
+first-price auction with risk-neutral bidders and independent private values,
+equilibrium bids are shaded below value \citep{milgrom2004}. A reserve price
+introduces a known revenue-efficiency tradeoff: it can raise seller revenue by
+withholding sales to low-value bidders, at the cost of realized welfare on the
+sales it prevents \citep{myerson1981}. The clock abstraction implemented here
+shares the second-price reference point: dropping out at true value is the
+truthful benchmark, just as bidding true value is in the sealed-bid version.
 
-The known-answer layer checks these claims before learned behavior is
-interpreted. The benchmark runner verifies that truthful bidding has zero grid
-regret in second-price auctions for both two and three bidders. Unit tests cover
-allocation, first-price payment, second-price payment, reserve/no-sale behavior,
-clock clearing, deterministic tie-breaking, information-policy observation
-transforms, truthful second-price benchmarks, first-price bid-shading
-benchmarks, ex-post regret, and Q-learning training. The validation obligation
-is therefore direct: learned bidders should be compared with the exact benchmark
-behavior, not evaluated by payoff alone.
+These predictions are checked directly before any learned result is interpreted.
+The known-answer runner confirms that truthful bidding has zero grid regret in
+second-price auctions for both two and three bidders, and that the first-price
+shading benchmark bids strictly below value at the same bidder counts.
+Separately, unit tests cover allocation, first-price and second-price payment,
+reserve and no-sale behavior, clock clearing, deterministic tie-breaking, and
+the information-policy observation transforms. The obligation this creates is
+direct: a learned bidder is judged by its distance from a known correct bid, not
+by whether it earns a positive payoff.
+
+Table~\ref{tab:auction-status} lists all six implemented scenarios with their
+validation status. The three sealed-bid formats carry the most direct benchmarks
+and the most complete evidence; the clock and information variants are
+validated and interpretable but are read here as extensions rather than as
+central results.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{p{0.20\linewidth}p{0.47\linewidth}p{0.23\linewidth}}
+\toprule
+Scenario & Validation & Role \\
+\midrule
+Second price & Known-answer checks pass; full Q-learning and full learner-suite runs & Central benchmark \\
+First price & Full Q-learning and full learner-suite runs & Central benchmark \\
+Reserve & Full Q-learning and full learner-suite runs & Central benchmark \\
+Clock & Full learner-suite runs; Q-learning smoke only & Benchmark-compatible extension \\
+Public signal & Full learner-suite runs & Information stress test \\
+Noisy signal & Full learner-suite runs & Information stress test \\
+\bottomrule
+\end{tabular}
+\caption{Auction House scenarios and validation status.}
+\label{tab:auction-status}
+\end{table}
 
 \subsection{Sealed-Bid Q-Learning Results}
 
-Table~\ref{tab:auction-qlearning} shows the full \(n=20\) Q-learning run for the
-three sealed-bid scenarios. The world reproduces the intended economic
-structure, but learned bidders do not fully recover the theoretical benchmark.
-Second-price auctions remain below perfect allocative efficiency, at \(0.734\)
-instead of the truthful benchmark value of \(1.0\). First-price auctions show
-the expected bid-shading direction: underbidding is frequent, at \(0.814\), and
-overbidding is rare, at \(0.066\). The reserve-price variant raises seller
-revenue from \(3.100\) in no-reserve second-price auctions to \(3.938\), while
-lowering total realized welfare from \(6.241\) to \(6.060\) and producing a
-positive no-sale rate.
+Table~\ref{tab:auction-qlearning} shows the full \(n=20\) Q-learning run across
+the three sealed-bid scenarios. The world reproduces the intended economic
+structure, but learned bidders do not fully recover the theoretical benchmark
+in any of the three. Second-price allocative efficiency is \(0.734\) against a
+truthful benchmark of \(1.0\). First-price bidding shows the expected shading
+direction clearly, with underbidding at \(0.814\) and overbidding at \(0.066\).
+The reserve variant raises seller revenue from \(3.100\) in plain second-price
+to \(3.938\), while lowering realized welfare from \(6.241\) to \(6.060\) and
+producing a positive no-sale rate.
 
 \begin{table}[h]
 \centering
@@ -211,24 +235,26 @@ Second price + reserve & 3.938 & 6.060 & 0.796 & 0.150 & 0.441 & 0.172 \\
 \label{tab:auction-qlearning}
 \end{table}
 
-The first-price result is the cleanest recovery of a theory-predicted direction:
-learned bidders shade bids below value. The second-price result is the opposite
-kind of evidence. The mechanism has a dominant-strategy benchmark, but the
-learned bidders do not reach it perfectly in finite training; the consequence is
-lower allocative efficiency and positive regret. The reserve result follows the
-standard revenue-efficiency interpretation: seller revenue rises while realized
-welfare falls relative to the no-reserve second-price baseline.
+First price is the most direct recovery of a predicted direction: learned bidders
+shade below value, as theory predicts, even though they do not converge tightly
+enough to eliminate regret. Second price gives a different kind of evidence:
+the mechanism is exactly strategy-proof, but finite learned bidding does not
+fully reach the dominant strategy, and the shortfall appears as lower
+allocative efficiency and positive regret rather than as a code or mechanism
+defect. The reserve result follows the textbook tradeoff direction: revenue
+rises, welfare falls, and a positive share of auctions produce no sale.
 
 \subsection{Cross-Mind Sealed-Bid Results}
 
-Table~\ref{tab:auction-crossmind-second} focuses on second-price auctions,
-where the benchmark is strongest. PPO is closest to the intended outcome among
-the tested learning minds: it has the lowest ex-post regret, \(0.187\), the
-highest welfare, \(6.389\), and the highest allocative efficiency, \(0.762\).
-DQN and independent-DQN raise seller revenue but do so with lower efficiency and
-larger truthful-bid distances. The centralized critic has substantially weaker
-results in this asymmetric bidding setting: revenue is nearly zero, allocative efficiency is
-\(0.522\), and regret is \(1.436\).
+Table~\ref{tab:auction-crossmind-second} reports second-price results across
+the full learner suite, where the benchmark is sharpest. PPO is closest to the
+intended outcome of every learner tested: lowest ex-post regret at \(0.187\),
+highest welfare at \(6.389\), and highest allocative efficiency at \(0.762\).
+DQN and independent-DQN raise seller revenue above the Q-learning baseline, but
+with lower efficiency and larger truthful-bid distance; the revenue gain does
+not come from bidding closer to the truthful benchmark. The centralized critic
+has the largest benchmark deviation in this table: revenue is close to zero,
+allocative efficiency falls to \(0.522\), and regret rises to \(1.436\).
 
 \begin{table}[h]
 \centering
@@ -249,10 +275,11 @@ Centralized critic & 0.063 & 5.061 & 0.522 & 1.436 & 4.577 \\
 
 Table~\ref{tab:auction-crossmind-first} gives the corresponding first-price
 results. Q-learning, DQN, PPO, and independent-DQN all show substantial
-underbidding, with underbid rates from \(0.716\) to \(0.814\), consistent with
-bid shading. None of them exactly recover the grid benchmark, but the direction
-of deviation is economically coherent. Centralized critic again has the weakest
-auction behavior, with lower revenue, lower efficiency, and the highest regret.
+underbidding, between \(0.716\) and \(0.814\), so every non-centralized learner
+recovers the correct qualitative direction, even though none reaches the grid
+benchmark exactly. Centralized critic again has the largest deviation: lower
+revenue, lower efficiency, and the highest regret of any learner in either
+sealed-bid format.
 
 \begin{table}[h]
 \centering
@@ -271,47 +298,64 @@ Centralized critic & 1.280 & 5.016 & 0.515 & 1.974 & 0.832 \\
 \label{tab:auction-crossmind-first}
 \end{table}
 
+The centralized critic's deviation is consistent across both mechanisms and is
+not an artifact of one auction format. It has the largest benchmark deviations
+in both second-price and first-price settings, which suggests difficulty with
+the asymmetric private-information structure rather than with one specific
+payment rule.
+
 \subsection{Reserve, Clock, and Information Variants}
 
-The reserve-price variant is the most direct institutional intervention in this
-world. Across several learners, reserve prices increase seller revenue relative
-to ordinary second-price auctions while reducing bidder surplus. For Q-learning,
-revenue rises from \(3.100\) to \(3.938\), bidder surplus falls from \(3.141\)
-to \(2.122\), and no-sale rate rises to \(0.172\). DQN and independent-DQN show
-the same revenue shift, with reserve revenues above \(4.3\). This is the
-expected reserve-price tradeoff rather than a new theoretical claim.
+The reserve variant reproduces the expected tradeoff across every learner
+tested, not only Q-learning. DQN and independent-DQN both post reserve revenues
+above \(4.3\), roughly a full point higher than their no-reserve second-price
+revenue, while bidder surplus falls in every case. This is the standard
+reserve-price direction rather than a new theoretical claim, and it is reported
+because it holds more uniformly than the second-price and first-price
+benchmark-recovery results.
 
-Clock and information variants are useful diagnostic extensions. PPO remains
-strong in the clock variant, with welfare \(6.402\), efficiency \(0.769\), and
-regret \(0.186\), close to its second-price results. Public-signal and
-noisy-signal variants preserve finite behavior for the neural and MARL minds,
-but public signals do not automatically improve allocation. For DQN and
-independent-DQN, public-signal second-price auctions have lower allocative
-efficiency than the corresponding private-signal second-price runs. These
-variants therefore support a narrower claim: information changes can be wired
-and measured through the same auction interface, but their current results are
-not a final information-design conclusion.
+The clock and information variants extend the platform beyond the three
+benchmarked sealed-bid formats. PPO remains closest to the benchmark in the
+clock abstraction, with welfare \(6.402\), efficiency \(0.769\), and regret
+\(0.186\), closely tracking its own second-price numbers. The information
+variants show that changing observations does not automatically improve bidding
+behavior: for DQN and independent-DQN, public-signal second-price auctions
+produce lower allocative efficiency than the corresponding private-signal
+second-price runs, and centralized critic's regret rises from \(1.436\) in the
+baseline second-price setting to \(1.487\) under the public signal and \(1.512\)
+under noise. These variants are validated and interpretable, but they are read
+as stress tests of the auction interface rather than as settled
+information-design results, since neither has the sealed-bid formats' full
+Q-learning evidence base.
 
 \subsection{Relation to the Main Question}
 
-Auction House answers the main thesis question by separating mechanism validity
-from learned recovery of the mechanism's guarantee. The classical guarantees
-survive at the mechanism layer: second-price truthfulness, first-price shading,
-reserve/no-sale behavior, and allocation/payment rules are implemented and
-validated against exact checks. They do not fully survive as learned behavior.
-Even in a clean second-price auction, learned bidders do not converge all the
-way to truthful, efficient bidding in the observed finite runs. First-price
-learners recover the qualitative shading direction, but not a zero-regret
-benchmark. Reserve prices reproduce the expected revenue-efficiency tradeoff.
+Auction House separates two objects that this paper treats as distinct: the
+validity of a mechanism and whether learned behavior recovers what the mechanism
+guarantees. The mechanism layer is exact and validated: second-price
+truthfulness, first-price shading, and reserve revenue-efficiency behavior all
+pass known-answer checks before any learned bidder is examined. Learned behavior
+does not fully match that layer. Even in a clean second-price auction, no
+learner in the suite converges all the way to truthful, efficient bidding within
+the tested training budget; first-price learners recover the correct shading
+direction without reaching a zero-regret benchmark; reserve pricing reproduces
+its textbook tradeoff consistently across learners.
 
-The break depends on learning architecture. PPO is closest to the second-price
-benchmark among the tested learners, while DQN and independent-DQN generate
-higher revenue with weaker allocative efficiency. Centralized critic has the
-largest benchmark deviation in this asymmetric auction setting, with weak
-results in both second-price and first-price formats. The correct claim is therefore not
-that auction theory fails. The claim is that exact auction-theory properties can
-be present in the mechanism while finite learned behavior remains far from the
-benchmark, and the distance from the benchmark is architecture-dependent.
+The gap between mechanism and learned behavior is architecture-dependent. PPO
+sits closest to the benchmark across second-price, first-price, and clock
+settings. DQN and independent-DQN typically raise seller revenue while moving
+farther from truthful bidding, a different kind of deviation than PPO's. The
+centralized critic has the largest deviations in almost every non-reserve
+scenario, a pattern specific to this world's private-information structure that
+does not appear in the same form in Pricing Arena or Resource Island.
+
+Two limits follow from this evidence. First, the result is a
+benchmark-deviation claim, not a claim that learned bidders converge to auction
+equilibrium. Second, this platform studies fixed mechanisms with learned
+bidders, which is different from learned mechanism design in the sense of
+RegretNet-style work \citep{dutting2019}, where the auction rule itself is
+learned. Auction House does not attempt that here: the auction format is fixed,
+and only the bidding behavior is learned.
 
 \section{Labor Market}
 
