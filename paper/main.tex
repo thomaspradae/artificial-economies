@@ -281,7 +281,7 @@ training, rather than a channel visible from the beginning. A short trace is
 therefore insufficient evidence for this result; the training-budget ladder is
 the validation that makes the interpretation credible.
 
-\subsection{The Other Four Mechanisms}
+\subsection{Secondary Pricing Interventions}
 
 Price cap is the only mechanism in this world that produces a consistent
 cross-learner pattern. The remaining four are correctly implemented and pass
@@ -410,8 +410,6 @@ Demand shock & Passes all checks & Robustness check, not a policy result \\
 \label{tab:pricing-mechanism-status}
 \end{table}
 
-\subsection{Summary}
-
 Pricing Arena's most interpretable result is a guardrail that succeeds on its
 direct target while failing to provide an invariant guarantee over adjacent
 economic outcomes: price caps lower exploitability for every learner tested,
@@ -427,108 +425,268 @@ synthesis section.
 
 \subsection{World}
 
-Resource Island is a bounded-grid gather/trade economy. Agents move, gather food
-and wood, maintain energy, accumulate inventories, and can die from starvation.
-The world contains property rights, redistribution, trade price controls, and
-reputation institutions. It was built to test whether the platform abstractions
-work outside a two-firm pricing game.
+Resource Island is a bounded-grid gather-and-trade economy. Agents move across
+the grid, gather food and wood, maintain an energy stock that is drawn down
+each round, hold separate food and wood inventories, and can starve if energy
+runs out. Available actions are staying in place, moving in one of four
+directions, gathering from the current cell, and offering food for wood or wood
+for food in trade. The world implements property rights, redistribution, trade
+price controls, and a reputation system as swappable institutions on top of
+this base economy. It was built specifically to test whether the platform's
+shared \code{World}/\code{Agent}/\code{Institution} interface holds up outside a
+two-firm pricing game, in a setting with spatial structure, inventory, and
+multilateral exchange rather than a single simultaneous-move market.
 
-\subsection{What v0 Taught}
+The world records survival rate, welfare, specialization, inequality over
+time, resource sustainability, trade attempts, successful trades,
+inventory-blocked trades, institution-blocked trades, property claims, property
+violations, and property opportunities. This last group exists because Resource
+Island, unlike Pricing Arena or Auction House, has no external closed-form
+benchmark to check learned behavior against; its central obligation is instead
+to demonstrate that each institution was placed under economic pressure before
+any welfare or trade number from it is interpreted.
 
-The first full Resource Island runs were mechanically valid but economically
-under-activated. In the initial full run, successful trade was sparse and some
-institutions did not bind. Follow-up replay showed that property rights almost
-never faced behavioral pressure: even when claims existed, non-owner
-opportunities to gather from claimed resource cells were extremely rare.
-Similarly, trade price controls could not bind because the original trade
-protocol only allowed one-for-one exchange.
+\subsection{Activation as the Governing Question}
 
-This is an important negative result for the platform: a world can be runnable,
-tested, and statistically replicated while still failing to exercise the
-institution it is supposed to study.
+Classical theory gives qualitative predictions here rather than a single target
+value: property rights should reduce conflict over contested resources, trade
+should raise welfare when agents have heterogeneous needs or access, reputation
+should support repeated exchange, and price controls can protect against
+exploitative trades while also blocking mutually beneficial ones. None of these
+predictions specifies a number a learned agent should reach. What they do
+specify is a precondition: an institution cannot be evaluated unless the world
+creates the situation the institution is meant to govern. A property-rights rule
+is not evaluated if no non-owner ever has reason to access a claimed cell, and a
+trade price control is not evaluated if every trade already happens to be
+one-for-one. This section therefore reports results only from a version of the
+world confirmed to place every institution under that pressure, and treats an
+earlier, non-activated version as a methods note rather than as economic
+evidence.
 
-\subsection{v1 Hardening}
+\subsection{Activation Check}
 
-Resource Island v1 adds four changes, motivated by common-pool-governance and
-public-goods work on monitoring, local fit, incentives, and repeated
-interaction \citep{ostrom1990,fehrgachter2000,isaac1994}:
+The first full runs of this world passed every unit and parity test and
+produced complete, statistically replicated output, but were economically
+under-activated. Successful trade was sparse, and property rights rarely faced
+behavioral pressure: even where a claim existed, non-owner opportunities to
+gather from claimed cells were negligible. Trade price controls could not bind
+because the original trade protocol only allowed strictly one-for-one exchange,
+which no control could flag as unequal. This was a concrete instance of an
+environment that was runnable, tested, and replicated across seeds, but still
+did not exercise the institution it claimed to study.
 
-\begin{enumerate}
-  \item contested resource layouts, so multiple agents have reason to access the
-  same cells;
-  \item unequal trade offers, so price controls can actually bind;
-  \item specialization pressure through heterogeneous resource preferences and
-  starting inventories;
-  \item activation diagnostics for trade attempts, blocked trades, property
-  opportunities, property violations, and institution blocks.
-\end{enumerate}
+The corrected version, v1, adds four changes: contested resource layouts, so
+that multiple agents have a reason to want the same cell; unequal trade offers,
+so that a price control has something to bind against; specialization pressure,
+through heterogeneous resource preferences and starting inventories; and the
+activation diagnostics themselves, counting trade attempts, blocked trades,
+property opportunities, property violations, and institution blocks directly.
+All results reported below are from this activated v1 configuration, confirmed
+by those diagnostics to place each institution under economic pressure and
+validated at both a medium-scale gate run and the full \(n=20\) replication that
+follows it.
 
-The v1 validation run verified that the economic channels were active, and the
-subsequent n=20 full run preserves that activation. Table~\ref{tab:resource-v1}
-shows the medium validation values used as the pre-full-run gate.
+\subsection{Baseline}
 
-\begin{table}[h]
-\centering
-\begin{tabular}{lrrrrr}
-\toprule
-Institution & Welfare & Survival & Trades & Trade Blocks & Property Opps. \\
-\midrule
-none & 1.095 & 0.933 & 6.034 & 0.000 & 0.000 \\
-property rights & 1.078 & 0.923 & 5.790 & 0.000 & 17.734 \\
-trade price controls & 0.875 & 0.898 & 0.000 & 5.779 & 0.000 \\
-reputation & 1.313 & 0.927 & 6.867 & 0.000 & 0.000 \\
-\bottomrule
-\end{tabular}
-\caption{Resource Island v1 validation results.}
-\label{tab:resource-v1}
-\end{table}
-
-The interpretation is straightforward. Price controls now bind because the
-world permits unequal trades. Reputation increases successful trade and welfare
-in the validation setting. Property-right opportunities are present, although
-the welfare effect is small in this medium run. The full n=20 v1 run confirms
-the activation pattern: successful trade appears under no institution, price
-controls bind and suppress trade, property-right opportunities are measured,
-and reputation produces the strongest welfare gains in this pressure setup.
-The strict-local ablation confirms that this remains partly a spatial-friction
-story: reducing trade from all-island matching to radius-one local matching cuts
-baseline trade from 5.325 to 1.900 and reputation trade from 6.667 to 1.927,
-while property opportunities and price-control blocks remain positive.
-
-\subsection{Cross-Mind Resource Island}
-
-The v0 Resource Island Phase 3 full table initially gave a different pattern
-from Pricing Arena: neural/MARL minds improved survival and welfare but did not
-learn successful trade. After the v1 pressure changes, that is no longer the
-main Resource Island conclusion. Table~\ref{tab:resource-v1-minds} shows the
-no-institution row from the v1 full learner-suite run.
+Table~\ref{tab:resource-baseline} shows the no-institution baseline under
+Q-learning, the reference point every institution result below is measured
+against. Trade attempts occur roughly twice as often as successful trades,
+survival is high, and resource sustainability sits below one, meaning agents
+draw the resource stock down through ordinary activity rather than leaving it
+untouched.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{lrr}
+\begin{tabular}{lr}
 \toprule
-Mind & Welfare & Trades \\
+Metric & Value \\
 \midrule
-Q-learning & 1.107 & 5.325 \\
-DQN & 1.061 & 0.640 \\  
-PPO & 1.254 & 8.892 \\
-Independent DQN & 1.063 & 1.730 \\
-Centralized critic & 1.248 & 8.697 \\
+Survival rate & 0.9439 \\
+Welfare & 1.1065 \\
+Successful trades & 5.3251 \\
+Trade attempts & 10.5507 \\
+Specialization index & 0.3895 \\
+Inequality over time & 0.1558 \\
+Resource sustainability & 0.7638 \\
 \bottomrule
 \end{tabular}
-\caption{Resource Island v1 full learner-suite run, no-institution condition.}
-\label{tab:resource-v1-minds}
+\caption{Resource Island v1, no-institution baseline, Q-learning.}
+\label{tab:resource-baseline}
 \end{table}
 
-The updated result is more useful. PPO and centralized-critic discover the
-trade channel under pressure, while DQN and fixed independent-DQN remain more
-conservative and trade much less. Under trade price controls, successful trade
-falls to zero across the learner suite because unequal exchange is blocked. Resource
-Island therefore contributes a different kind of learner-architecture effect from Pricing
-Arena: stronger learners do not simply exploit or avoid an institution
-monotonically; their ability to activate the intended market channel depends on
-the learning rule and on whether the environment creates enough pressure for
-exchange.
+\subsection{Institution Results}
+
+Property rights create a claim on a cell after its first successful gather, and
+can then block or penalize a later gather attempt by a non-owner. Under v1, this
+rule is measurably exercised: Table~\ref{tab:resource-property} reports nearly
+28 property-opportunity events per run under Q-learning, alongside small
+positive changes in survival, welfare, and trade. Violations remain low
+relative to opportunities, so the result should not be interpreted as evidence
+that property rights resolve conflict in general. The supported claim is that
+v1 makes the mechanism observable and mildly beneficial in this configuration.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+Metric & Value \\
+\midrule
+Survival \(\Delta\) & \(+0.0077\) \\
+Welfare \(\Delta\) & \(+0.0474\) \\
+Trade count \(\Delta\) & \(+0.4861\) \\
+Property claims & 1.8695 \\
+Property violations & 0.0468 \\
+Property opportunities & 27.8249 \\
+\bottomrule
+\end{tabular}
+\caption{Property rights versus no institution, Q-learning.}
+\label{tab:resource-property}
+\end{table}
+
+Trade price controls block any trade whose exchange ratio exceeds a set
+maximum. Table~\ref{tab:resource-pricecontrol} shows that the control is active:
+successful trade falls to zero, and welfare, survival, and sustainability fall
+with it. The institutional channel is therefore exercised, but the observed
+effect is restrictive rather than welfare-improving. A rule designed to prevent
+unequal exchange can eliminate exchange altogether rather than making it more
+equitable, and that is the pattern observed in this configuration.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+Metric & Value \\
+\midrule
+Survival \(\Delta\) & \(-0.0249\) \\
+Welfare \(\Delta\) & \(-0.1558\) \\
+Trade count \(\Delta\) & \(-5.3251\) \\
+Successful trades (level) & 0.0000 \\
+Institution-blocked trades & 4.7862 \\
+Resource sustainability \(\Delta\) & \(-0.0300\) \\
+\bottomrule
+\end{tabular}
+\caption{Trade price controls versus no institution, Q-learning.}
+\label{tab:resource-pricecontrol}
+\end{table}
+
+Reputation gives agents a reward bonus tied to a history of successful trades.
+Table~\ref{tab:resource-reputation} shows welfare and trade both rising under
+this institution. This separates the result from a purely accounting-based
+reward effect: trade volume also changes, so at least part of the welfare gain
+is associated with additional exchange.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+Metric & Value \\
+\midrule
+Survival \(\Delta\) & \(-0.0138\) \\
+Welfare \(\Delta\) & \(+0.2412\) \\
+Trade count \(\Delta\) & \(+1.3414\) \\
+Trade attempt count \(\Delta\) & \(+0.5410\) \\
+\bottomrule
+\end{tabular}
+\caption{Reputation system versus no institution, Q-learning.}
+\label{tab:resource-reputation}
+\end{table}
+
+Redistribution was tested in the earlier, non-activated configuration and is
+reported here only as preliminary evidence rather than an activated-world
+result. In that setting it slightly reduced inequality, at the cost of a small
+reduction in survival, welfare, and trade. Whether this pattern holds under v1
+pressure has not yet been tested.
+
+\subsection{Cross-Mind Results}
+
+Table~\ref{tab:resource-crossmind} shows the no-institution baseline across the
+full learner suite. The split is substantial: Q-learning, PPO, and the
+centralized critic all sustain meaningful trade, while DQN and independent-DQN
+trade much less, by roughly an order of magnitude on trade count relative to
+PPO. DQN and independent-DQN also show the highest resource sustainability in
+the table, but this should be read as reduced economic activity rather than as
+efficient resource governance.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{lrrrrrr}
+\toprule
+Mind & Survival & Welfare & Trades & Attempts & Specialization & Sustain. \\
+\midrule
+Q-learning & 0.9439 & 1.1065 & 5.3251 & 10.5507 & 0.3895 & 0.7638 \\
+DQN & 0.9102 & 1.0614 & 0.6398 & 1.0709 & 0.1790 & 0.9529 \\
+PPO & 0.9150 & 1.2537 & 8.8919 & 9.8380 & 0.4052 & 0.8789 \\
+Independent-DQN & 0.9064 & 1.0630 & 1.7300 & 2.1310 & 0.1524 & 0.9639 \\
+Centralized critic & 0.9150 & 1.2484 & 8.6973 & 10.8525 & 0.4073 & 0.8920 \\
+\bottomrule
+\end{tabular}
+\normalsize
+\caption{Resource Island v1, no-institution condition, full learner suite.}
+\label{tab:resource-crossmind}
+\end{table}
+
+This is a different architecture effect from the one observed in Pricing Arena.
+In Pricing Arena, DQN eventually learns a profit-preserving response to a price
+constraint. In Resource Island, DQN and independent-DQN underuse a productive
+channel that is demonstrably available, since three other learners in the same
+environment use it extensively. The failure mode here is non-discovery of a
+productive market opportunity rather than exploitation of a regulatory
+guardrail.
+
+Table~\ref{tab:resource-activation-by-mind} shows that this split is not
+confined to the baseline; it carries through to institutional activation.
+Property opportunities under property rights, and trade volume under
+reputation, both show the same DQN-and-independent-DQN-low pattern as the
+baseline trade numbers.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrr}
+\toprule
+Mind & Property Opportunities & Trade (Reputation) & Welfare (Reputation) \\
+\midrule
+Q-learning & 27.8249 & 6.6665 & 1.3477 \\
+DQN & 8.2279 & 2.4212 & 1.1686 \\
+PPO & 27.1268 & 13.9870 & 1.8244 \\
+Independent-DQN & 6.5695 & 2.2882 & 1.1541 \\
+Centralized critic & 24.9577 & 7.7649 & 1.4858 \\
+\bottomrule
+\end{tabular}
+\caption{Institution activation by learner, property rights and reputation.}
+\label{tab:resource-activation-by-mind}
+\end{table}
+
+Reputation therefore amplifies an exchange channel that already has to exist
+for the reputation bonus to have behavioral content. For DQN and
+independent-DQN, the baseline trade channel is limited, so the reputation effect
+is also limited. Trade price controls show the reverse pattern: successful
+trade falls to zero for every learner under this institution, so the formal
+rule binds universally, but the amount of blocked-trade pressure differs by
+learner, from 4.79 for Q-learning to 0.04 for PPO. The practical economic effect
+of the same rule therefore depends on how much a given learner attempts to
+trade in the first place.
+
+\subsection{What Remains Open}
+
+The DQN and independent-DQN trade result above is reported at a single training
+budget, and Pricing Arena's price-cap result showed why single-budget
+interpretations require caution. It is possible that DQN discovers the trade
+channel more slowly than PPO or the centralized critic rather than failing to
+discover it altogether. Until a budget ladder analogous to
+Table~\ref{tab:pricing-budget-ladder} is run for this world, the claim is
+limited to the training budget actually tested.
+
+Resource Island's contribution is different in kind from Pricing Arena's. Its
+early configuration demonstrated a methodological failure mode: an environment
+can pass mechanics tests and still fail to exercise the institution it claims
+to study. The activated v1 configuration then produced an institutional result:
+trade price controls bind and eliminate exchange, reputation amplifies trade
+where a learner already engages in it, and property rights become measurable
+rather than purely nominal. The learner-architecture split is consistent across
+the baseline and the institutions tested: Q-learning, PPO, and the centralized
+critic sustain meaningful trade economies, while DQN and independent-DQN do not
+at the training budget tested here.
 
 \section{Environment 3: Auction House}
 
