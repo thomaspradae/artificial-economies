@@ -4,7 +4,7 @@ Artificial Economies is a research codebase for testing whether economic institu
 
 Paper:
 
-- [Compiled PDF](paper/main.pdf)
+- [Compiled PDF](https://thomaspradae.github.io/artificial-economies/paper/main.pdf)
 - [LaTeX source](paper/main.tex)
 
 ## Overview
