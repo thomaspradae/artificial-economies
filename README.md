@@ -2,18 +2,14 @@
 
 Artificial Economies is a research codebase for testing whether economic institutions remain robust when their participants are learning agents rather than equilibrium solvers.
 
-The repository accompanies the paper:
+Paper:
 
-- `paper/main.tex`
-- `paper/main.pdf`
-
-Project repository:
-
-- <https://github.com/thomaspradae/artificial-economies>
+- [Compiled PDF](paper/main.pdf)
+- [LaTeX source](paper/main.tex)
 
 ## Overview
 
-The codebase implements five controlled economic worlds behind a shared interface:
+The project implements five controlled economic worlds behind a shared `World` / `Agent` / `Institution` interface:
 
 - `Auction House`: single-item auctions with first-price, second-price, reserve, clock, and information variants.
 - `Labor Market`: worker-proposing deferred-acceptance matching with learned worker reports.
@@ -21,16 +17,7 @@ The codebase implements five controlled economic worlds behind a shared interfac
 - `Public Goods`: common-pool contribution and extraction with penalties, matching, reputation, information restriction, and taxes.
 - `Resource Island`: spatial gather-and-trade economy with property rights, trade controls, reputation, and activation diagnostics.
 
-Each world can be paired with multiple learner classes:
-
-- random behavior
-- tabular Q-learning
-- DQN
-- PPO
-- decorrelated independent-DQN
-- centralized-critic training
-
-The main research question is not which learner performs best. The question is which institutional guarantees survive when the behavioral assumptions behind classical benchmarks are changed.
+Each world can be paired with random behavior, tabular Q-learning, DQN, PPO, decorrelated independent-DQN, and centralized-critic learners. The main research question is not which learner performs best; it is which institutional guarantees survive when the behavioral assumptions behind classical benchmarks are changed.
 
 ## Repository Layout
 
@@ -58,7 +45,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-PyTorch is used for the DQN, PPO, independent-DQN, and centralized-critic learners. CPU execution is sufficient for the structured MLP experiments in this repository.
+PyTorch is used for the DQN, PPO, independent-DQN, and centralized-critic learners. CPU execution is sufficient for these structured MLP experiments.
 
 ## Tests
 
@@ -68,51 +55,15 @@ Run the full Python test suite:
 python -m unittest discover
 ```
 
-The tests cover:
+The tests cover core abstractions, world mechanics, benchmark checks, institution transforms, learner integration, output schemas, and comparison builders.
 
-- core abstractions
-- world mechanics
-- benchmark and known-answer checks
-- institution transforms
-- tabular and deep-RL learner integration
-- output schemas and comparison builders
+## Reproducing Runs
 
-## Common Experiment Runners
-
-Pricing Arena:
+The main runners are:
 
 ```bash
 python run_multiseed.py --mind q_learning --steps 40000 --n-seeds 20 --save-dir outputs/pricing_q_learning
 python run_exploitability.py --incumbent-mind q_learning --save-dir outputs/pricing_exploitability
-```
-
-Auction House:
-
-```bash
-python run_auction_house_smoke.py --steps 40000 --n-seeds 20 --save-dir outputs/auction_house_full
-```
-
-Public Goods:
-
-```bash
-python run_public_goods_smoke.py --steps 40000 --n-seeds 20 --save-dir outputs/public_goods_full
-```
-
-Labor Market:
-
-```bash
-python run_labor_market_smoke.py --steps 40000 --n-seeds 20 --save-dir outputs/labor_market_full
-```
-
-Resource Island:
-
-```bash
-python run_resource_island_smoke.py --steps 40000 --n-seeds 20 --save-dir outputs/resource_island_full
-```
-
-Cross-world validation and synthesis:
-
-```bash
 python run_known_answer_sanity_checks.py --save-dir outputs/known_answer_checks
 python run_mechanism_traces.py --save-dir outputs/mechanism_traces
 python run_claim_audit_suite.py --save-dir outputs/claim_audit_suite
@@ -150,10 +101,6 @@ pdflatex -interaction=nonstopmode main.tex
 pdflatex -interaction=nonstopmode main.tex
 ```
 
-## Notes
+## Archive Branch
 
-This repository is the cleaned publication version of the project. The pre-publication working state is preserved in the local git branch:
-
-```text
-pre-publication-working-state-2026-07-28
-```
+The cleaned `main` branch is the publication-facing version. The full pre-cleanup working state is preserved in `pre-publication-working-state-2026-07-28`.
