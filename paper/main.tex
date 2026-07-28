@@ -1176,9 +1176,12 @@ for every learner under this institution, so the formal rule binds universally,
 but the amount of blocked-trade pressure differs sharply by learner, from 4.79
 for Q-learning to 0.04 for PPO. The practical force of an identical rule
 therefore depends on how much a given learner attempts to trade in the first
-place.
+place. Resource Island therefore answers the main question through activation:
+the same institution can be formally present for every learner, but its economic
+effect depends on whether the learner discovers and repeatedly uses the channel
+the rule governs.
 
-\subsection{Relation to the Main Question}
+\subsection{Training-Budget Boundary}
 
 The DQN and independent-DQN trade result above is reported at a single training
 budget. Pricing Arena's price-cap result showed that a single-budget reading of
@@ -1192,14 +1195,9 @@ more slowly than PPO's on-policy exploration, without that implying that DQN
 cannot learn it at all.
 
 Until a budget ladder analogous to Table~\ref{tab:pricing-budget-ladder} is run
-for this world, the claim is limited to the training budget actually tested. At
-that budget, trade price controls bind and eliminate exchange, reputation
-amplifies trade where a learner already engages in it, and property rights are
-measurable through opportunity counters. The learner split is also
-activation-conditioned: Q-learning, PPO, and the centralized critic sustain
-meaningful trade economies, while DQN and independent-DQN show low trade
-activation relative to those learners. Whether that gap narrows, holds, or
-reverses with more training remains open.
+for this world, the DQN-family trade claim is limited to the training budget
+actually tested. Whether that gap narrows, holds, or reverses with more training
+remains open.
 
 \section{Cross-World Synthesis}
 
@@ -1212,15 +1210,25 @@ independent learners, and centralized critics violate different assumptions of
 the classical benchmark story. The comparisons are therefore best read as a
 learner-architecture stress test, not as a scalar capability ranking.
 
-The Pricing Arena result shows architecture-sensitive institutional effects:
-price caps reduce exploitability broadly, but DQN's profit response flips sign
-with training budget and is positive in the full paired audit. Resource Island
-shows why activation diagnostics are necessary: institution effects are
-interpretable only in runs where agents attempt the behavior the institution is
-meant to govern. Auction House adds theory-anchored bidding benchmarks
-\citep{vickrey1961,myerson1981}. Public Goods adds a sustainability and
-commons-collapse channel. Labor Market adds a matching-stability and
-truthfulness channel.
+\begin{table}[h]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.12\linewidth}>{\raggedright\arraybackslash}p{0.19\linewidth}>{\raggedright\arraybackslash}p{0.18\linewidth}>{\raggedright\arraybackslash}p{0.19\linewidth}>{\raggedright\arraybackslash}p{0.18\linewidth}}
+\toprule
+World & Guarantee tested & What survives & What breaks & Architecture-sensitive channel \\
+\midrule
+Auction House & Truthful or shaded bidding and reserve-price tradeoffs & Fixed auction rules reproduce the benchmark structure & Learned bidders do not fully recover zero-regret benchmark behavior & PPO is closest to benchmark bidding; centralized critic deviates most under private information \\
+Labor Market & Deferred-acceptance stability and proposing-side strategy-proofness & Match rates stay high and most learners preserve stability & Welfare can rise while truthfulness and stability fall & Centralized critic gives the clearest welfare-versus-stability conflict \\
+Pricing Arena & Pricing guardrails against collusion and exploitability & Price caps reduce exploitability for every learner tested & Profit and collusion effects are not invariant to learner or training budget & DQN's price-cap profit response changes sign with training budget \\
+Public Goods & Incentives against free-riding and commons depletion & Contribution matching moves contribution and sustainability for several learners & Welfare/reward gains can overstate changes in the resource state & PPO and centralized critic remain near-zero contributors at the validated group size \\
+Resource Island & Activation of property, trade-control, and reputation channels & Property pressure, blocked trades, and reputation-mediated exchange are measurable & Trade price controls eliminate exchange; DQN-family learners trade much less at the tested budget & Learners differ in whether they discover the trade/reputation channel \\
+\bottomrule
+\end{tabular}
+\normalsize
+\caption{Cross-world synthesis of the main guarantee tested, what survives, what breaks, and the learner-dependent channel in each world.}
+\label{tab:cross-world-synthesis}
+\end{table}
 
 The five-world synthesis is now built from full n=20 learner-suite outputs for Pricing
 Arena, Resource Island, Auction House, Public Goods, and Labor Market. The
@@ -1235,17 +1243,11 @@ becoming a table of averages without claim boundaries.
 
 The main synthesis claim is qualitative but concrete. Learning architecture
 changes institutional outcomes in every world, but not through one universal
-direction. In Pricing Arena, DQN's price-cap profit increase is a
-long-training, seed-heterogeneous effect rather than a short-run channel. In
-Resource Island, PPO and centralized-critic activate trade strongly while
-DQN-family learners trade much less \citep{mnih2015,schulman2017}. In Auction House, the relevant
-question is distance from truthful, shaded, or reserve-price benchmarks rather
-than raw reward \citep{vickrey1961,myerson1981,milgrom2004}. In Public Goods, the relevant state variables are
-contribution, extraction, and sustainability, while some tax effects are
-accounting effects rather than state changes. In Labor Market, deferred
-acceptance produces high match rates and mostly stable outcomes, so future
-manipulation claims must target the right side of the market or a different
-matching institution.
+direction. Table~\ref{tab:cross-world-synthesis} is the compact form of that
+claim: the relevant failure is a benchmark-recovery gap in Auction House, a
+welfare-versus-stability conflict in Labor Market, a budget-dependent
+price-cap response in Pricing Arena, a welfare-versus-resource-state split in
+Public Goods, and an activation-conditioned trade channel in Resource Island.
 
 \section{Limitations}
 
@@ -1260,12 +1262,12 @@ than an empirical commons. Labor Market currently uses worker-side learning
 under deferred acceptance, so it tests one asymmetric matching channel rather
 than matching-market design generally.
 
-The most important limitation is interpretive. A complete CSV does not imply a
-validated economic result. Every institution must be checked for activation. Every
-learner-architecture comparison must be checked for implementation artifacts. The
-independent-DQN alias issue is a concrete example: the table was statistically
-valid as an output file, but not valid as evidence for a distinct mind until the
-implementation was corrected and rerun.
+Several empirical boundaries remain. The current results do not calibrate the
+worlds to external market data, do not perform broad hyperparameter sweeps, and
+do not yet include the pending Resource Island training-budget ladder or the
+Public Goods group-size sweep as final evidence. The mechanisms are fixed by the
+experimenter rather than learned, so the paper studies learned behavior inside
+institutions rather than learned mechanism design.
 
 The Pricing Arena price-cap audit adds a second interpretive warning. A
 mechanism trace can reveal the local channel but cannot replace a replicated
@@ -1305,6 +1307,13 @@ outputs are stored under \code{outputs/}. Major runners include:
 The test suite currently includes unit, integration, and output-validation
 coverage for the core abstractions, Pricing Arena, Resource Island, Auction
 House, Public Goods, Labor Market, and deep-RL/MARL minds.
+
+One implementation issue is recorded explicitly because it changes how earlier
+tables should be read. The original independent-DQN registration produced an
+alias of the DQN condition rather than a decorrelated independent-learner
+baseline. The implementation was corrected, smoke gates now verify divergence,
+and the thesis-facing Pricing Arena and Resource Island tables use the corrected
+independent-DQN reruns.
 
 \subsection{Primary Output Artifacts}
 
