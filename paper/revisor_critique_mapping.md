@@ -17,7 +17,7 @@ The current data confirms this. Baseline outcomes are non-monotonic in almost ev
 | World | Baseline Pattern |
 |---|---|
 | Pricing Arena | DQN/PPO reduce exploitability relative to Q-learning, but centralized-critic has worse exploitability than Q-learning. |
-| Resource Island v1 | PPO and centralized-critic trade heavily; DQN and independent-DQN trade much less. |
+| Resource Island | PPO and centralized-critic trade heavily; DQN and independent-DQN trade much less. |
 | Auction House | PPO has the best second-price regret; centralized-critic performs badly. |
 | Public Goods | Q-learning contributes more than PPO and centralized-critic under baseline. |
 | Labor Market | Centralized-critic has higher welfare but much lower stability/truthfulness. |
@@ -89,12 +89,12 @@ This is not `stronger is better`; it is architecture-environment mismatch. The c
 
 Claim status: good diagnostic, but be careful. It shows brittleness of this implementation, not a theorem about centralized critics.
 
-### D. Activation-Reversal Candidate: Resource Island v0 to v1
+### D. Activation Candidate: Resource Island
 
-Resource Island v0 made neural/MARL minds look like high-survival non-traders. Resource Island v1 changes that:
+Resource Island should be evaluated only in the pressure-tested configuration where contested resources, specialization pressure, unequal trades, and activation counters are present:
 
 ```text
-v1 none trade_count:
+none trade_count:
 Q-learning: 5.325
 DQN: 0.640
 PPO: 8.892
@@ -102,9 +102,9 @@ independent-DQN: 1.730
 centralized-critic: 8.697
 ```
 
-This is valuable because it proves the old non-trade result was not a final economic result. It was a design/training activation failure. Once contested resources, specialization pressure, and unequal trades exist, PPO and centralized-critic activate the market channel strongly.
+This is valuable because the institution channels are active enough to interpret. PPO and centralized-critic activate the market channel strongly, Q-learning trades meaningfully, and DQN-family learners trade much less at the tested budget.
 
-Claim status: strong as a world-design lesson; moderate as an institution result.
+Claim status: strong as an activation-conditioned architecture result; moderate as a general institution result.
 
 ### E. Labor Market Metric Tradeoff
 
@@ -156,7 +156,7 @@ Keep:
 - The platform contribution.
 - The five-world validated output discipline.
 - The Pricing Arena price-cap finding.
-- The Resource Island v1 activation lesson.
+- The Resource Island activation-conditioned trade result.
 - The Public Goods metric-decomposition warning.
 - The Auction House benchmark-deviation framing.
 
@@ -174,7 +174,7 @@ The project is not just a 4x5 grid search anymore, but only if the paper foregro
 
 1. Pricing Arena has a real reversal/metric conflict: price cap reduces exploitability while DQN profit-collusion rises.
 2. Public Goods has a real metric lie: welfare/reputation rewards can improve without sustainability/cooperation improving.
-3. Resource Island proves activation diagnostics are necessary: v0 under-tested institutions; v1 changes the learned economy.
+3. Resource Island proves activation diagnostics are necessary: institution claims are interpretable only when the world exercises the channel being measured.
 4. Auction House shows benchmark deviation is the right object: centralized critic can be worse despite being a more complex MARL scaffold.
 5. Labor Market shows outcome metrics split: high matching/welfare can coexist with lower stability/truthfulness.
 

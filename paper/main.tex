@@ -18,7 +18,7 @@ Testing Whether Institutions Stay Robust Across Learning Architectures}
   Universidad Nacional de Colombia\\
   \texttt{tpradae@unal.edu.co}
 }
-\date{Draft v0.3 -- \today}
+\date{Draft 0.3 -- \today}
 
 \begin{document}
 \maketitle
@@ -40,10 +40,10 @@ training budget, becomes mostly positive by 10,000 steps, and is positive in
 the 40,000-step full table. The second environment, Resource Island, extends
 the same interface to a spatial inventory economy and reveals a different
 lesson: institution conclusions are only meaningful when the world actually
-exercises the institutional channel. Early Resource Island versions
-mechanically under-tested property rights and trade price controls; a hardened
-v1 now creates contested resources, unequal trades, and specialization
-pressure. Three additional environments extend the suite: Auction House
+exercises the institutional channel. The reported Resource Island configuration
+therefore uses contested resources, unequal trades, specialization pressure, and
+activation diagnostics before interpreting property rights, trade controls, and
+reputation. Three additional environments extend the suite: Auction House
 provides a benchmarked auction-design testbed, Public Goods exposes common-pool
 extraction and contribution incentives, and Labor Market tests learned
 reporting under deferred acceptance. The current contribution is both empirical
@@ -1021,33 +1021,21 @@ specify is a precondition: an institution cannot be evaluated unless the world
 creates the situation the institution is meant to govern. A property-rights rule
 is not evaluated if no non-owner ever has reason to access a claimed cell, and a
 trade price control is not evaluated if every trade already happens to be
-one-for-one. This section therefore reports results only from a version of the
-world confirmed to place every institution under that pressure, and treats an
-earlier, non-activated version as a methods note rather than as economic
-evidence.
+one-for-one. This section therefore reports Resource Island results only under
+a configuration with contested resources, heterogeneous resource pressure,
+unequal trade offers, and direct activation diagnostics.
 
 \subsection{Activation Check}
 
-The first full runs of this world passed every unit and parity test and
-produced complete, statistically replicated output, but were economically
-under-activated. Successful trade was sparse, and property rights rarely faced
-behavioral pressure: even where a claim existed, non-owner opportunities to
-gather from claimed cells were negligible. Trade price controls could not bind
-because the original trade protocol only allowed strictly one-for-one exchange,
-which no control could flag as unequal. This was a concrete instance of an
-environment that was runnable, tested, and replicated across seeds, but still
-did not exercise the institution it claimed to study.
-
-The corrected version, v1, adds four changes: contested resource layouts, so
-that multiple agents have a reason to want the same cell; unequal trade offers,
-so that a price control has something to bind against; specialization pressure,
-through heterogeneous resource preferences and starting inventories; and the
-activation diagnostics themselves, counting trade attempts, blocked trades,
-property opportunities, property violations, and institution blocks directly.
-All results reported below are from this activated v1 configuration, confirmed
-by those diagnostics to place each institution under economic pressure and
-validated at both a medium-scale gate run and the full \(n=20\) replication that
-follows it.
+Resource Island uses activation diagnostics as a prerequisite for interpreting
+institution effects. The reported configuration contains contested resource
+layouts, so multiple agents have reason to access the same cells; unequal trade
+offers, so trade price controls can bind; specialization pressure, through
+heterogeneous resource preferences and starting inventories; and direct counters
+for trade attempts, blocked trades, property opportunities, property violations,
+and institution blocks. These diagnostics confirm that the reported runs place
+the relevant institutions under economic pressure before welfare or trade
+differences are interpreted.
 
 \subsection{Baseline}
 
@@ -1073,20 +1061,20 @@ Inequality over time & 0.1558 \\
 Resource sustainability & 0.7638 \\
 \bottomrule
 \end{tabular}
-\caption{Resource Island v1, no-institution baseline, Q-learning.}
+\caption{Resource Island, no-institution baseline, Q-learning.}
 \label{tab:resource-baseline}
 \end{table}
 
 \subsection{Institution Results}
 
 Property rights create a claim on a cell after its first successful gather, and
-can then block or penalize a later gather attempt by a non-owner. Under v1, this
-rule is measurably exercised: Table~\ref{tab:resource-property} reports nearly
+can then block or penalize a later gather attempt by a non-owner. This rule is
+measurably exercised: Table~\ref{tab:resource-property} reports nearly
 28 property-opportunity events per run under Q-learning, alongside small
 positive changes in survival, welfare, and trade. Violations remain low
 relative to opportunities, so the result should not be interpreted as evidence
 that property rights resolve conflict in general. The supported claim is that
-v1 makes the mechanism observable and mildly beneficial in this configuration.
+the mechanism is observable and mildly beneficial in this configuration.
 
 \begin{table}[h]
 \centering
@@ -1154,11 +1142,11 @@ Trade attempt count \(\Delta\) & \(+0.5410\) \\
 \label{tab:resource-reputation}
 \end{table}
 
-Redistribution was tested in the earlier, non-activated configuration and is
-reported here only as preliminary evidence rather than an activated-world
-result. In that setting it slightly reduced inequality, at the cost of a small
-reduction in survival, welfare, and trade. Whether this pattern holds under v1
-pressure has not yet been tested.
+Redistribution is not part of the main activated Resource Island institution
+comparison reported here. It remains implemented in the world, but the current
+thesis-facing Resource Island evidence focuses on property rights, trade price
+controls, and reputation because those are the institutions with directly
+validated activation diagnostics in the reported table.
 
 \subsection{Cross-Mind Results}
 
@@ -1185,7 +1173,7 @@ Centralized critic & 0.9150 & 1.2484 & 8.6973 & 10.8525 & 0.4073 & 0.8920 \\
 \bottomrule
 \end{tabular}
 \normalsize
-\caption{Resource Island v1, no-institution condition, full learner suite.}
+\caption{Resource Island, no-institution condition, full learner suite.}
 \label{tab:resource-crossmind}
 \end{table}
 
@@ -1240,16 +1228,16 @@ discover it altogether. Until a budget ladder analogous to
 Table~\ref{tab:pricing-budget-ladder} is run for this world, the claim is
 limited to the training budget actually tested.
 
-Resource Island's contribution is different in kind from Pricing Arena's. Its
-early configuration demonstrated a methodological failure mode: an environment
-can pass mechanics tests and still fail to exercise the institution it claims
-to study. The activated v1 configuration then produced an institutional result:
-trade price controls bind and eliminate exchange, reputation amplifies trade
-where a learner already engages in it, and property rights become measurable
-rather than purely nominal. The learner-architecture split is consistent across
-the baseline and the institutions tested: Q-learning, PPO, and the centralized
-critic sustain meaningful trade economies, while DQN and independent-DQN do not
-at the training budget tested here.
+Resource Island's contribution is different in kind from Pricing Arena's. The
+central requirement is activation: the world must place property rights, trade
+controls, and reputation under measurable economic pressure before their effects
+can be interpreted. Under that requirement, trade price controls bind and
+eliminate exchange, reputation amplifies trade where a learner already engages
+in it, and property rights become measurable rather than purely nominal. The
+learner-architecture split is consistent across the baseline and the
+institutions tested: Q-learning, PPO, and the centralized critic sustain
+meaningful trade economies, while DQN and independent-DQN do not at the training
+budget tested here.
 
 \section{Cross-World Synthesis}
 
@@ -1265,15 +1253,15 @@ learner-architecture stress test, not as a scalar capability ranking.
 The Pricing Arena result shows architecture-sensitive institutional effects:
 price caps reduce exploitability broadly, but DQN's profit response flips sign
 with training budget and is positive in the full paired audit. Resource Island
-shows the complementary failure mode: if the world design does not put an
-institution under pressure, then the absence of an effect is not a mechanism
-result. Auction House adds theory-anchored bidding benchmarks
+shows why activation diagnostics are necessary: if the world design does not
+put an institution under pressure, then the absence of an effect is not a
+mechanism result. Auction House adds theory-anchored bidding benchmarks
 \citep{vickrey1961,myerson1981}. Public Goods adds a sustainability and
 commons-collapse channel. Labor Market adds a matching-stability and
 truthfulness channel.
 
 The five-world synthesis is now built from full n=20 learner-suite outputs for Pricing
-Arena, Resource Island v1, Auction House, Public Goods, and Labor Market. The
+Arena, Resource Island, Auction House, Public Goods, and Labor Market. The
 protocol-comparability report passes for all five worlds, and the publication
 inference table includes all worlds under the same confirmatory bookkeeping.
 The claim-audit suite adds a second pass over those outputs: paired seed
@@ -1287,8 +1275,8 @@ The main synthesis claim is qualitative but concrete. Learning architecture
 changes institutional outcomes in every world, but not through one universal
 direction. In Pricing Arena, DQN's price-cap profit increase is a
 long-training, seed-heterogeneous effect rather than a short-run channel. In
-Resource Island v1, PPO and centralized-critic activate trade strongly while
-DQN-family learners remain more conservative \citep{mnih2015,schulman2017}. In Auction House, the relevant
+Resource Island, PPO and centralized-critic activate trade strongly while
+DQN-family learners trade much less \citep{mnih2015,schulman2017}. In Auction House, the relevant
 question is distance from truthful, shaded, or reserve-price benchmarks rather
 than raw reward \citep{vickrey1961,myerson1981,milgrom2004}. In Public Goods, the relevant state variables are
 contribution, extraction, and sustainability, while some tax effects are
@@ -1302,7 +1290,7 @@ matching institution.
 Several limitations are deliberate. The environments are small and stylized.
 They are designed for auditability rather than realism. The deep-RL agents are
 structured-observation MLP agents rather than large-scale policies. The
-Resource Island trade protocol is still simple, and the current v1 pressure
+Resource Island trade protocol is still simple, and the current pressure-tested
 configuration is an activation test rather than a realistic market. Auction
 House currently has benchmarked sealed-bid full runs and smoke-tested clock and
 information variants. Public Goods is still a stylized common-pool model rather

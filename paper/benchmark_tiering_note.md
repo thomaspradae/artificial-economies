@@ -363,7 +363,7 @@ Resource Island is Tier 3. Its central benchmark is not "economic theory says ex
 
 > Does the world actually activate the economic channel the institution is supposed to govern?
 
-This matters because property rights, trade controls, redistribution, and reputation are meaningless if agents never contest resources or trade.
+This matters because property rights, trade controls, redistribution, and reputation cannot be interpreted if agents never contest resources or trade.
 
 ### 1. What This World Is
 
@@ -404,36 +404,26 @@ Classical anchor:
 - Price controls may protect against exploitative exchange, but can also block mutually beneficial trade.
 - Redistribution may reduce inequality but can distort effort/reward incentives.
 
-Resource Island does not have a clean closed-form Nash benchmark. The benchmark is therefore:
+Resource Island does not have a closed-form Nash benchmark. The benchmark is therefore conditional:
 
 ```text
 Did the world create scarcity, contestation, heterogeneous needs, and trade opportunities?
 Then, conditional on activation, did institutions change survival/trade/welfare?
 ```
 
-### 3. Main Text Should Start With V1
+### 3. Activation Requirement
 
-The main thesis should not lead with the v0 history. V0 is useful as a methods caveat, not as the economic result.
+The main thesis should not present Resource Island as a story about implementation versions. It should present Resource Island as a pressure-tested scarce-resource world.
 
-Main Resource Island story:
-
-> Resource Island is evaluated in its activated configuration: contested resources, specialization pressure, unequal trades, and diagnostic counters for property/trade activation.
-
-Use v0 only briefly:
-
-> Earlier non-activated configurations are treated as diagnostics, not evidence. We only interpret Resource Island institution effects in configurations where trade attempts, successful trades, property opportunities, and institution blocks are observed.
-
-This is cleaner than making "we discovered activation diagnostics" sound like the economics finding. The methodological rule is simply:
+The methodological rule is simple:
 
 > Require activation diagnostics before interpreting institution effects.
 
-### 4. Activated V1 Baseline
+The reported configuration includes contested resource layouts, specialization pressure, unequal trades, and diagnostic counters for property/trade activation. That is the configuration used for thesis-facing Resource Island interpretation.
 
-V1 Q-learning full output:
+### 4. Baseline
 
-- [outputs/resource_island_v1_full/summary_aggregate.csv](/home/t/Downloads/fogo/thesis/outputs/resource_island_v1_full/summary_aggregate.csv)
-
-Baseline `none`:
+Baseline `none` result:
 
 ```text
 survival_rate = 0.9439
@@ -447,13 +437,13 @@ resource_sustainability = 0.7638
 
 Interpretation:
 
-> The base V1 economy has meaningful exchange and scarcity. This is the correct configuration for interpreting Resource Island institutions.
+> The base Resource Island economy has meaningful exchange and scarcity. This is the correct configuration for interpreting Resource Island institutions.
 
 ### 5. Institution-by-Institution Results
 
 #### `property_rights`
 
-Mechanism: the first successful gather from a cell creates a claim. Later non-owner gather attempts from claimed cells can be blocked/penalized.
+Mechanism: the first successful gather from a cell creates a claim. Later non-owner gather attempts from claimed cells can be blocked or penalized.
 
 Result versus `none` under Q-learning:
 
@@ -469,9 +459,9 @@ property_resource_opportunities = 14.4547
 
 Interpretation:
 
-> Property rights are activated in V1. They create real opportunity pressure and mildly improve survival/welfare/trade under Q-learning.
+> Property rights are activated. They create opportunity pressure and mildly improve survival/welfare/trade under Q-learning.
 
-Caveat: violations remain low, so do not claim property rights broadly "solve conflict." The safe claim is that V1 finally makes the mechanism measurable and mildly beneficial under this learner/configuration.
+Caveat: violations remain low, so do not claim property rights broadly solve conflict. The safe claim is that the mechanism is measurable and mildly beneficial under this learner/configuration.
 
 #### `trade_price_controls`
 
@@ -491,7 +481,7 @@ resource_sustainability -0.0300
 
 Interpretation:
 
-> Trade price controls bind hard. They block unequal trades and eliminate successful trade, reducing welfare and survival in this configuration.
+> Trade price controls bind. They block unequal trades and eliminate successful trade, reducing welfare and survival in this configuration.
 
 This is economically coherent: a fairness/protection rule can shut down mutually useful exchange.
 
@@ -514,24 +504,9 @@ Interpretation:
 
 #### `redistribution`
 
-Redistribution is not the main V1 pressure result. In the corrected v0 full table it slightly reduced inequality, survival, and welfare:
+Redistribution is implemented, but it is not part of the main activated Resource Island comparison currently emphasized in the thesis. The thesis-facing Resource Island result should focus on property rights, trade price controls, and reputation because those are the mechanisms with directly validated activation diagnostics in the reported comparison table.
 
-```text
-survival -0.0110
-welfare -0.0299
-trade_count -0.0051
-inequality -0.0081
-```
-
-Interpretation:
-
-> Redistribution is mechanically valid but not a strong positive Resource Island result yet.
-
-### 6. Cross-Mind V1 Results
-
-Full V1 cross-mind table:
-
-- [outputs/resource_island_v1_phase3_full/mind_comparison.csv](/home/t/Downloads/fogo/thesis/outputs/resource_island_v1_phase3_full/mind_comparison.csv)
+### 6. Cross-Mind Results
 
 Baseline `none`:
 
@@ -547,8 +522,8 @@ Interpretation:
 
 - PPO and centralized critic learn the trade economy.
 - Q-learning also trades meaningfully.
-- DQN and independent-DQN mostly do not trade.
-- DQN/independent-DQN preserve resources more, but partly because they do less economic activity.
+- DQN and independent-DQN trade much less.
+- DQN/independent-DQN preserve resources more, partly because they do less economic activity.
 
 This is not the same pattern as Pricing Arena. In Pricing Arena, DQN finds a profit-preserving regulatory channel. In Resource Island, DQN-family learners underuse a productive trade channel at the current budget.
 
@@ -588,7 +563,7 @@ Interpretation:
 
 > Reputation works best for minds that already learn or explore trade. It amplifies a trade channel only when the learning architecture discovers that channel.
 
-Trade price controls eliminate successful trade for every mind in V1:
+Trade price controls eliminate successful trade for every mind:
 
 ```text
 Q-learning = 0.0000
@@ -625,7 +600,7 @@ Survives:
 - Trade, property, and reputation can be made economically active if the world has contested resources, specialization pressure, and unequal exchange.
 - Price controls successfully block unequal trades.
 - Reputation increases welfare/trade when agents learn to use trade.
-- Property rights create measurable claims and opportunity pressure in V1.
+- Property rights create measurable claims and opportunity pressure.
 - Q-learning, PPO, and centralized critic can sustain nontrivial trade economies.
 
 Breaks or weakens:
@@ -644,25 +619,13 @@ Depends on architecture: yes.
 - Independent-DQN: distinct from DQN, but still weak on trade.
 - Centralized critic: strong trade behavior, close to PPO in baseline/reputation.
 
-### 9. V0 Versus V1 Framing
-
-V0-to-V1 should be described plainly:
-
-> The early Resource Island configuration was too weak to test the institutions it claimed to test. It had one-for-one trades and insufficient contested-cell pressure, so property rights and price controls could not meaningfully bind. We therefore treat those outputs as diagnostics and interpret only activated configurations.
-
-This is not the main economics claim. It is an engineering/research-methods quality-control point.
-
-The main V1 result is different:
-
-> Once the world creates contested resources and unequal trades, Q-learning, PPO, and centralized critic all activate trade, but DQN and independent-DQN largely do not. Since the same environment supports trade for other learners, this is a provisional learning-architecture result rather than evidence that the world is broken.
-
-### 10. Pending Budget-Ladder Caveat
+### 9. Pending Budget-Ladder Caveat
 
 The DQN trade result should be stated as budget-conditioned until it receives the same audit discipline as Pricing Arena.
 
 Current safe claim:
 
-> At the validated 40k-step V1 budget, PPO and centralized critic learn productive trade, while DQN and independent-DQN show low trade activation.
+> At the validated 40k-step budget, PPO and centralized critic learn productive trade, while DQN and independent-DQN show low trade activation.
 
 Stronger claim not yet justified:
 
@@ -670,17 +633,17 @@ Stronger claim not yet justified:
 
 Required audit before making the stronger claim:
 
-- Resource Island V1 DQN trade budget ladder at longer training budgets, e.g. `40k`, `80k`, `160k`, and possibly `320k` if feasible.
+- Resource Island DQN trade budget ladder at longer training budgets, e.g. `40k`, `80k`, `160k`, and possibly `320k` if feasible.
 
 If DQN still does not trade at longer budgets, the result becomes a strong architecture finding. If it starts trading later, the finding becomes:
 
 > DQN discovers trade more slowly than PPO/centralized critic.
 
-### 11. Resource Island Thesis Takeaway
+### 10. Resource Island Thesis Takeaway
 
 Clean current claim:
 
-> In the activated Resource Island configuration, institutions affect real trade channels rather than only reward accounting. Reputation increases trade and welfare; trade price controls bind and suppress exchange; property rights create measurable access pressure. These effects are learning-architecture dependent: PPO and centralized critic learn high-trade policies, while DQN-family learners show low trade activation at the current training budget.
+> In Resource Island, institutions affect real trade channels rather than only reward accounting. Reputation increases trade and welfare; trade price controls bind and suppress exchange; property rights create measurable access pressure. These effects are learning-architecture dependent: PPO and centralized critic learn high-trade policies, while DQN-family learners show low trade activation at the current training budget.
 
 ## Auction House Writing Note
 
@@ -1511,8 +1474,6 @@ The tiering should be stated directly in the methods or environment-design secti
 ## Resource Island Placement
 
 Resource Island should be framed as different in kind, not simply weaker. Its contribution is not a scalar theory-recovery benchmark. Its contribution is a pressure-tested institutional setting where the central requirement is to verify that the economic channel is active before interpreting institution effects.
-
-The main text should lead with activated V1 results. V0 should appear only as a concise methods caveat explaining why non-activated configurations are excluded from institution-level inference.
 
 ## Draft Sentence
 

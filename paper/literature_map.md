@@ -137,11 +137,11 @@ Must cite:
 
 Paper-specific angle:
 
-- Resource Island v0 is a cautionary result: a tested world can still fail to
-  exercise its institutions. The v1 pressure setting now creates contested
-  resource access, unequal exchange, and specialization pressure.
-- The current v1 result should be described as an activation-validated testbed,
-  not as a final realistic model of property or trade institutions.
+- Resource Island should be described as an activation-validated testbed with
+  contested resource access, unequal exchange, specialization pressure, and
+  direct institution-pressure diagnostics.
+- The current result should not be described as a final realistic model of
+  property or trade institutions.
 
 Future extension:
 
@@ -364,7 +364,7 @@ High-yield Boolean-style queries:
    - economic simulation and policy learning,
    - LLM agents.
 3. When the current full runs land, replace validation numbers with final
-   n=20 Resource Island v1 and Auction House numbers.
+   n=20 Resource Island and Auction House numbers.
 4. Do not build LLM scaffolding until its protocol is written: prompt format,
    allowed memory, deterministic settings, transcript logging, and comparison
    baselines.

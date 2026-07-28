@@ -41,7 +41,7 @@ Canonical inputs:
 
 **What our code reproduces.** The repo implements a bounded spatial gather/trade economy with inventory, energy, property rights, redistribution, trade price controls, reputation, oracle/greedy gather benchmarks, Q-learning, and the neural/MARL mind ladder.
 
-**What our result adds.** Resource Island exposed a useful failure mode: a mechanically valid world can under-exercise its institutions. V0 showed sparse trade and inactive property/price-control channels; v1 adds contested resources, unequal trades, specialization pressure, and activation diagnostics so institution claims are no longer based on silent non-binding rules.
+**What our result adds.** Resource Island is evaluated as a pressure-tested scarce-resource world with contested resources, unequal trades, specialization pressure, and activation diagnostics. This lets institution claims be conditioned on observed trade attempts, property opportunities, and institution-block counters rather than inferred from welfare alone.
 
 **What we still cannot claim.** Resource Island is not a realistic model of property law, bargaining, or community governance. Whole-island trade weakens the spatial-trade interpretation. Strict-local trade-radius ablations remain needed before claiming spatial-friction effects.
 

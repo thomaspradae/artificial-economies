@@ -90,10 +90,9 @@ Validation completed:
 
 Current research status:
 
-- Corrected Resource Island produces nonzero trade attempts and sparse successful trades under tabular Q-learning.
-- Property rights and trade price controls are mechanically under-exercised in v0.
-- Neural/MARL minds find higher survival/welfare policies but do not learn successful trade under the current reward, observation, and training setup.
-- Resource Island v1 needs stronger institution activation: contested resources, unequal exchange offers, specialization pressure, and stricter activation diagnostics.
+- Resource Island is evaluated as a pressure-tested scarce-resource economy with contested resources, unequal trades, specialization pressure, and explicit activation diagnostics.
+- The thesis-facing runs show successful trade under the baseline, measurable property-right pressure, binding trade price controls, and reputation-mediated trade/welfare gains.
+- Neural/MARL minds differ in whether they discover the activated trade/reputation channel: PPO and centralized-critic trade strongly, while DQN-family learners trade less under the tested budget.
 
 ## 5. Auction House
 
@@ -149,7 +148,7 @@ Thesis-facing distinct-mind tables exist for:
 ## 8. Main Open Items
 
 - Replace stale independent-DQN full outputs with fixed decorrelated reruns where needed.
-- Harden Resource Island v1 so property rights and price controls actually bind.
+- Maintain Resource Island activation diagnostics so property rights and price controls are interpreted only when they bind.
 - Finish Auction House design lock and benchmark pass.
 - Add Public Goods / Commons world.
 - Add Labor Market world.
