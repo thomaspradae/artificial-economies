@@ -78,7 +78,7 @@ benchmark that classical theory says is optimal; and an institution can raise a
 headline welfare number while quietly eroding the property, stability,
 sustainability, truthfulness, that the institution actually exists to protect. The next section sets out, world by
 world, the classical benchmark each environment owes and what claim boundary
-follows from it, while sections 4 through 8 report where each of these failure modes appears, and where
+follows from it, while the world sections report where each of these failure modes appears, and where
 the evidence is instead null or still provisional. 
 
 \section{Related Work}
@@ -99,7 +99,7 @@ Auction House and Labor Market belong to the first tier. In Auction House, the c
 
 Pricing Arena and Public Goods belong to the second tier. Pricing Arena has two exact static prices, the Nash price and the joint-profit price, but no closed-form prediction for behavior in the repeated game itself, only a range bounded by the two. A collusion claim in this world is therefore only as credible as the decomposition behind it: price, profit, quantity, welfare, and exploitability are reported together and checked against each other, and the resulting claim is limited to finite-run, regulatory evidence in a stylized duopoly, not a theorem or a real-market antitrust result. Public Goods is bracketed rather than pointed: theory predicts underprovision when private incentives diverge from the social good, with free-riding as a lower bound and the social optimum as an upper one, and nothing more specific in between. The obligation this creates is to keep the welfare number honest against the underlying resource state, since an institution can raise measured welfare through reward accounting without changing the incentive to extract or contribute at all. Contribution, extraction, sustainability, inequality, and tax revenue are therefore reported as separate quantities from welfare, so that an accounting effect is not mistaken for a real one.
 
-Resource Island belongs to the third tier alone. It carries no external closed-form benchmark, so its obligation is not how close a learned agent gets to a known correct value, but whether the institution being measured was ever placed under real economic pressure in the first place. A property-rights rule is not being tested if no non-owner ever has reason to access a claimed resource; a trade price control is not being tested if every trade happens to be one-for-one already. Survival, sustainability, trade counts, property pressure, specialization, and institution-block counters exist to answer that prior question before any welfare number from this world is trusted. This is not a weaker test than the other four worlds run; it is a test of a condition the other four simply assume already holds, and Section 5 reports a case where that assumption failed and had to be corrected before the world's results meant anything.
+Resource Island belongs to the third tier alone. It carries no external closed-form benchmark, so its obligation is not how close a learned agent gets to a known correct value, but whether the institution being measured was ever placed under real economic pressure in the first place. A property-rights rule is not being tested if no non-owner ever has reason to access a claimed resource; a trade price control is not being tested if every trade happens to be one-for-one already. Survival, sustainability, trade counts, property pressure, specialization, and institution-block counters exist to answer that prior question before any welfare number from this world is trusted. This is not a weaker test than the other four worlds run; it is a test of a condition the other four simply assume already holds, and the Resource Island section reports a case where that assumption failed and had to be corrected before the world's results meant anything.
 
 \section{Platform}
 
@@ -135,11 +135,121 @@ Resource Island gather bounds. Third, the experiment must be replicated over
 seeds, with per-seed and aggregate CSV outputs. Fourth, the institution must
 actually activate. An institution that never faces the behavior it is meant to
 govern produces no evidence about that institution, only about the world design.
-Section 5.2 gives a concrete case. The second new validation layer is mechanism tracing. The trace runner produces
+The Resource Island section gives a concrete case. The second new validation layer is mechanism tracing. The trace runner produces
 per-step rows and algebraic decomposition rows for all five worlds and all
 thesis-facing minds. These traces do not replace full-run evidence; they show
 the channel behind a claim and can expose contradictions between short traces
-and full-run results. Section 4.3 gives a concrete case.
+and full-run results. The Pricing Arena section gives a concrete case.
+
+\section{Auction House}
+
+\subsection{World}
+
+Auction House is a single-item sealed-bid auction world with independent private
+values, discrete bids, deterministic tie-breaking, first-price and second-price
+payment rules, and optional reserve prices \citep{vickrey1961,myerson1981,milgrom2004}. Each bidder observes its own
+valuation bin and chooses a bid. The world reports seller revenue, bidder
+surplus, total welfare, allocative efficiency, regret, overbidding, underbidding,
+and distance from benchmark bid functions.
+
+\subsection{Benchmarks}
+
+The second-price benchmark is truthful bidding \citep{vickrey1961}. The first-price benchmark is
+bid shading under symmetric independent private values, with discrete-grid
+regret checks used where the continuous benchmark is too coarse
+\citep{milgrom2004,dutting2019,banchio2022}. Reserve-price
+variants evaluate the revenue-efficiency tradeoff against the no-reserve
+benchmark \citep{vickrey1961,myerson1981,milgrom2004}.
+
+\subsection{Validation}
+
+The Auction House validation run is economically coherent but not yet final
+evidence. Second-price learning moves toward the truthful benchmark, first-price
+learning shows underbidding and bid shading, and reserve prices increase
+revenue while changing allocative efficiency. Table~\ref{tab:auction-validation}
+summarizes the current validation run.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrrrr}
+\toprule
+Scenario & Revenue & Welfare & Efficiency & Underbid Rate \\
+\midrule
+second price & 3.373 & 6.216 & 0.747 & 0.381 \\
+first price & 3.481 & 6.331 & 0.768 & 0.774 \\
+second price + reserve & 4.031 & 6.098 & 0.814 & 0.366 \\
+\bottomrule
+\end{tabular}
+\caption{Auction House validation results.}
+\label{tab:auction-validation}
+\end{table}
+
+\subsection{Cross-Mind Auction Diagnostics}
+
+The full P.6 auction learner-suite run confirms that the auction world should be read
+against benchmark deviations, not raw reward alone. In second-price auctions,
+PPO has the lowest ex-post regret among the tested learning minds
+(\(0.187\)) and higher allocative efficiency than Q-learning (\(0.762\)
+versus \(0.734\)). DQN and fixed independent-DQN earn higher seller revenue but
+with lower allocative efficiency. The centralized-critic scaffold performs
+poorly in this asymmetric bidding setting, with low revenue and high regret.
+
+First-price auctions show the expected underbidding/shading channel across the
+non-centralized learners \citep{milgrom2004}. Q-learning, DQN, PPO, and fixed independent-DQN all
+underbid frequently, with first-price underbid rates between \(0.716\) and
+\(0.814\) \citep{milgrom2004}. This makes Auction House theory-anchored: the economic question is
+how each learner deviates from truthful second-price bidding or shaded
+first-price bidding, not whether the environment merely produces positive
+payoffs \citep{vickrey1961,milgrom2004,dutting2019}.
+
+\section{Labor Market}
+
+\subsection{World}
+
+Labor Market is a two-sided matching environment. Workers are learning agents;
+employers have fixed preferences. Each worker reports a top choice, the world
+constructs reported preferences, and matching is resolved using deferred
+acceptance \citep{galeshapley1962,rothsotomayor1990}. The world reports match rate, total welfare, truthful-report rate,
+stability, blocking-pair diagnostics, and manipulation-gain diagnostics.
+
+This world is intentionally asymmetric. Unlike Pricing Arena, Resource Island,
+Public Goods, and Auction House, not every economic actor is a learning agent.
+That asymmetry is the main interface test for the learning-architecture suite:
+DQN, PPO, independent-DQN, and centralized-critic operate only over the worker
+side while employers remain fixed preference holders.
+
+\subsection{Q-Learning Full Run}
+
+The n=20 tabular Q-learning full run is substantially more stable than the
+short smoke run. Match rate remains \code{1.0}, while
+\code{stability\_mean=0.9508}, \code{truthful\_report\_rate\_mean=0.7859}, and
+\code{total\_welfare\_mean=3.6393}. The report-top action space creates
+truthfulness variation, but worker-proposing deferred acceptance still produces
+mostly stable matchings under the current random-preference setup.
+
+Fixed benchmark cases clarify the interpretation. Under worker-proposing
+deferred acceptance, workers should not have profitable report deviations in
+the canonical strategy-proof setting \citep{galeshapley1962,rothsotomayor1990,roth1984}. Future manipulation tests therefore need
+to target the non-proposing side, change the mechanism, or add information and
+commitment frictions rather than treating worker misreports under standard
+deferred acceptance as the main expected failure mode.
+
+\subsection{Cross-Mind Status}
+
+The full Labor Market learner-suite run keeps match rate at \(1.0\) for every mind, so the
+relevant margins are stability and truthful-report behavior. DQN slightly
+improves stability relative to Q-learning (\(0.975\) versus \(0.951\)) while
+reporting truthfully less often. PPO and fixed independent-DQN preserve high
+stability but also lower truthfulness. The centralized-critic scaffold has the
+weakest matching behavior in this asymmetric setup, with stability \(0.749\)
+and truthful-report rate \(0.433\).
+
+Economically, this is consistent with the benchmark warning: worker-proposing
+deferred acceptance is strategy-proof for workers in the canonical setting, so
+lower truthful-report rates are not automatically evidence of profitable
+manipulation \citep{galeshapley1962,rothsotomayor1990,roth1984}. The result is better framed as a learned-reporting diagnostic:
+the mechanism keeps matches mostly stable for most learners, while the
+centralized-critic architecture is sensitive to this asymmetric environment.
 
 \section{Pricing Arena}
 
@@ -421,6 +531,57 @@ Whether the price-cap result and the secondary-mechanism patterns persist as
 the number of firms increases beyond two is addressed in the cross-world
 synthesis section.
 
+\section{Public Goods}
+
+\subsection{World}
+
+Public Goods is a repeated common-pool resource environment, following the
+standard tension between private extraction and shared surplus
+\citep{samuelson1954,hardin1968}. Agents choose
+between contributing to the pool, extracting from it, or remaining inactive.
+Extraction pays private reward but depletes the shared stock; contribution costs
+the contributor but helps sustain the pool. When requested extraction exceeds
+available stock, extraction is rationed proportionally. Deterministic
+regeneration makes the sustainability channel easy to audit.
+
+The implemented institutions are no intervention, a penalty schedule,
+contribution matching, reputation rewards, information restriction, and a
+generic tax-and-redistribution schedule. The main metrics are welfare,
+sustainability, total contribution, extraction relative to regeneration,
+inequality, collapse diagnostics, and tax revenue where applicable.
+
+\subsection{Q-Learning Full Run}
+
+The n=20 tabular Q-learning full run confirms the intended commons pressure. In
+the baseline, agents mostly extract and contribute little: sustainability is
+0.0892 and total contribution is 0.1418. Contribution matching improves both
+welfare and sustainability in this setting, reaching welfare 2.0808 and
+sustainability 0.1048. Reputation is a strong reward-shaping intervention, with
+welfare 9.5750, while the tax schedule mainly changes redistribution/accounting
+at the tested rates.
+
+The effect validator classifies the tax schedule as mostly reward/accounting
+under this configuration, while penalty, contribution matching, reputation, and
+information restriction change state metrics relative to baseline. This is a
+diagnostic classification, not yet a final welfare ranking.
+
+\subsection{Cross-Mind Status}
+
+The full Public Goods learner suite shows that stronger function approximation
+or centralized training does not automatically solve the commons problem. Under
+no institution, Q-learning reaches welfare \(1.815\),
+sustainability \(0.089\), and contribution \(0.142\). DQN and fixed
+independent-DQN are close but contribute less; PPO and centralized-critic
+contribute almost nothing and sit near the lower sustainability regime.
+
+Contribution matching is the clearest state-changing intervention in the full
+learner-suite run. It improves Q-learning sustainability from \(0.089\) to \(0.105\) and
+fixed independent-DQN sustainability from \(0.085\) to \(0.121\), with a larger
+increase in contribution for independent-DQN. It does not rescue PPO in this
+configuration. The economic reading is therefore conditional: the institution
+can improve the state variables when the learner explores contribution, but a
+more capable policy class can still converge to low-contribution behavior.
+
 \section{Resource Island}
 
 \subsection{World}
@@ -687,167 +848,6 @@ rather than purely nominal. The learner-architecture split is consistent across
 the baseline and the institutions tested: Q-learning, PPO, and the centralized
 critic sustain meaningful trade economies, while DQN and independent-DQN do not
 at the training budget tested here.
-
-\section{Auction House}
-
-\subsection{World}
-
-Auction House is a single-item sealed-bid auction world with independent private
-values, discrete bids, deterministic tie-breaking, first-price and second-price
-payment rules, and optional reserve prices \citep{vickrey1961,myerson1981,milgrom2004}. Each bidder observes its own
-valuation bin and chooses a bid. The world reports seller revenue, bidder
-surplus, total welfare, allocative efficiency, regret, overbidding, underbidding,
-and distance from benchmark bid functions.
-
-\subsection{Benchmarks}
-
-The second-price benchmark is truthful bidding \citep{vickrey1961}. The first-price benchmark is
-bid shading under symmetric independent private values, with discrete-grid
-regret checks used where the continuous benchmark is too coarse
-\citep{milgrom2004,dutting2019,banchio2022}. Reserve-price
-variants evaluate the revenue-efficiency tradeoff against the no-reserve
-benchmark \citep{vickrey1961,myerson1981,milgrom2004}.
-
-\subsection{Validation}
-
-The Auction House validation run is economically coherent but not yet final
-evidence. Second-price learning moves toward the truthful benchmark, first-price
-learning shows underbidding and bid shading, and reserve prices increase
-revenue while changing allocative efficiency. Table~\ref{tab:auction-validation}
-summarizes the current validation run.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lrrrr}
-\toprule
-Scenario & Revenue & Welfare & Efficiency & Underbid Rate \\
-\midrule
-second price & 3.373 & 6.216 & 0.747 & 0.381 \\
-first price & 3.481 & 6.331 & 0.768 & 0.774 \\
-second price + reserve & 4.031 & 6.098 & 0.814 & 0.366 \\
-\bottomrule
-\end{tabular}
-\caption{Auction House validation results.}
-\label{tab:auction-validation}
-\end{table}
-
-\subsection{Cross-Mind Auction Diagnostics}
-
-The full P.6 auction learner-suite run confirms that the auction world should be read
-against benchmark deviations, not raw reward alone. In second-price auctions,
-PPO has the lowest ex-post regret among the tested learning minds
-(\(0.187\)) and higher allocative efficiency than Q-learning (\(0.762\)
-versus \(0.734\)). DQN and fixed independent-DQN earn higher seller revenue but
-with lower allocative efficiency. The centralized-critic scaffold performs
-poorly in this asymmetric bidding setting, with low revenue and high regret.
-
-First-price auctions show the expected underbidding/shading channel across the
-non-centralized learners \citep{milgrom2004}. Q-learning, DQN, PPO, and fixed independent-DQN all
-underbid frequently, with first-price underbid rates between \(0.716\) and
-\(0.814\) \citep{milgrom2004}. This makes Auction House theory-anchored: the economic question is
-how each learner deviates from truthful second-price bidding or shaded
-first-price bidding, not whether the environment merely produces positive
-payoffs \citep{vickrey1961,milgrom2004,dutting2019}.
-
-\section{Public Goods}
-
-\subsection{World}
-
-Public Goods is a repeated common-pool resource environment, following the
-standard tension between private extraction and shared surplus
-\citep{samuelson1954,hardin1968}. Agents choose
-between contributing to the pool, extracting from it, or remaining inactive.
-Extraction pays private reward but depletes the shared stock; contribution costs
-the contributor but helps sustain the pool. When requested extraction exceeds
-available stock, extraction is rationed proportionally. Deterministic
-regeneration makes the sustainability channel easy to audit.
-
-The implemented institutions are no intervention, a penalty schedule,
-contribution matching, reputation rewards, information restriction, and a
-generic tax-and-redistribution schedule. The main metrics are welfare,
-sustainability, total contribution, extraction relative to regeneration,
-inequality, collapse diagnostics, and tax revenue where applicable.
-
-\subsection{Q-Learning Full Run}
-
-The n=20 tabular Q-learning full run confirms the intended commons pressure. In
-the baseline, agents mostly extract and contribute little: sustainability is
-0.0892 and total contribution is 0.1418. Contribution matching improves both
-welfare and sustainability in this setting, reaching welfare 2.0808 and
-sustainability 0.1048. Reputation is a strong reward-shaping intervention, with
-welfare 9.5750, while the tax schedule mainly changes redistribution/accounting
-at the tested rates.
-
-The effect validator classifies the tax schedule as mostly reward/accounting
-under this configuration, while penalty, contribution matching, reputation, and
-information restriction change state metrics relative to baseline. This is a
-diagnostic classification, not yet a final welfare ranking.
-
-\subsection{Cross-Mind Status}
-
-The full Public Goods learner suite shows that stronger function approximation
-or centralized training does not automatically solve the commons problem. Under
-no institution, Q-learning reaches welfare \(1.815\),
-sustainability \(0.089\), and contribution \(0.142\). DQN and fixed
-independent-DQN are close but contribute less; PPO and centralized-critic
-contribute almost nothing and sit near the lower sustainability regime.
-
-Contribution matching is the clearest state-changing intervention in the full
-learner-suite run. It improves Q-learning sustainability from \(0.089\) to \(0.105\) and
-fixed independent-DQN sustainability from \(0.085\) to \(0.121\), with a larger
-increase in contribution for independent-DQN. It does not rescue PPO in this
-configuration. The economic reading is therefore conditional: the institution
-can improve the state variables when the learner explores contribution, but a
-more capable policy class can still converge to low-contribution behavior.
-
-\section{Labor Market}
-
-\subsection{World}
-
-Labor Market is a two-sided matching environment. Workers are learning agents;
-employers have fixed preferences. Each worker reports a top choice, the world
-constructs reported preferences, and matching is resolved using deferred
-acceptance \citep{galeshapley1962,rothsotomayor1990}. The world reports match rate, total welfare, truthful-report rate,
-stability, blocking-pair diagnostics, and manipulation-gain diagnostics.
-
-This world is intentionally asymmetric. Unlike Pricing Arena, Resource Island,
-Public Goods, and Auction House, not every economic actor is a learning agent.
-That asymmetry is the main interface test for the learning-architecture suite:
-DQN, PPO, independent-DQN, and centralized-critic operate only over the worker
-side while employers remain fixed preference holders.
-
-\subsection{Q-Learning Full Run}
-
-The n=20 tabular Q-learning full run is substantially more stable than the
-short smoke run. Match rate remains \code{1.0}, while
-\code{stability\_mean=0.9508}, \code{truthful\_report\_rate\_mean=0.7859}, and
-\code{total\_welfare\_mean=3.6393}. The report-top action space creates
-truthfulness variation, but worker-proposing deferred acceptance still produces
-mostly stable matchings under the current random-preference setup.
-
-Fixed benchmark cases clarify the interpretation. Under worker-proposing
-deferred acceptance, workers should not have profitable report deviations in
-the canonical strategy-proof setting \citep{galeshapley1962,rothsotomayor1990,roth1984}. Future manipulation tests therefore need
-to target the non-proposing side, change the mechanism, or add information and
-commitment frictions rather than treating worker misreports under standard
-deferred acceptance as the main expected failure mode.
-
-\subsection{Cross-Mind Status}
-
-The full Labor Market learner-suite run keeps match rate at \(1.0\) for every mind, so the
-relevant margins are stability and truthful-report behavior. DQN slightly
-improves stability relative to Q-learning (\(0.975\) versus \(0.951\)) while
-reporting truthfully less often. PPO and fixed independent-DQN preserve high
-stability but also lower truthfulness. The centralized-critic scaffold has the
-weakest matching behavior in this asymmetric setup, with stability \(0.749\)
-and truthful-report rate \(0.433\).
-
-Economically, this is consistent with the benchmark warning: worker-proposing
-deferred acceptance is strategy-proof for workers in the canonical setting, so
-lower truthful-report rates are not automatically evidence of profitable
-manipulation \citep{galeshapley1962,rothsotomayor1990,roth1984}. The result is better framed as a learned-reporting diagnostic:
-the mechanism keeps matches mostly stable for most learners, while the
-centralized-critic architecture is sensitive to this asymmetric environment.
 
 \section{Cross-World Synthesis}
 
