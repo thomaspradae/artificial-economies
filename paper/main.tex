@@ -99,7 +99,7 @@ Auction House and Labor Market belong to the first tier. In Auction House, the c
 
 Pricing Arena and Public Goods belong to the second tier. Pricing Arena has two exact static prices, the Nash price and the joint-profit price, but no closed-form prediction for behavior in the repeated game itself, only a range bounded by the two. A collusion claim in this world is therefore only as credible as the decomposition behind it: price, profit, quantity, welfare, and exploitability are reported together and checked against each other, and the resulting claim is limited to finite-run, regulatory evidence in a stylized duopoly, not a theorem or a real-market antitrust result. Public Goods is bracketed rather than pointed: theory predicts underprovision when private incentives diverge from the social good, with free-riding as a lower bound and the social optimum as an upper one, and nothing more specific in between. The obligation this creates is to keep the welfare number honest against the underlying resource state, since an institution can raise measured welfare through reward accounting without changing the incentive to extract or contribute at all. Contribution, extraction, sustainability, inequality, and tax revenue are therefore reported as separate quantities from welfare, so that an accounting effect is not mistaken for a real one.
 
-Resource Island belongs to the third tier alone. It carries no external closed-form benchmark, so its obligation is not how close a learned agent gets to a known correct value, but whether the institution being measured was ever placed under real economic pressure in the first place. A property-rights rule is not being tested if no non-owner ever has reason to access a claimed resource; a trade price control is not being tested if every trade happens to be one-for-one already. Survival, sustainability, trade counts, property pressure, specialization, and institution-block counters exist to answer that prior question before any welfare number from this world is trusted. This is not a weaker test than the other four worlds run; it is a test of a condition the other four simply assume already holds, and the Resource Island section reports a case where that assumption failed and had to be corrected before the world's results meant anything.
+Resource Island belongs to the third tier alone. It carries no external closed-form benchmark, so its obligation is not how close a learned agent gets to a known correct value, but whether the institution being measured was ever placed under real economic pressure in the first place. A property-rights rule is not being tested if no non-owner ever has reason to access a claimed resource; a trade price control is not being tested if every trade happens to be one-for-one already. Survival, sustainability, trade counts, property pressure, specialization, and institution-block counters exist to answer that prior question before any welfare number from this world is trusted. This is not a weaker test than the other four worlds run; it is a test of a condition the other four simply assume already holds, and the Resource Island section reports institution effects only after those activation conditions are measured.
 
 \section{Platform}
 
@@ -1253,9 +1253,9 @@ learner-architecture stress test, not as a scalar capability ranking.
 The Pricing Arena result shows architecture-sensitive institutional effects:
 price caps reduce exploitability broadly, but DQN's profit response flips sign
 with training budget and is positive in the full paired audit. Resource Island
-shows why activation diagnostics are necessary: if the world design does not
-put an institution under pressure, then the absence of an effect is not a
-mechanism result. Auction House adds theory-anchored bidding benchmarks
+shows why activation diagnostics are necessary: institution effects are
+interpretable only in runs where agents attempt the behavior the institution is
+meant to govern. Auction House adds theory-anchored bidding benchmarks
 \citep{vickrey1961,myerson1981}. Public Goods adds a sustainability and
 commons-collapse channel. Labor Market adds a matching-stability and
 truthfulness channel.
