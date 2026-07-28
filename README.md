@@ -1,114 +1,159 @@
-That mismatch is the real finding — `ps aux` shows **nothing** for those PIDs, but `status.json` still claims all 4 are `running`. That means the training processes are already dead (very likely OOM-killed during the swap-thrashing period), and the orchestrator either also died or hasn't polled recently enough to notice. You have a zombie status file, not zombie jobs. Let's confirm and clean this up properly, then move to old1/old2.
+# Artificial Economies
 
-## Roadmap
+Artificial Economies is a research codebase for testing whether economic institutions remain robust when their participants are learning agents rather than equilibrium solvers.
 
-### Step 1 — Confirm what's actually alive on ofi1
+The repository accompanies the paper:
 
-```bash
-# is the orchestrator itself (parent PID 379605) still alive?
-ps -p 379605 -f
+- `paper/main.tex`
+- `paper/main.pdf`
 
-# any python at all still running?
-ps aux | grep python | grep -v grep
+Project repository:
 
-# when did status.json last update?
-stat outputs/phase3_full/status.json
+- <https://github.com/thomaspradae/artificial-economies>
+
+## Overview
+
+The codebase implements five controlled economic worlds behind a shared interface:
+
+- `Auction House`: single-item auctions with first-price, second-price, reserve, clock, and information variants.
+- `Labor Market`: worker-proposing deferred-acceptance matching with learned worker reports.
+- `Pricing Arena`: repeated pricing games with regulatory institutions and exploitability checks.
+- `Public Goods`: common-pool contribution and extraction with penalties, matching, reputation, information restriction, and taxes.
+- `Resource Island`: spatial gather-and-trade economy with property rights, trade controls, reputation, and activation diagnostics.
+
+Each world can be paired with multiple learner classes:
+
+- random behavior
+- tabular Q-learning
+- DQN
+- PPO
+- decorrelated independent-DQN
+- centralized-critic training
+
+The main research question is not which learner performs best. The question is which institutional guarantees survive when the behavioral assumptions behind classical benchmarks are changed.
+
+## Repository Layout
+
+```text
+core/                 Shared World, Agent, Institution, metrics, registry, logging
+institutions/         Institution implementations used across worlds
+minds/                Random, tabular, deep-RL, and MARL learner implementations
+worlds/               Auction House, Labor Market, Pricing Arena, Public Goods, Resource Island
+paper/                Paper source, bibliography, and compiled PDF
+explorer/             Interactive browser explainer for selected results
+run_*.py              Experiment, validation, audit, and comparison runners
+build_*.py            Table and synthesis builders
+test_*.py             Unit, integration, and output-schema tests
 ```
 
-If `ps -p 379605` returns nothing, the orchestrator is dead too — `status.json` is a frozen snapshot from whenever it last wrote, not live state. Either way, the 4 training processes are gone.
+Generated run outputs are intentionally not tracked in git. Experiment scripts write CSV, JSON, Markdown, and plot outputs under `outputs/`.
 
-### Step 2 — Check how far each dead job actually got, before discarding anything
+## Installation
 
-```bash
-for m in dqn ppo centralized_critic; do
-  echo "=== $m ==="
-  tail -20 outputs/phase3_full/logs/${m}_multiseed.log
-  ls -la outputs/${m}_v0_multiseed/ 2>&1
-done
-```
-
-This tells you if any seeds actually completed and got written to disk (partial CSV rows), or if 12 hours produced nothing durable. Don't assume zero — check.
-
-### Step 3 — Clean up ofi1 fully
+Python 3.11+ is recommended.
 
 ```bash
-# kill orchestrator if somehow still alive
-kill 379605 2>/dev/null
-
-# check resource island too
-ps aux | grep resource_island | grep -v grep
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-Confirm `ps aux | grep python` is clean before moving to old1/old2 — you don't want a half-dead process holding memory while you're trying to diagnose whether ofi1 is usable again.
+PyTorch is used for the DQN, PPO, independent-DQN, and centralized-critic learners. CPU execution is sufficient for the structured MLP experiments in this repository.
 
-### Step 4 — Reconcile status.json instead of trusting it
+## Tests
 
-Don't just relaunch blind. Decide per-job: **complete / partial-restart / full-restart**, based on Step 2's findings. If zero seeds landed for any job, that's a full restart. If partial output exists but your runner doesn't support resume-from-seed, that's still effectively a full restart — check whether `run_multiseed.py` has a `--resume` or `--skip-existing-seeds` flag before assuming you have to redo everything.
-
-### Step 5 — Deploy code to old1 and old2
+Run the full Python test suite:
 
 ```bash
-rsync -avz --exclude 'outputs' --exclude '.venv' --exclude '__pycache__' \
-  /home/t/Downloads/fogo/thesis/ old1:~/thesis/
-rsync -avz --exclude 'outputs' --exclude '.venv' --exclude '__pycache__' \
-  /home/t/Downloads/fogo/thesis/ old2:~/thesis/
-
-ssh old1 "cd ~/thesis && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt"
-ssh old2 "cd ~/thesis && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt"
+python -m unittest discover
 ```
 
-**Important constraint you didn't have on ofi1**: old1/old2 are i5-2400s with only **3.8GB RAM each** (from the neofetch output — "Memory: 526MiB / 3873MiB" and "268MiB / 3803MiB", both nearly empty right now, which is good, but the ceiling is much lower than ofi1's 7.7GB). Run **one job per machine**, not two — you just learned what happens when you overcommit memory on this exact codebase.
+The tests cover:
 
-### Step 6 — Launch in a controlled, verifiable way (one job per machine, nohup + explicit log)
+- core abstractions
+- world mechanics
+- benchmark and known-answer checks
+- institution transforms
+- tabular and deep-RL learner integration
+- output schemas and comparison builders
+
+## Common Experiment Runners
+
+Pricing Arena:
 
 ```bash
-ssh old1 "cd ~/thesis && source .venv/bin/activate && \
-  nohup python run_multiseed.py --mind dqn --steps 40000 --n-seeds 20 \
-  --save-dir outputs/dqn_v0_multiseed > outputs/dqn_multiseed.log 2>&1 & \
-  echo \$! > outputs/dqn.pid"
-
-ssh old2 "cd ~/thesis && source .venv/bin/activate && \
-  nohup python run_multiseed.py --mind ppo --steps 40000 --n-seeds 20 \
-  --save-dir outputs/ppo_v0_multiseed > outputs/ppo_multiseed.log 2>&1 & \
-  echo \$! > outputs/ppo.pid"
+python run_multiseed.py --mind q_learning --steps 40000 --n-seeds 20 --save-dir outputs/pricing_q_learning
+python run_exploitability.py --incumbent-mind q_learning --save-dir outputs/pricing_exploitability
 ```
 
-Wait and confirm each actually started and is climbing in CPU-time (not thrashing) before queuing the next job behind it:
+Auction House:
 
 ```bash
-ssh old1 "cat ~/thesis/outputs/dqn.pid; ps -p \$(cat ~/thesis/outputs/dqn.pid) -o pid,%cpu,%mem,etime,cmd"
+python run_auction_house_smoke.py --steps 40000 --n-seeds 20 --save-dir outputs/auction_house_full
 ```
 
-Do not queue `independent_dqn` as a distinct full-run condition until it is made algorithmically different from `dqn`. Current audit: `IndependentDQNMind` subclasses `DQNMind` without overriding behavior, and the training paths instantiate both names with the same per-agent seed schedule. Queue `centralized_critic` behind `ppo` on old2 as the next distinct MARL condition:
+Public Goods:
 
 ```bash
-ssh old2 "cd ~/thesis && source .venv/bin/activate && \
-  nohup python run_multiseed.py --mind centralized_critic --steps 40000 --n-seeds 20 \
-  --save-dir outputs/centralized_critic_v0_multiseed > outputs/centralized_critic_multiseed.log 2>&1 & \
-  echo \$! > outputs/centralized_critic.pid"
+python run_public_goods_smoke.py --steps 40000 --n-seeds 20 --save-dir outputs/public_goods_full
 ```
 
-(Launch it manually once you've confirmed the first job on that box finished; avoid shell `wait` on a PID that is not a child process.)
-
-### Step 7 — Verify health repeatedly, not just once
+Labor Market:
 
 ```bash
-watch -n30 'ssh old1 "cat ~/thesis/outputs/dqn.pid | xargs -I{} ps -p {} -o pid,%cpu,%mem,etime,cmd"; ssh old2 "cat ~/thesis/outputs/ppo.pid | xargs -I{} ps -p {} -o pid,%cpu,%mem,etime,cmd"'
+python run_labor_market_smoke.py --steps 40000 --n-seeds 20 --save-dir outputs/labor_market_full
 ```
 
-Or simpler, since you already have `poormans` — just watch it and confirm old1/old2's RAM stays well under 100% (not pinned like ofi1 was) and their `TIME+`/CPU%-over-elapsed-time ratio stays close to 1, not the ~10% you saw on ofi1.
-
-### Step 8 — Where exploitability jobs and Resource Island go
-
-Once the 4 multiseed jobs are confirmed running healthily (2 on old1, 2 on old2, sequential per box), the 4 exploitability jobs queue up behind them the same way. Resource Island (cheap, tabular, low memory) can go back onto ofi1 alone now that it's not fighting 4 torch processes for RAM — that machine's fine for one lightweight job.
-
-### Step 9 — When everything's done, pull results back
+Resource Island:
 
 ```bash
-rsync -avz old1:~/thesis/outputs/ ~/thesis/outputs/
-rsync -avz old2:~/thesis/outputs/ ~/thesis/outputs/
+python run_resource_island_smoke.py --steps 40000 --n-seeds 20 --save-dir outputs/resource_island_full
 ```
 
-Then `build_combined_table.py` runs locally on ofi1 against the merged `outputs/` as before.
+Cross-world validation and synthesis:
 
-Start with Step 1-2 — reconcile what's real before launching anything new, since if any seeds did complete on ofi1 you don't want to burn old1/old2 cycles redoing that work.
+```bash
+python run_known_answer_sanity_checks.py --save-dir outputs/known_answer_checks
+python run_mechanism_traces.py --save-dir outputs/mechanism_traces
+python run_claim_audit_suite.py --save-dir outputs/claim_audit_suite
+python build_cross_world_synthesis.py --output-dir outputs/cross_world_synthesis
+```
+
+## Interactive Explorer
+
+The `explorer/` app is a Vite/React interface for browsing selected cross-world results and the Pricing Arena price-cap audit.
+
+```bash
+cd explorer
+npm install
+npm run dev
+```
+
+Build for static hosting:
+
+```bash
+cd explorer
+npm run build
+```
+
+The repository includes a GitHub Pages workflow for publishing the built explorer.
+
+## Paper Build
+
+The paper can be compiled from `paper/`:
+
+```bash
+cd paper
+pdflatex -interaction=nonstopmode main.tex
+bibtex main
+pdflatex -interaction=nonstopmode main.tex
+pdflatex -interaction=nonstopmode main.tex
+```
+
+## Notes
+
+This repository is the cleaned publication version of the project. The pre-publication working state is preserved in the local git branch:
+
+```text
+pre-publication-working-state-2026-07-28
+```

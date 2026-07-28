@@ -40,16 +40,16 @@ WORLD_TABLES = [
         ],
     },
     {
-        "id": "resource_island_v1",
-        "title": "Resource Island v1",
+        "id": "resource_island",
+        "title": "Resource Island",
         "source_path": "outputs/resource_island_v1_phase3_full/mind_comparison.csv",
         "institution_key": "institution",
         "baseline_institution": "none",
         "institution_label": "institution",
         "summary": "Spatial inventory economy with contested resources, specialization pressure, and unequal trades.",
         "interpretation": (
-            "The v1 ladder reverses the earlier v0 non-trade artifact. PPO and centralized-critic activate "
-            "the trade/reputation channel strongly; DQN and independent-DQN trade less but remain distinct."
+            "PPO and centralized-critic activate the trade and reputation channel strongly; DQN and "
+            "independent-DQN trade less but remain distinct."
         ),
         "metrics": [
             {"key": "welfare_mean", "label": "welfare", "better": "higher"},
@@ -399,8 +399,8 @@ def build_all_world_bundle() -> dict[str, Any]:
         "generatedAt": datetime.now(timezone.utc).isoformat(),
         "title": "Five Worlds, Five Learner Architectures",
         "subtitle": (
-            "The project is not just DQN in Pricing Arena. These are the thesis-facing full-ladder outputs "
-            "for Pricing Arena, Resource Island v1, Auction House, Public Goods, and Labor Market."
+            "Thesis-facing full-ladder outputs for Pricing Arena, Resource Island, Auction House, "
+            "Public Goods, and Labor Market."
         ),
         "architectureAxis": ARCHITECTURE_AXIS,
         "worlds": worlds,
