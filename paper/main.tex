@@ -236,16 +236,16 @@ every learner's exploitability falls as a result, since a capped price cannot
 be pushed into the range a deviating opponent could exploit most severely. But
 the cap does not constrain profit directly, only through price, and for three
 of the five learners the resulting change in realized quantity and market
-structure more than offsets the lower price. Q-learning behaves close to the
-textbook intuition. DQN, independent-DQN, and the centralized critic do not.
+structure more than offsets the lower price. Q-learning follows the standard
+price-discipline expectation more closely than DQN, independent-DQN, or the
+centralized critic.
 
 \subsection{The Training-Budget Correction}
 
 The DQN result above was not visible in the first version of this analysis. A
 short, 1000-step mechanism trace, run to check the channel behind the headline
 number, showed DQN profit falling under the cap for every seed tested, the
-opposite of Table~\ref{tab:pricing-cap-full}. This contradiction was not
-resolved by picking the number that fit the argument. It was resolved by
+opposite of Table~\ref{tab:pricing-cap-full}. This discrepancy was resolved by
 running the same paired-seed comparison at a range of training budgets, from
 the short trace up to the full 40,000-step run the headline table is drawn
 from.
@@ -275,20 +275,20 @@ change at that budget is small, unlike the 5,000 and 10,000-step rows where
 quantity moves substantially. This rules out the simplest explanation, that
 DQN is exploiting a fixed quantity-margin loophole from the start; the effect
 is not present early and does not have a single stable channel behind it at
-every budget. The safer claim is that the price cap becomes a focal constraint
-some DQN runs learn to use to their advantage only after enough training, not a
-channel visible or exploitable from the beginning. A short trace is not
-sufficient evidence either way for a result like this one; the training-budget
-ladder is what makes the finding reportable.
+every budget. The more defensible interpretation is that the price cap becomes
+a focal constraint that some DQN runs learn to use only after sufficient
+training, rather than a channel visible from the beginning. A short trace is
+therefore insufficient evidence for this result; the training-budget ladder is
+the validation that makes the interpretation credible.
 
 \subsection{The Other Four Mechanisms}
 
-Price cap is the only mechanism in this world with a result this clean, and
-that asymmetry is itself worth reporting rather than hiding. The remaining four
-are correctly implemented and pass the same unit and parity checks as price
-cap, but three of the four are weak, inert, or inconsistent enough across
-learners that no single clear claim follows from them at the currently tested
-parameters.
+Price cap is the only mechanism in this world that produces a consistent
+cross-learner pattern. The remaining four are correctly implemented and pass
+the same unit and parity checks as price cap, but their effects are smaller,
+more parameter-sensitive, or less consistent across learners. At the currently
+tested parameters, no single mechanism-level claim is as well supported for
+these interventions as it is for the price cap.
 
 The high-price tax subtracts a quantity-weighted penalty from reward above a
 price threshold. Its effect is small in every direction and every learner:
@@ -315,12 +315,11 @@ Centralized critic & \(+0.088\) & \(+4.2\) & \(-1.2\) \\
 \end{table}
 
 Random audits apply a stochastic penalty when average price is high. The result
-here is worse than merely weak: for Q-learning, exploitability rises under
-audits rather than falling, and for the centralized critic, profit rises
-sharply while exploitability falls only partially. An enforcement mechanism
-that increases exploitability for one learner while partially working for
-another is not a guardrail; at these parameters it is closer to noise with an
-inconsistent sign.
+here is not only small but directionally inconsistent: for Q-learning,
+exploitability rises under audits rather than falling, and for the centralized
+critic, profit rises sharply while exploitability falls only partially. An
+enforcement mechanism with opposite signs across learners does not provide a
+robust guardrail at these parameters.
 
 \begin{table}[h]
 \centering
@@ -341,11 +340,11 @@ Centralized critic & \(+0.125\) & \(+49.1\) & \(-21.7\) \\
 
 The direct anti-collusion penalty punishes prices that are both high and close
 together, the most explicit mechanism in the suite and, on paper, the one
-closest to actual antitrust enforcement logic. It still mostly fails to bind:
+closest to actual antitrust enforcement logic. Its observed effect is limited:
 four of the five learners show negligible or worsened exploitability, and only
-PPO shows a mild, coherent improvement across price, profit, and exploitability
-together. A rule aimed directly at the behavior of interest is not
-automatically more effective than the blunter price cap.
+PPO shows a mild improvement across price, profit, and exploitability together.
+A rule aimed directly at the behavior of interest is therefore not
+automatically more effective than the blunter price cap in this setting.
 
 \begin{table}[h]
 \centering
@@ -388,9 +387,9 @@ Centralized critic & \(-0.050\) & \(-9.2\) & \(-12.0\) & \(+2.7\) \\
 \label{tab:pricing-demandshock}
 \end{table}
 
-None of the four should be read as a code defect. All four pass the same
-mechanics and parity tests as price cap. The difference is economic activation,
-not implementation: at the parameters currently tested, only price cap creates
+These outcomes should be interpreted as economic-activation results rather than
+implementation defects. All four mechanisms pass the same mechanics and parity
+tests as price cap. At the parameters currently tested, only price cap creates
 pressure strong enough to produce a consistent, cross-learner, interpretable
 signal. Table~\ref{tab:pricing-mechanism-status} summarizes the distinction.
 
@@ -403,7 +402,7 @@ Mechanism & Implementation & Interpretability \\
 Price cap & Passes all checks & Strong, consistent, cross-learner \\
 High-price tax & Passes all checks & Weak at tested rate \\
 Random audit & Passes all checks & Mixed, sign-inconsistent \\
-Anti-collusion penalty & Passes all checks & Mostly inert, brittle \\
+Anti-collusion penalty & Passes all checks & Limited binding, parameter-sensitive \\
 Demand shock & Passes all checks & Robustness check, not a policy result \\
 \bottomrule
 \end{tabular}
@@ -413,16 +412,16 @@ Demand shock & Passes all checks & Robustness check, not a policy result \\
 
 \subsection{Summary}
 
-Pricing Arena's clearest result is a guardrail that succeeds on the axis it
-directly targets and fails to hold as a guarantee on an adjacent one: price caps
-lower exploitability for every learner tested, but their effect on profit and
-collusion is learner-dependent, with the effect for DQN emerging only after
-sufficient training rather than being present from the start. The remaining
-four mechanisms are correctly implemented but, at current parameters, mostly
-too weak or inconsistent to support a claim beyond their own numbers. Whether
-the price-cap result and the weakness of the other four persist as the number
-of firms increases beyond two is addressed in the cross-world synthesis
-section.
+Pricing Arena's most interpretable result is a guardrail that succeeds on its
+direct target while failing to provide an invariant guarantee over adjacent
+economic outcomes: price caps lower exploitability for every learner tested,
+but their effect on profit and collusion is learner-dependent, with the DQN
+effect emerging only after sufficient training. The remaining four mechanisms
+are correctly implemented, but at current parameters their effects are too
+small or inconsistent to support a general claim beyond the reported values.
+Whether the price-cap result and the secondary-mechanism patterns persist as
+the number of firms increases beyond two is addressed in the cross-world
+synthesis section.
 
 \section{Environment 2: Resource Island}
 
@@ -690,7 +689,7 @@ deferred acceptance is strategy-proof for workers in the canonical setting, so
 lower truthful-report rates are not automatically evidence of profitable
 manipulation \citep{galeshapley1962,rothsotomayor1990,roth1984}. The result is better framed as a learned-reporting diagnostic:
 the mechanism keeps matches mostly stable for most learners, while the
-centralized-critic architecture is brittle in this asymmetric environment.
+centralized-critic architecture is sensitive to this asymmetric environment.
 
 \section{Cross-World Synthesis}
 
@@ -751,8 +750,8 @@ than an empirical commons. Labor Market currently uses worker-side learning
 under deferred acceptance, so it tests one asymmetric matching channel rather
 than matching-market design generally.
 
-The most important limitation is interpretive. A clean CSV does not imply a
-clean economic result. Every institution must be checked for activation. Every
+The most important limitation is interpretive. A complete CSV does not imply a
+validated economic result. Every institution must be checked for activation. Every
 learner-architecture comparison must be checked for implementation artifacts. The
 independent-DQN alias issue is a concrete example: the table was statistically
 valid as an output file, but not valid as evidence for a distinct mind until the
