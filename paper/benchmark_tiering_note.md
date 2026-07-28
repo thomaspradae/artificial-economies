@@ -684,11 +684,11 @@ Clean current claim:
 
 ## Auction House Writing Note
 
-Auction House is Tier 1. It has the cleanest canonical theory layer in the project because auction theory supplies exact mechanism benchmarks: truthful bidding in second-price auctions, bid shading in first-price auctions, and reserve-price revenue/efficiency tradeoffs.
+Auction House is Tier 1. It is one of the most tightly benchmarked worlds in the project because auction theory supplies exact mechanism predictions: truthful bidding in second-price auctions, bid shading in first-price auctions, and reserve-price revenue/efficiency tradeoffs.
 
 ### 1. What This World Is
 
-Auction House is a repeated single-item independent-private-values auction. Each bidder privately observes its own value, submits a bid from a discrete grid, and receives surplus if it wins:
+Auction House is a repeated single-item auction with independent private values. Each bidder privately observes its own value, submits a bid from a discrete grid, and receives surplus if it wins:
 
 ```text
 reward_i = value_i - payment_i if bidder i wins, else 0
@@ -705,7 +705,7 @@ The world records seller revenue, bidder surplus, realized welfare, maximum feas
 
 ### 2. Classical Economic Question
 
-The question is:
+The guiding question is:
 
 > Do learning bidders recover known auction-theory behavior under first-price, second-price, reserve, clock, and information variants?
 
@@ -714,8 +714,8 @@ Classical anchor:
 - In second-price/Vickrey auctions with private values, truthful bidding is weakly dominant.
 - In first-price auctions, bidders shade below value.
 - Reserve prices can raise seller revenue while sacrificing allocative efficiency or bidder surplus.
-- Clock auctions share a second-price-style truthful dropout benchmark in the simple abstraction used here.
-- Information/noise variants test whether altered observations degrade allocation or bidding discipline.
+- Clock auctions share a second-price-style dropout benchmark in the simplified ascending-clock abstraction used here.
+- Public-signal and noisy-signal variants test whether altered information degrades allocation or bidding discipline.
 
 This is a true theory-recovery world: when the learned agents fail, the failure is measured against a known benchmark rather than only against an oracle or diagnostic counter.
 
@@ -734,7 +734,33 @@ Artifact:
 
 This validates the economic instrument: the benchmark layer knows the textbook answers before learned bidders are interpreted.
 
-### 4. Q-Learning Full Results
+### 4. What Institutions Are Tested
+
+Auction House tests six auction scenarios:
+
+- `second_price`: highest bidder wins and pays the second-highest bid.
+- `first_price`: highest bidder wins and pays its own bid.
+- `second_price_reserve`: second-price auction with a reserve/no-sale threshold.
+- `clock`: simplified ascending-clock auction.
+- `second_price_public_signal`: second-price payment rule with public-signal observation changes.
+- `second_price_noisy_signal`: second-price payment rule with noisy private observations.
+
+The first three are the core full Q-learning auction mechanisms. The last three extend the world to clock-auction and information-structure variants for the full neural/MARL learner suite.
+
+Implementation status:
+
+| Scenario | Code Status | Interpretation Status |
+|---|---|---|
+| `second_price` | Implemented, tested, full Q-learning and full P.6 outputs exist | Strong benchmark-deviation interpretation |
+| `first_price` | Implemented, tested, full Q-learning and full P.6 outputs exist | Strong qualitative shading interpretation |
+| `second_price_reserve` | Implemented, tested, full Q-learning and full P.6 outputs exist | Strong revenue/surplus tradeoff interpretation |
+| `clock` | Implemented, tested, full P.6 outputs exist | Interpretable as a simplified benchmark-compatible clock variant |
+| `second_price_public_signal` | Implemented, tested, full P.6 outputs exist | Information-structure stress test |
+| `second_price_noisy_signal` | Implemented, tested, full P.6 outputs exist | Information-structure stress test |
+
+All six scenarios are mechanically implemented and tested. The key distinction is that sealed-bid second-price, first-price, and reserve auctions have the cleanest economic benchmarks, while clock and information variants are currently best read as robustness extensions.
+
+### 5. Q-Learning Full Results
 
 Full Q-learning output:
 
@@ -752,7 +778,7 @@ Interpretation:
 - First-price produces clear bid shading/underbidding: underbid rate is `0.814`, and overbid rate is only `0.066`.
 - Reserve raises seller revenue relative to plain second-price (`3.938` vs `3.100`) and lowers bidder surplus/welfare, with no-sale probability `0.172`.
 
-### 5. Mechanism-by-Mechanism Interpretation
+### 6. Mechanism-by-Mechanism Interpretation
 
 #### `second_price`
 
@@ -829,7 +855,7 @@ Status:
 
 - Full neural/MARL outputs exist.
 - Q-learning variant smoke exists.
-- Treat as validated execution and benchmark-compatible, but not yet as strong as sealed-bid full Q-learning evidence.
+- Treat as validated and benchmark-compatible, but not as central as the sealed-bid mechanisms.
 
 Cross-mind full highlights:
 
@@ -875,9 +901,9 @@ Centralized critic efficiency = 0.525, regret = 1.512
 
 Finding:
 
-> Public/noisy information variants generally degrade or perturb allocation and regret, with PPO remaining strongest among neural minds and centralized critic performing poorly in this asymmetric private-information setting.
+> Public/noisy information variants generally degrade or perturb allocation and regret, with PPO remaining closest to the benchmark among neural minds and centralized critic performing poorly in this asymmetric private-information setting.
 
-### 6. Cross-Mind Results
+### 7. Cross-Mind Results
 
 Full cross-mind output:
 
@@ -916,11 +942,11 @@ Reserve:
 Interpretation:
 
 - PPO is generally closest to the efficient/truthful benchmark in second-price and clock/noisy variants.
-- DQN and independent-DQN often raise revenue but reduce bidder surplus and remain farther from truthful bidding.
+- DQN and independent-DQN often raise seller revenue but reduce bidder surplus and remain farther from truthful bidding.
 - Centralized critic is poor in non-reserve second-price/clock/information settings, with very low revenue and high bidder surplus because it often underbids.
 - In reserve settings, centralized critic no longer collapses revenue, because the reserve supports revenue mechanically.
 
-### 7. What Survives, What Breaks
+### 8. What Survives, What Breaks
 
 Original thesis question:
 
@@ -947,23 +973,60 @@ Depends on architecture: yes.
 
 - Q-learning: economically coherent but imperfect; shows shading and reserve tradeoffs.
 - DQN: often higher revenue, lower surplus, farther from truthful bidding.
-- PPO: strongest overall auction learner by regret/efficiency in many scenarios.
+- PPO: closest overall auction learner by regret/efficiency in many scenarios.
 - Independent-DQN: distinct from DQN but broadly similar revenue-seeking/bid-distance pattern.
 - Centralized critic: fails badly in non-reserve asymmetric-information settings, suggesting centralized value learning does not automatically solve private-information bidding.
 
-### 8. Auction House Thesis Takeaway
+### 9. Relation to the Main Thesis Question
+
+Auction House answers the main question differently from Pricing Arena and Resource Island.
+
+It does not primarily show that an institution becomes inactive or that a regulatory guardrail leaks through another strategic channel. It shows that exact mechanism-design guarantees are not automatically recovered by finite learned behavior. The second-price auction remains strategy-proof as a mechanism, but learned bidders do not perfectly learn truthful bidding. The first-price auction induces the correct qualitative direction, underbidding, but learned bidders still retain regret. The reserve mechanism produces the expected seller-revenue increase and surplus/welfare shift, but the exact magnitude depends on the learner.
+
+Surviving guarantees:
+
+- The code reproduces the exact auction-theory benchmark layer.
+- First-price learning moves in the expected shading direction.
+- Reserve pricing creates the expected revenue/surplus/no-sale tradeoff.
+
+Broken or weakened guarantees:
+
+- Dominant-strategy truthfulness in the mechanism does not imply learned truthful behavior.
+- Allocative efficiency remains below the truthful benchmark under learned bidding.
+- More complex training information does not guarantee better bidding: centralized critic performs poorly in several private-information auction settings.
+
+Architecture dependence:
+
+- PPO is the most benchmark-aligned learner in several auction scenarios.
+- DQN and independent-DQN often increase revenue while moving farther from truthful bidding.
+- Centralized critic is brittle in the asymmetric private-information settings, especially without a reserve.
+
+### 10. What This World Contributes
 
 Clean current claim:
 
 > Auction House validates the platform against exact mechanism-design benchmarks, then shows that learned bidders do not automatically recover those benchmarks. First-price auctions induce the expected underbidding direction, reserve prices raise revenue while shifting surplus and no-sale behavior, and second-price auctions remain below perfect truthful/efficient allocation under learned policies. The failure is architecture-dependent: PPO is closest to the benchmark in several settings, while centralized critic performs poorly in private-information auctions.
 
+### 11. What We Cannot Claim Yet
+
+Do not overclaim:
+
+- We cannot say the learning bidders converge to auction equilibrium.
+- We cannot say centralized critic is generally bad for auctions; this is evidence about the current implementation and private-information setup.
+- We cannot treat the clock and information variants as equally theory-tight as the sealed-bid second-price and first-price mechanisms.
+- We cannot claim full learned mechanism design in the RegretNet sense; the auction rules are fixed, and the learners are bidders, not mechanism designers.
+
+Current safe claim:
+
+> In a benchmarked auction world with fixed auction rules, learned bidders recover some qualitative auction-theory directions but not the full theoretical guarantees. The gap is measurable with regret, truthful-bid distance, allocative efficiency, revenue, and surplus, and the size and direction of the gap depend on the learning architecture.
+
 ## Public Goods / Commons Writing Note
 
-Public Goods is Tier 2. It has a strong classical direction but not one single scalar answer for the learned-agent setting. Theory predicts free-riding and underprovision when private extraction/contribution incentives diverge from the group optimum. The code therefore owes bracketed comparison and state diagnostics: welfare alone is not enough.
+Public Goods is Tier 2. It has a strong classical direction but not a single scalar prediction for learned-agent behavior. Theory predicts free-riding and overuse when private incentives diverge from the group optimum. The code therefore owes bracketed comparison and state diagnostics: welfare alone is not enough.
 
 ### 1. What This World Is
 
-Public Goods is a common-pool resource game. Agents repeatedly choose contribution/extraction actions against a shared public pool. Contributions are costly but replenish or preserve the public state; extraction gives private reward while pushing the pool toward depletion. Institutions modify penalties, matching, reputation, information, or tax accounting.
+Public Goods is a repeated common-pool resource and public-goods environment. Agents choose actions that contribute to the shared pool, extract from it, or remain inactive. Contributions are costly to the individual but support the public state; extraction gives private reward while depleting the pool. If requested extraction exceeds available stock, extraction is rationed. Deterministic regeneration makes the resource-state channel auditable.
 
 Code/design anchors:
 
@@ -973,20 +1036,20 @@ Code/design anchors:
 - [institutions/public_goods.py](/home/t/Downloads/fogo/thesis/institutions/public_goods.py)
 - [institutions/tax_schedule.py](/home/t/Downloads/fogo/thesis/institutions/tax_schedule.py)
 
-The world records pool stock, sustainability, contribution, extraction, contribution/extraction rates, collapse rate, welfare, inequality, penalty totals, matched contribution, reputation bonuses, and tax revenue.
+The world records pool stock, sustainability, total contribution, total extraction, contribution and extraction rates, collapse rate, welfare, inequality, penalty totals, matched contribution, reputation bonuses, and tax revenue.
 
 ### 2. Classical Economic Question
 
-The question is:
+The guiding question is:
 
 > Do institutions prevent free-riding and commons collapse under different learning minds and group sizes?
 
 Classical anchor:
 
 - Public goods are vulnerable to underprovision because each individual contributor captures only part of the social benefit.
-- Common-pool resources are vulnerable to over-extraction because each extractor imposes depletion costs on everyone.
+- Common-pool resources are vulnerable to over-extraction because each extractor imposes depletion costs on the group.
 - Larger groups can worsen free-riding because each individual's contribution becomes less pivotal.
-- Penalties, matching, reputation, monitoring, and taxes can change incentives, but only if they change behavior or resource state, not just accounting.
+- Penalties, matching, reputation, monitoring, and taxes can change incentives, but only if they alter contribution/extraction behavior or resource state, not only reward accounting.
 
 So the benchmark is not a single known value. It is:
 
@@ -1004,7 +1067,33 @@ Artifact:
 
 - [known_answer_sanity_checks.md](/home/t/Downloads/fogo/thesis/outputs/known_answer_sanity_checks_current/known_answer_sanity_checks.md)
 
-### 3. Q-Learning Full Results
+This validates the bracket layer before learned behavior is interpreted. It does not say a learned run should converge to the social optimum; it says the code can distinguish the free-rider and cooperative reference regimes.
+
+### 3. What Institutions Are Tested
+
+Public Goods tests six institution variants:
+
+- `none`: baseline commons game.
+- `public_goods_penalty`: penalizes extraction/free-riding behavior.
+- `contribution_matching`: matches or rewards contribution to the shared pool.
+- `public_goods_reputation`: adds reputation-based contributor rewards.
+- `information_restriction`: coarsens or restricts observable public-state information.
+- `tax_schedule`: taxes and redistributes rewards.
+
+Implementation status:
+
+| Institution | Code Status | Interpretation Status |
+|---|---|---|
+| `none` | Implemented, tested, full Q-learning and full P.6 outputs exist | Strong baseline commons-pressure interpretation |
+| `public_goods_penalty` | Implemented, tested, full Q-learning and full P.6 outputs exist | Weak or slightly perverse under current parameters |
+| `contribution_matching` | Implemented, tested, full Q-learning and full P.6 outputs exist | Clearest state-changing intervention |
+| `public_goods_reputation` | Implemented, tested, full Q-learning and full P.6 outputs exist | Strong reward/welfare effect; state effect must be separated |
+| `information_restriction` | Implemented, tested, full Q-learning and full P.6 outputs exist | Close to baseline under current parameters |
+| `tax_schedule` | Implemented, tested, full Q-learning and full P.6 outputs exist | Mostly accounting/revenue at tested rate |
+
+All six are mechanically implemented and tested. The important interpretive distinction is whether they move the underlying commons state, not only whether they move total reward.
+
+### 4. Q-Learning Full Results
 
 Full Q-learning output:
 
@@ -1016,15 +1105,15 @@ Full Q-learning output:
 | `none` | `0.089` | `0.142` | `1.783` | `1.815` | `0.912` | Baseline free-riding/near-collapse pressure. |
 | `public_goods_penalty` | `0.088` | `0.126` | `1.762` | `1.785` | `0.919` | Penalty binds but slightly worsens state/welfare here. |
 | `contribution_matching` | `0.105` | `0.279` | `2.088` | `2.081` | `0.839` | Clearest state-improving Q-learning institution. |
-| `public_goods_reputation` | `0.094` | `0.222` | `1.885` | `9.575` | `0.873` | Big reward/welfare effect plus modest state improvement. |
+| `public_goods_reputation` | `0.094` | `0.222` | `1.885` | `9.575` | `0.873` | Large reward/welfare effect plus modest state improvement. |
 | `information_restriction` | `0.088` | `0.125` | `1.760` | `1.799` | `0.920` | Close to baseline or slightly worse. |
 | `tax_schedule` | `0.089` | `0.134` | `1.773` | `1.808` | `0.916` | Mostly accounting/revenue, not state-changing. |
 
 Interpretation:
 
-> Baseline agents mostly extract and contribute little. The pool is not literally zero, but the final-window collapse rate is high. Contribution matching is the cleanest Q-learning improvement because it changes both welfare and state variables. Reputation raises welfare strongly through bonuses and also changes contribution/sustainability modestly. Tax schedule raises revenue but is classified as reward/accounting-only at the tested rate.
+> Baseline agents mostly extract and contribute little. Contribution matching is the cleanest Q-learning improvement because it changes both welfare and state variables. Reputation raises welfare strongly through bonuses, but its state improvement is much smaller than the welfare change. Tax schedule raises revenue but is classified as reward/accounting-only at the tested rate.
 
-### 4. Mechanism-by-Mechanism Interpretation
+### 5. Mechanism-by-Mechanism Interpretation
 
 #### `none`
 
@@ -1046,7 +1135,7 @@ Finding:
 
 #### `contribution_matching`
 
-Mechanism: institution matches or rewards contribution to the shared pool.
+Mechanism: contribution to the shared pool is matched or rewarded.
 
 Result relative to baseline:
 
@@ -1059,7 +1148,7 @@ welfare_delta = +0.266
 
 Finding:
 
-> Contribution matching is the strongest current Public Goods institution because it changes the underlying state, not just rewards. It raises contribution and sustainability while lowering collapse.
+> Contribution matching is the clearest current Public Goods institution because it changes the underlying state, not just rewards. It raises contribution and sustainability while lowering collapse.
 
 #### `public_goods_reputation`
 
@@ -1077,7 +1166,7 @@ collapse_rate = 0.873
 
 Finding:
 
-> Reputation is partly state-changing and partly reward-shaping. It dramatically raises welfare through bonuses, but the state improvement is smaller than the welfare number suggests. This is a metric-warning result: welfare can move much more than the commons state.
+> Reputation is partly state-changing and partly reward-shaping. It dramatically raises welfare through bonuses, but the state improvement is smaller than the welfare number suggests. This is the main Public Goods metric-decomposition warning.
 
 #### `public_goods_penalty`
 
@@ -1094,7 +1183,7 @@ collapse_delta = +0.007
 
 Finding:
 
-> The penalty binds, but at this configuration it does not improve the commons. It slightly lowers welfare and slightly worsens collapse. This is not a code failure; it is a weak/perverse incentive setting under current parameters.
+> The penalty binds, but at this configuration it does not improve the commons. It slightly lowers welfare and slightly worsens collapse, so it is a weak or perverse incentive setting under current parameters.
 
 #### `information_restriction`
 
@@ -1111,7 +1200,7 @@ collapse_delta = +0.009
 
 Finding:
 
-> Information restriction is close to baseline and slightly worse in the Q-learning full run. It does not currently create a clean positive institutional result.
+> Information restriction is close to baseline and slightly worse in the Q-learning full run. It does not currently produce a clean positive institutional result.
 
 #### `tax_schedule`
 
@@ -1128,9 +1217,9 @@ classification = reward_or_accounting_only
 
 Finding:
 
-> Tax schedule changes accounting and revenue without materially changing the public-pool state at the tested rate. This is exactly why welfare, tax revenue, contribution, extraction, and sustainability must be reported separately.
+> Tax schedule changes accounting and revenue without materially changing the public-pool state at the tested rate. This is why welfare, tax revenue, contribution, extraction, and sustainability must be reported separately.
 
-### 5. Cross-Mind Results
+### 6. Cross-Mind Results
 
 Full cross-mind output:
 
@@ -1153,34 +1242,45 @@ Contribution matching:
 | Q-learning | `0.105` | `0.279` | `2.081` | `0.839` | Improves state and welfare. |
 | DQN | `0.096` | `0.170` | `1.923` | `0.904` | Improves versus DQN baseline. |
 | PPO | `0.080` | `0.000` | `1.680` | `1.000` | Almost no state response. |
-| Independent-DQN | `0.121` | `0.413` | `2.269` | `0.805` | Strongest contribution response. |
+| Independent-DQN | `0.121` | `0.413` | `2.269` | `0.805` | Largest contribution response. |
 | Centralized critic | `0.081` | `0.007` | `1.690` | `0.995` | Barely responds. |
+
+Reputation:
+
+| Mind | Sustainability | Contribution | Welfare | Reputation Bonus | Read |
+|---|---:|---:|---:|---:|---|
+| Q-learning | `0.094` | `0.222` | `9.575` | `7.684` | Large reward effect, modest state effect. |
+| DQN | `0.085` | `0.072` | `12.444` | `10.696` | Welfare rises without state improvement. |
+| PPO | `0.080` | `0.000` | `5.183` | `3.503` | Welfare rises while contribution remains zero. |
+| Independent-DQN | `0.085` | `0.073` | `10.973` | `9.224` | Welfare rises without material state improvement. |
+| Centralized critic | `0.080` | `0.006` | `3.976` | `2.290` | Small state response. |
 
 Interpretation:
 
 - PPO and centralized critic are near-zero contribution learners in the baseline.
 - DQN and independent-DQN contribute more than PPO, but still below Q-learning under no institution.
-- Contribution matching works strongly for Q-learning, DQN, and especially independent-DQN.
+- Contribution matching works clearly for Q-learning, DQN, and especially independent-DQN.
 - PPO and centralized critic mostly fail to use the contribution channel even when the institution exists.
-- Reputation creates large welfare bonuses for all neural learners, but that can be an accounting/reward effect much larger than the state change.
+- Reputation creates large welfare bonuses for all neural learners, but this is often an accounting/reward effect much larger than the state change.
 
-### 6. Group-Size Sweep Status
+### 7. Group-Size Sweep Status
 
-The live group-size sweep asks whether the free-riding mechanism scales with `n_agents`.
+The group-size sweep asks whether the free-riding mechanism scales with `n_agents`.
 
 Question:
 
-> Does contribution collapse as group size rises, and do matching/reputation/tax institutions still work at larger n?
+> Does contribution decline as group size rises, and do matching/reputation/tax institutions still work at larger `n`?
 
-Current status:
+Current local status:
 
-- Full `ofi1` group-size sweep is still running.
-- Local `gashadokuro` split was stopped by request.
-- The runner is now patched with `--resume` and per-seed checkpointing so future partial runs do not lose completed rows.
+- The full Q-learning and full P.6 Public Goods outputs are validated locally.
+- The expected full relaunch directory, `outputs/public_goods_group_size_sweep_full_relaunch/`, is not present locally at the time of this note.
+- Local split directories exist for `n=2`, `n=4`, `n=8`, and `n=16`, but they currently contain no validated summary CSVs.
+- Therefore group-size results should be treated as pending until completed outputs are pulled or regenerated and validated.
 
-This matters because Olson-style group-size logic is directly about scale: if contribution failure is real, it should change as each individual becomes less pivotal.
+This matters because the group-size hypothesis is not optional for the commons claim. If contribution failure is a free-riding mechanism, it should change as individual pivotality changes with group size.
 
-### 7. What Survives, What Breaks
+### 8. What Survives, What Breaks
 
 Original thesis question:
 
@@ -1192,12 +1292,12 @@ Survives:
 
 - The free-riding/commons pressure is visible under baseline.
 - Contribution matching improves the resource state for several learners.
-- The validator correctly separates state-changing effects from reward/accounting effects.
-- Public Goods can run Q-learning, DQN, PPO, independent-DQN, and centralized critic through the shared ladder.
+- The validator separates state-changing effects from reward/accounting effects.
+- Public Goods runs Q-learning, DQN, PPO, independent-DQN, and centralized critic through the shared learner suite.
 
 Breaks or weakens:
 
-- Welfare can rise without equivalent improvement in contribution/sustainability.
+- Welfare can rise without equivalent improvement in contribution or sustainability.
 - Tax schedule is mostly accounting-only at the tested rates.
 - PPO and centralized critic can nearly stop contributing, even when the commons is collapsing.
 - Penalty does not automatically improve the commons.
@@ -1207,14 +1307,34 @@ Depends on architecture: yes.
 - Q-learning: contributes some and responds clearly to matching/reputation.
 - DQN: lower baseline contribution, but responds to matching.
 - PPO: near-zero contribution and weak response to matching.
-- Independent-DQN: strongest matching response in the current full table.
+- Independent-DQN: largest matching response in the current full table.
 - Centralized critic: weak contribution and near-collapse under most institutions.
 
-### 8. Public Goods Thesis Takeaway
+### 9. Relation to the Main Thesis Question
+
+Public Goods shows that institutional success must be decomposed into reward and state channels. A mechanism can raise welfare while leaving the commons almost unchanged, which means the institution appears successful only if the wrong metric is read in isolation. Reputation is the cleanest example: it raises welfare sharply through bonuses, but sustainability and contribution move much less. Tax schedule is the stricter version of the same warning because it changes revenue/accounting while leaving the resource state close to baseline.
+
+The architecture dependence is also substantive. Contribution matching changes behavior for Q-learning, DQN, and independent-DQN, but PPO and centralized critic remain close to zero contribution. That means the institution's effect is not only a property of the rule. It also depends on whether the learner discovers and reinforces the contribution channel.
+
+### 10. What This World Contributes
 
 Clean current claim:
 
-> Public Goods shows a commons/free-riding failure that is not captured by welfare alone. Contribution matching can improve the underlying resource state, reputation can raise welfare much more than it improves state, and tax schedule can remain mostly accounting-like. The architecture effect is sharp: PPO and centralized critic often fail to contribute even when the mechanism exists, while independent-DQN responds strongly to contribution matching. The pending group-size sweep tests whether this is truly a free-riding mechanism rather than only a fixed-n artifact.
+> Public Goods shows a commons/free-riding failure that is not captured by welfare alone. Contribution matching can improve the underlying resource state, reputation can raise welfare much more than it improves state, and tax schedule can remain mostly accounting-like. The architecture effect is clear at fixed `n`: PPO and centralized critic often fail to contribute even when the mechanism exists, while independent-DQN responds strongly to contribution matching. The group-size sweep remains the boundary condition for whether this is a robust free-riding result rather than only a fixed-group-size pattern.
+
+### 11. What We Cannot Claim Yet
+
+Do not overclaim:
+
+- We cannot say Public Goods institutions solve commons collapse.
+- We cannot rank institutions by welfare alone.
+- We cannot treat reputation's welfare gain as equivalent to sustainability improvement.
+- We cannot make final group-size claims until the `n_agents` sweep outputs are completed and validated.
+- We cannot infer real climate-governance results from this world; it is a controlled commons benchmark, not an external-policy model.
+
+Current safe claim:
+
+> In the validated fixed-size Public Goods runs, baseline agents mostly extract and contribute little. Contribution matching is the clearest state-improving institution, reputation produces a large welfare/reward effect with weaker state movement, and tax schedule is mostly accounting-like. These effects depend on the learning architecture, especially for PPO and centralized critic, which often fail to activate contribution at all.
 
 ## Labor Market Writing Note
 
